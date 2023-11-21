@@ -1,17 +1,17 @@
 {
-  "name": "cocos-node",
+  "name": "moye",
   "version": "1.0.0",
   "description": "game framework of cocos creator & nodejs",
-  "main": "dist/cocos-node.mjs",
-  "types": "dist/cocos-node.d.ts",
+  "main": "dist/moye.mjs",
+  "types": "dist/moye.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Alistairot/cocos-node"
+    "url": "https://github.com/Alistairot/moye"
   },
   "files": [
-    "dist/cocos-node.mjs",
-    "dist/cocos-node.min.mjs",
-    "dist/cocos-node.d.ts"
+    "dist/moye.mjs",
+    "dist/moye.min.mjs",
+    "dist/moye.d.ts"
   ],
   "scripts": {},
   "author": "Alistairot",
