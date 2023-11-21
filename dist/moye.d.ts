@@ -7,9 +7,9 @@ declare abstract class Singleton {
 	private _isDisposed;
 	static getInst<T extends Singleton>(this: new () => T): T;
 	get isDisposed(): boolean;
-	destroy?(): void;
 	dispose(): void;
-	_onPreDestroy(): void;
+	protected destroy?(): void;
+	private _onPreDestroy;
 }
 /**
  * 构造函数
@@ -71,6 +71,10 @@ export declare function log(str: string, ...args: any[]): void;
 export declare function warn(str: string, ...args: any[]): void;
 export declare function error(str: string, ...args: any[]): void;
 export declare class SizeFollow extends Component {
+}
+export declare class IdGenerator extends Singleton {
+	generateInstanceId(): bigint;
+	generateId(): bigint;
 }
 
 export {};

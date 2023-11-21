@@ -22,3 +22,4 @@ https://github.com/egametang/ET
 ### Todo
 添加demo  
 添加文档  
+apply eslint in moye project  

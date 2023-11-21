@@ -9,12 +9,10 @@ class Singleton {
     }
     static getInst() {
         let self = this;
-        ///@ts-ignore
-        let inst = self._inst;
-        if (inst == null) {
-            throw new Error(`Singleton is not initialized, name is ${self.name}`);
+        if (self._inst == null) {
+            throw new Error(`Singleton is not initialized or destroyed, name is ${self.name}`);
         }
-        return inst;
+        return self._inst;
     }
     get isDisposed() {
         return this._isDisposed;
@@ -270,4 +268,235 @@ function error(str, ...args) {
 class SizeFollow extends Component {
 }
 
-export { Logger, ObjectPool, SizeFollow, error, log, warn };
+class TimeInfo extends Singleton {
+    awake() {
+        this.serverMinusClientTime = 0;
+    }
+    clientNow() {
+        return Date.now();
+    }
+    serverNow() {
+        return this.clientNow() + this.serverMinusClientTime;
+    }
+}
+
+function coreWarn(str, ...args) {
+    let formatStr = JsHelper.formatStr(str, ...args);
+    let output = `[core]: ${formatStr}`;
+    try {
+        let inst = Logger.getInst();
+        inst.coreWarn(output);
+    }
+    catch (e) {
+        console.warn(output);
+    }
+}
+function coreError(str, ...args) {
+    let formatStr = JsHelper.formatStr(str, ...args);
+    let output = `[core]: ${formatStr}`;
+    try {
+        let inst = Logger.getInst();
+        inst.coreError(output);
+    }
+    catch (e) {
+        console.error(output);
+    }
+}
+
+/**
+ * 可用时间 s
+ * 34年
+ */
+const timeBit$1 = 30n;
+/**
+ * 最大进程数量
+ * 16384
+ */
+const processBit = 14n;
+/**
+ * 每秒可以产生的数量
+ * 100w/s
+ */
+const valueBit$1 = 20n;
+const powTimeBit$1 = 2n ** timeBit$1 - 1n;
+const powProcessBit = 2n ** processBit - 1n;
+const powValueBit$1 = 2n ** valueBit$1 - 1n;
+const epoch$1 = new Date(2023, 4, 1).getTime();
+class IdStruct {
+    static get inst() {
+        if (IdStruct._inst == null) {
+            IdStruct._inst = new IdStruct();
+        }
+        return IdStruct._inst;
+    }
+    static generate() {
+        if (this.lastTime == 0) {
+            this.lastTime = this.timeSinceEpoch();
+            if (this.lastTime <= 0) {
+                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
+                this.lastTime = 1;
+            }
+        }
+        let time = this.timeSinceEpoch();
+        if (time > this.lastTime) {
+            this.lastTime = time;
+            this.idCount = 0;
+        }
+        else {
+            ++this.idCount;
+            if (this.idCount > powValueBit$1) {
+                ++this.lastTime; // 借用下一秒
+                this.idCount = 0;
+                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this.lastTime}`);
+            }
+        }
+        let struct = IdStruct.inst;
+        struct.init(this.lastTime, Options.getInst().process, this.idCount);
+        return struct.result;
+    }
+    static convertToId(time, process, value) {
+        let id = IdStruct.inst.init(time, process, value).result;
+        return id;
+    }
+    /**
+     * convert id to 3 args
+     * not reference return value
+     * @param id bigint
+     * @returns
+     */
+    static parseId(id) {
+        return IdStruct.inst.initById(id);
+    }
+    static timeSinceEpoch() {
+        let a = (TimeInfo.getInst().clientNow() - epoch$1) / 1000;
+        return Math.floor(a);
+    }
+    /**
+     * convert id to 3 args
+     * @param id bigint
+     * @returns
+     */
+    initById(id) {
+        this.result = id;
+        this.time = id & powTimeBit$1;
+        id >>= timeBit$1;
+        this.process = id & powProcessBit;
+        id >>= processBit;
+        this.value = id & powValueBit$1;
+        return this;
+    }
+    init(time, process, value) {
+        this.time = BigInt(time);
+        this.process = BigInt(process);
+        this.value = BigInt(value);
+        this.updateResult();
+        return this;
+    }
+    updateResult() {
+        this.result = this.value;
+        this.result <<= processBit;
+        this.result |= this.process;
+        this.result <<= timeBit$1;
+        this.result |= this.time;
+    }
+}
+IdStruct.lastTime = 0;
+IdStruct.idCount = 0;
+
+/**
+ * 可用时间 s
+ */
+const timeBit = 32n;
+/**
+ * 每秒可以产生的数量
+ */
+const valueBit = 32n;
+const powTimeBit = 2n ** timeBit - 1n;
+const powValueBit = 2n ** valueBit - 1n;
+const epoch = new Date(2023, 4, 1).getTime();
+class InstanceIdStruct {
+    static get inst() {
+        if (InstanceIdStruct._inst == null) {
+            InstanceIdStruct._inst = new InstanceIdStruct();
+        }
+        return InstanceIdStruct._inst;
+    }
+    static generate() {
+        if (this.lastTime == 0) {
+            this.lastTime = this.timeSinceEpoch();
+            if (this.lastTime <= 0) {
+                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
+                this.lastTime = 1;
+            }
+        }
+        let time = this.timeSinceEpoch();
+        if (time > this.lastTime) {
+            this.lastTime = time;
+            this.idCount = 0;
+        }
+        else {
+            ++this.idCount;
+            if (this.idCount > powValueBit) {
+                ++this.lastTime; // 借用下一秒
+                this.idCount = 0;
+                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this.lastTime}`);
+            }
+        }
+        let struct = InstanceIdStruct.inst;
+        struct.init(this.lastTime, this.idCount);
+        return struct.result;
+    }
+    static convertToId(time, value) {
+        let id = InstanceIdStruct.inst.init(time, value).result;
+        return id;
+    }
+    /**
+     * convert id to 2 args
+     * not reference return value
+     * @param id bigint
+     * @returns
+     */
+    static parseId(id) {
+        return InstanceIdStruct.inst.initById(id);
+    }
+    static timeSinceEpoch() {
+        let a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
+        return Math.floor(a);
+    }
+    /**
+     * convert id to 3 args
+     * @param id bigint
+     * @returns
+     */
+    initById(id) {
+        this.result = id;
+        this.time = id & powTimeBit;
+        id >>= timeBit;
+        this.value = id & powValueBit;
+        return this;
+    }
+    init(time, value) {
+        this.time = BigInt(time);
+        this.value = BigInt(value);
+        this.updateResult();
+        return this;
+    }
+    updateResult() {
+        this.result = this.value;
+        this.result <<= timeBit;
+        this.result |= this.time;
+    }
+}
+InstanceIdStruct.lastTime = 0;
+InstanceIdStruct.idCount = 0;
+
+class IdGenerator extends Singleton {
+    generateInstanceId() {
+        return InstanceIdStruct.generate();
+    }
+    generateId() {
+        return IdStruct.generate();
+    }
+}
+
+export { IdGenerator, Logger, ObjectPool, SizeFollow, error, log, warn };

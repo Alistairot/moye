@@ -1,4 +1,5 @@
-import { IdStruct } from "../src/Core/IdGenerator/IdStructWithBigInt";
+import { IdStruct } from "../src/Core/IdGenerator/IdStruct";
+import { Type } from "../src/Core/Type/Type";
 
 let idStruct1 = new IdStruct();
 idStruct1.init(123, 456, 789);

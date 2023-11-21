@@ -40,7 +40,7 @@ export class Game {
     }
 
     public static async waitFrameFinish(): Promise<void> {
-        let task = Task.create()
+        let task = Task.create();
 
         Game.frameFinishTaskQueue.push(task);
 
@@ -50,45 +50,43 @@ export class Game {
     public static update(): void {
         for (let index = 0; index < Game.updates.length; index++) {
             let update = Game.updates[index];
-            let singleton = update
+            let singleton = update;
 
             if (singleton.isDisposed) {
                 continue
             }
 
-            ///@ts-ignore
-            update.update()
+            update.update();
         }
     }
 
     public static lateUpdate(): void {
         for (let index = 0; index < Game.lateUpdates.length; index++) {
             let lateUpdate = Game.lateUpdates[index];
-            let singleton = lateUpdate
+            let singleton = lateUpdate;
 
             if (singleton.isDisposed) {
                 continue
             }
 
-            ///@ts-ignore
-            lateUpdate.lateUpdate()
+            lateUpdate.lateUpdate();
         }
     }
 
     public static frameFinishUpdate(): void {
-        let len = Game.frameFinishTaskQueue.length
+        let len = Game.frameFinishTaskQueue.length;
 
         if (len == 0) {
-            return
+            return;
         }
 
         for (let index = 0; index < len; index++) {
-            const task = Game.frameFinishTaskQueue[index]
+            const task = Game.frameFinishTaskQueue[index];
 
-            task.setResult()
+            task.setResult();
         }
 
-        Game.frameFinishTaskQueue = []
+        Game.frameFinishTaskQueue = [];
     }
 
     public static dispose() {
@@ -99,7 +97,7 @@ export class Game {
                 continue
             }
 
-            singleton._onPreDestroy()
+            singleton._onPreDestroy();
         }
     }
 }

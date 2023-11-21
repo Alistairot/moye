@@ -20,7 +20,7 @@ export abstract class RecycleObj {
             Object.assign(event, values);
         }
 
-        event._isRecycle = true
+        event._isRecycle = true;
 
         return event;
     }
