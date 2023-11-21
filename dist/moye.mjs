@@ -1,4 +1,5 @@
-import { Component } from 'cc';
+import { dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, CCFloat, SpriteFrame, _decorator, UIRenderer, NodeEventType, cclegacy, InstanceMaterialType, RenderTexture, Material, UITransform, Component, Size } from 'cc';
+import { EDITOR, BUILD } from 'cc/env';
 
 /**
  * 单例基类
@@ -265,9 +266,6 @@ function error(str, ...args) {
     Logger.getInst().error(str, ...args);
 }
 
-class SizeFollow extends Component {
-}
-
 class TimeInfo extends Singleton {
     awake() {
         this.serverMinusClientTime = 0;
@@ -499,4 +497,701 @@ class IdGenerator extends Singleton {
     }
 }
 
-export { IdGenerator, Logger, ObjectPool, SizeFollow, error, log, warn };
+const RoundBoxAssembler = {
+    // 根据圆角segments参数，构造网格的顶点索引列表
+    GetIndexBuffer(sprite) {
+        let indexBuffer = [
+            0, 1, 2, 2, 3, 0,
+            4, 5, 6, 6, 7, 4,
+            8, 9, 10, 10, 11, 8
+        ];
+        // 为四个角的扇形push进索引值
+        let index = 12;
+        let fanIndexBuild = function (center, start, end) {
+            let last = start;
+            for (let i = 0; i < sprite.segments - 1; i++) {
+                // 左上角 p2为扇形圆心，p1/p5为两个边界
+                let cur = index;
+                index++;
+                indexBuffer.push(center, last, cur);
+                last = cur;
+            }
+            indexBuffer.push(center, last, end);
+        };
+        if (sprite.leftBottom)
+            fanIndexBuild(3, 4, 0);
+        if (sprite.leftTop)
+            fanIndexBuild(2, 1, 5);
+        if (sprite.rightTop)
+            fanIndexBuild(9, 6, 10);
+        if (sprite.rightBottom)
+            fanIndexBuild(8, 11, 7);
+        return indexBuffer;
+    },
+    createData(sprite) {
+        const renderData = sprite.requestRenderData();
+        let corner = 0;
+        corner += sprite.leftBottom ? 1 : 0;
+        corner += sprite.leftTop ? 1 : 0;
+        corner += sprite.rightTop ? 1 : 0;
+        corner += sprite.rightBottom ? 1 : 0;
+        let vNum = 12 + (sprite.segments - 1) * corner;
+        renderData.dataLength = vNum;
+        renderData.resize(vNum, 18 + sprite.segments * 3 * corner);
+        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        renderData.chunk.setIndexBuffer(indexBuffer);
+        return renderData;
+    },
+    // 照抄simple的
+    updateRenderData(sprite) {
+        const frame = sprite.spriteFrame;
+        dynamicAtlasManager.packToDynamicAtlas(sprite, frame);
+        this.updateUVs(sprite); // dirty need
+        //this.updateColor(sprite);// dirty need
+        const renderData = sprite.renderData;
+        if (renderData && frame) {
+            if (renderData.vertDirty) {
+                this.updateVertexData(sprite);
+            }
+            renderData.updateRenderData(sprite, frame);
+        }
+    },
+    // 局部坐标转世界坐标 照抄的，不用改
+    updateWorldVerts(sprite, chunk) {
+        const renderData = sprite.renderData;
+        const vData = chunk.vb;
+        const dataList = renderData.data;
+        const node = sprite.node;
+        const m = node.worldMatrix;
+        const stride = renderData.floatStride;
+        let offset = 0;
+        const length = dataList.length;
+        for (let i = 0; i < length; i++) {
+            const curData = dataList[i];
+            const x = curData.x;
+            const y = curData.y;
+            let rhw = m.m03 * x + m.m07 * y + m.m15;
+            rhw = rhw ? 1 / rhw : 1;
+            offset = i * stride;
+            vData[offset + 0] = (m.m00 * x + m.m04 * y + m.m12) * rhw;
+            vData[offset + 1] = (m.m01 * x + m.m05 * y + m.m13) * rhw;
+            vData[offset + 2] = (m.m02 * x + m.m06 * y + m.m14) * rhw;
+        }
+    },
+    // 每帧调用的，把数据和到一整个meshbuffer里
+    fillBuffers(sprite) {
+        if (sprite === null) {
+            return;
+        }
+        const renderData = sprite.renderData;
+        const chunk = renderData.chunk;
+        if (sprite.node.hasChangedFlags || renderData.vertDirty) {
+            // const vb = chunk.vertexAccessor.getVertexBuffer(chunk.bufferId);
+            this.updateWorldVerts(sprite, chunk);
+            renderData.vertDirty = false;
+        }
+        // quick version
+        chunk.bufferId;
+        const vidOrigin = chunk.vertexOffset;
+        const meshBuffer = chunk.meshBuffer;
+        const ib = chunk.meshBuffer.iData;
+        let indexOffset = meshBuffer.indexOffset;
+        const vid = vidOrigin;
+        // 沿着当前这个位置往后将我们这个对象的index放进去
+        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        for (let i = 0; i < renderData.indexCount; i++) {
+            ib[indexOffset++] = vid + indexBuffer[i];
+        }
+        meshBuffer.indexOffset += renderData.indexCount;
+    },
+    // 计算每个顶点相对于sprite坐标的位置
+    updateVertexData(sprite) {
+        const renderData = sprite.renderData;
+        if (!renderData) {
+            return;
+        }
+        const uiTrans = sprite.node._uiProps.uiTransformComp;
+        const dataList = renderData.data;
+        const cw = uiTrans.width;
+        const ch = uiTrans.height;
+        const appX = uiTrans.anchorX * cw;
+        const appY = uiTrans.anchorY * ch;
+        const left = 0 - appX;
+        const right = cw - appX;
+        const top = ch - appY;
+        const bottom = 0 - appY;
+        const left_r = left + sprite.radius;
+        const bottom_r = bottom + sprite.radius;
+        const top_r = top - sprite.radius;
+        const right_r = right - sprite.radius;
+        // 三个矩形的顶点
+        dataList[0].x = left;
+        dataList[0].y = sprite.leftBottom ? bottom_r : bottom;
+        dataList[1].x = left;
+        dataList[1].y = sprite.leftTop ? top_r : top;
+        dataList[2].x = left_r;
+        dataList[2].y = sprite.leftTop ? top_r : top;
+        dataList[3].x = left_r;
+        dataList[3].y = sprite.leftBottom ? bottom_r : bottom;
+        dataList[4].x = left_r;
+        dataList[4].y = bottom;
+        dataList[5].x = left_r;
+        dataList[5].y = top;
+        dataList[6].x = right_r;
+        dataList[6].y = top;
+        dataList[7].x = right_r;
+        dataList[7].y = bottom;
+        dataList[8].x = right_r;
+        dataList[8].y = sprite.rightBottom ? bottom_r : bottom;
+        dataList[9].x = right_r;
+        dataList[9].y = sprite.rightTop ? top_r : top;
+        dataList[10].x = right;
+        dataList[10].y = sprite.rightTop ? top_r : top;
+        dataList[11].x = right;
+        dataList[11].y = sprite.rightBottom ? bottom_r : bottom;
+        // 扇形圆角的顶点
+        let index = 12;
+        let fanPosBuild = function (center, startAngle) {
+            for (let i = 1; i < sprite.segments; i++) {
+                // 我这里顶点都是按顺时针分配的，所以角度要从开始角度减
+                // 每个扇形都是90度
+                let angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
+                dataList[index].x = center.x + Math.cos(angle) * sprite.radius;
+                dataList[index].y = center.y + Math.sin(angle) * sprite.radius;
+                index++;
+            }
+        };
+        if (sprite.leftBottom)
+            fanPosBuild(dataList[3], 270);
+        if (sprite.leftTop)
+            fanPosBuild(dataList[2], 180);
+        if (sprite.rightTop)
+            fanPosBuild(dataList[9], 90);
+        if (sprite.rightBottom)
+            fanPosBuild(dataList[8], 0);
+        renderData.vertDirty = true;
+    },
+    // 更新计算uv
+    updateUVs(sprite) {
+        if (!sprite.spriteFrame)
+            return;
+        const renderData = sprite.renderData;
+        const vData = renderData.chunk.vb;
+        const uv = sprite.spriteFrame.uv;
+        // 这里我打印了一下uv的值，第一个看上去是左上角，但其实，opengl端的纹理存在上下颠倒问题，所以这里其实还是左下角
+        // 左下，右下，左上，右上
+        const uv_l = uv[0];
+        const uv_b = uv[1];
+        const uv_r = uv[2];
+        const uv_t = uv[5];
+        const uv_w = Math.abs(uv_r - uv_l);
+        const uv_h = uv_t - uv_b;
+        const uiTrans = sprite.node._uiProps.uiTransformComp;
+        const dataList = renderData.data;
+        const cw = uiTrans.width;
+        const ch = uiTrans.height;
+        const appX = uiTrans.anchorX * cw;
+        const appY = uiTrans.anchorY * ch;
+        // 用相对坐标，计算uv
+        for (let i = 0; i < renderData.dataLength; i++) {
+            vData[i * renderData.floatStride + 3] = uv_l + (dataList[i].x + appX) / cw * uv_w;
+            vData[i * renderData.floatStride + 4] = uv_b + (dataList[i].y + appY) / ch * uv_h;
+        }
+    },
+    // 照抄，不用改
+    updateColor(sprite) {
+        const renderData = sprite.renderData;
+        const vData = renderData.chunk.vb;
+        let colorOffset = 5;
+        const color = sprite.color;
+        const colorR = color.r / 255;
+        const colorG = color.g / 255;
+        const colorB = color.b / 255;
+        const colorA = color.a / 255;
+        for (let i = 0; i < renderData.dataLength; i++, colorOffset += renderData.floatStride) {
+            vData[colorOffset] = colorR;
+            vData[colorOffset + 1] = colorG;
+            vData[colorOffset + 2] = colorB;
+            vData[colorOffset + 3] = colorA;
+        }
+    },
+};
+
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$1, property: property$1, type, menu: menu$1 } = _decorator;
+var EventType;
+(function (EventType) {
+    EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
+})(EventType || (EventType = {}));
+let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
+    constructor() {
+        super(...arguments);
+        // 尺寸模式，可以看枚举原本定义的地方有注释说明
+        this._sizeMode = Sprite.SizeMode.TRIMMED;
+        // 图集
+        this._atlas = null;
+        // 圆角用三角形模拟扇形的线段数量，越大，则越圆滑
+        this._segments = 10;
+        // 圆角半径
+        this._radius = 20;
+        this._spriteFrame = null;
+        this._leftTop = true;
+        this._rightTop = true;
+        this._leftBottom = true;
+        this._rightBottom = true;
+    }
+    get sizeMode() {
+        return this._sizeMode;
+    }
+    set sizeMode(value) {
+        if (this._sizeMode === value) {
+            return;
+        }
+        this._sizeMode = value;
+        if (value !== Sprite.SizeMode.CUSTOM) {
+            this._applySpriteSize();
+        }
+    }
+    get spriteAtlas() {
+        return this._atlas;
+    }
+    set spriteAtlas(value) {
+        if (this._atlas === value) {
+            return;
+        }
+        this._atlas = value;
+    }
+    get segments() {
+        return this._segments;
+    }
+    set segments(segments) {
+        this._segments = segments;
+        this._renderData = null;
+        this._flushAssembler();
+    }
+    get radius() {
+        return this._radius;
+    }
+    set radius(radius) {
+        this._radius = radius;
+        this._updateUVs();
+        this.markForUpdateRenderData(true);
+    }
+    get spriteFrame() {
+        return this._spriteFrame;
+    }
+    set spriteFrame(value) {
+        if (this._spriteFrame === value) {
+            return;
+        }
+        const lastSprite = this._spriteFrame;
+        this._spriteFrame = value;
+        this.markForUpdateRenderData();
+        this._applySpriteFrame(lastSprite);
+        if (EDITOR) {
+            this.node.emit(EventType.SPRITE_FRAME_CHANGED, this);
+        }
+    }
+    get leftTop() {
+        return this._leftTop;
+    }
+    set leftTop(value) {
+        this._leftTop = value;
+        this.resetAssembler();
+    }
+    get rightTop() {
+        return this._rightTop;
+    }
+    set rightTop(value) {
+        this._rightTop = value;
+        this.resetAssembler();
+    }
+    get leftBottom() {
+        return this._leftBottom;
+    }
+    set leftBottom(value) {
+        this._leftBottom = value;
+        this.resetAssembler();
+    }
+    get rightBottom() {
+        return this._rightBottom;
+    }
+    set rightBottom(value) {
+        this._rightBottom = value;
+        this.resetAssembler();
+    }
+    onLoad() {
+        this._flushAssembler();
+    }
+    __preload() {
+        this.changeMaterialForDefine();
+        super.__preload();
+        if (EDITOR) {
+            this._resized();
+            this.node.on(NodeEventType.SIZE_CHANGED, this._resized, this);
+        }
+    }
+    onEnable() {
+        super.onEnable();
+        // Force update uv, material define, active material, etc
+        this._activateMaterial();
+        const spriteFrame = this._spriteFrame;
+        if (spriteFrame) {
+            this._updateUVs();
+        }
+    }
+    onDestroy() {
+        if (EDITOR) {
+            this.node.off(NodeEventType.SIZE_CHANGED, this._resized, this);
+        }
+        super.onDestroy();
+    }
+    /**
+     * @en
+     * Quickly switch to other sprite frame in the sprite atlas.
+     * If there is no atlas, the switch fails.
+     *
+     * @zh
+     * 选取使用精灵图集中的其他精灵。
+     * @param name @en Name of the spriteFrame to switch. @zh 要切换的 spriteFrame 名字。
+     */
+    changeSpriteFrameFromAtlas(name) {
+        if (!this._atlas) {
+            console.warn('SpriteAtlas is null.');
+            return;
+        }
+        const sprite = this._atlas.getSpriteFrame(name);
+        this.spriteFrame = sprite;
+    }
+    /**
+     * @deprecated Since v3.7.0, this is an engine private interface that will be removed in the future.
+     */
+    changeMaterialForDefine() {
+        let texture;
+        const lastInstanceMaterialType = this._instanceMaterialType;
+        if (this._spriteFrame) {
+            texture = this._spriteFrame.texture;
+        }
+        let value = false;
+        if (texture instanceof cclegacy.TextureBase) {
+            const format = texture.getPixelFormat();
+            value = (format === cclegacy.TextureBase.PixelFormat.RGBA_ETC1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_4BPPV1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_2BPPV1);
+        }
+        if (value) {
+            this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED;
+        }
+        else {
+            this._instanceMaterialType = InstanceMaterialType.ADD_COLOR_AND_TEXTURE;
+        }
+        if (lastInstanceMaterialType !== this._instanceMaterialType) {
+            // this.updateMaterial();
+            // d.ts里没有注上这个函数，直接调用会表红。
+            this["updateMaterial"]();
+        }
+    }
+    _updateBuiltinMaterial() {
+        let mat = super._updateBuiltinMaterial();
+        if (this.spriteFrame && this.spriteFrame.texture instanceof RenderTexture) {
+            const defines = { SAMPLE_FROM_RT: true, ...mat.passes[0].defines };
+            const renderMat = new Material();
+            renderMat.initialize({
+                effectAsset: mat.effectAsset,
+                defines,
+            });
+            mat = renderMat;
+        }
+        return mat;
+    }
+    _render(render) {
+        render.commitComp(this, this.renderData, this._spriteFrame, this._assembler, null);
+    }
+    _canRender() {
+        if (!super._canRender()) {
+            return false;
+        }
+        const spriteFrame = this._spriteFrame;
+        if (!spriteFrame || !spriteFrame.texture) {
+            return false;
+        }
+        return true;
+    }
+    resetAssembler() {
+        this._assembler = null;
+        this._flushAssembler();
+    }
+    _flushAssembler() {
+        const assembler = RoundBoxAssembler;
+        if (this._assembler !== assembler) {
+            this.destroyRenderData();
+            this._assembler = assembler;
+        }
+        if (!this._renderData) {
+            if (this._assembler && this._assembler.createData) {
+                this._renderData = this._assembler.createData(this);
+                this._renderData.material = this.getRenderMaterial(0);
+                this.markForUpdateRenderData();
+                if (this.spriteFrame) {
+                    this._assembler.updateRenderData(this);
+                }
+                this._updateColor();
+            }
+        }
+    }
+    _applySpriteSize() {
+        if (this._spriteFrame) {
+            if (BUILD || !this._spriteFrame) {
+                if (Sprite.SizeMode.RAW === this._sizeMode) {
+                    const size = this._spriteFrame.originalSize;
+                    this.node._uiProps.uiTransformComp.setContentSize(size);
+                }
+                else if (Sprite.SizeMode.TRIMMED === this._sizeMode) {
+                    const rect = this._spriteFrame.rect;
+                    this.node._uiProps.uiTransformComp.setContentSize(rect.width, rect.height);
+                }
+            }
+            this.markForUpdateRenderData(true);
+            this._assembler.updateRenderData(this);
+        }
+    }
+    _resized() {
+        if (!EDITOR) {
+            return;
+        }
+        if (this._spriteFrame) {
+            const actualSize = this.node._uiProps.uiTransformComp.contentSize;
+            let expectedW = actualSize.width;
+            let expectedH = actualSize.height;
+            if (this._sizeMode === Sprite.SizeMode.RAW) {
+                const size = this._spriteFrame.originalSize;
+                expectedW = size.width;
+                expectedH = size.height;
+            }
+            else if (this._sizeMode === Sprite.SizeMode.TRIMMED) {
+                const rect = this._spriteFrame.rect;
+                expectedW = rect.width;
+                expectedH = rect.height;
+            }
+            if (expectedW !== actualSize.width || expectedH !== actualSize.height) {
+                this._sizeMode = Sprite.SizeMode.CUSTOM;
+            }
+        }
+    }
+    _activateMaterial() {
+        const spriteFrame = this._spriteFrame;
+        const material = this.getRenderMaterial(0);
+        if (spriteFrame) {
+            if (material) {
+                this.markForUpdateRenderData();
+            }
+        }
+        if (this.renderData) {
+            this.renderData.material = material;
+        }
+    }
+    _updateUVs() {
+        if (this._assembler) {
+            this._assembler.updateUVs(this);
+        }
+    }
+    _applySpriteFrame(oldFrame) {
+        const spriteFrame = this._spriteFrame;
+        let textureChanged = false;
+        if (spriteFrame) {
+            if (!oldFrame || oldFrame.texture !== spriteFrame.texture) {
+                textureChanged = true;
+            }
+            if (textureChanged) {
+                if (this.renderData)
+                    this.renderData.textureDirty = true;
+                this.changeMaterialForDefine();
+            }
+            this._applySpriteSize();
+        }
+    }
+};
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_sizeMode", void 0);
+__decorate$1([
+    type(Sprite.SizeMode)
+], RoundBoxSprite.prototype, "sizeMode", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_atlas", void 0);
+__decorate$1([
+    type(SpriteAtlas)
+], RoundBoxSprite.prototype, "spriteAtlas", null);
+__decorate$1([
+    property$1({ type: CCInteger, serializable: true })
+], RoundBoxSprite.prototype, "_segments", void 0);
+__decorate$1([
+    property$1({ type: CCInteger, serializable: true, min: 1 })
+], RoundBoxSprite.prototype, "segments", null);
+__decorate$1([
+    property$1({ type: CCFloat, serializable: true })
+], RoundBoxSprite.prototype, "_radius", void 0);
+__decorate$1([
+    property$1({ type: CCFloat, serializable: true, min: 0 })
+], RoundBoxSprite.prototype, "radius", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_spriteFrame", void 0);
+__decorate$1([
+    type(SpriteFrame)
+], RoundBoxSprite.prototype, "spriteFrame", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_leftTop", void 0);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "leftTop", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_rightTop", void 0);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "rightTop", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_leftBottom", void 0);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "leftBottom", null);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "_rightBottom", void 0);
+__decorate$1([
+    property$1({ serializable: true })
+], RoundBoxSprite.prototype, "rightBottom", null);
+RoundBoxSprite = __decorate$1([
+    menu$1('moye/RoundBoxSprite'),
+    ccclass$1('RoundBoxSprite')
+], RoundBoxSprite);
+
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass, property, menu } = _decorator;
+let SizeFollow = class SizeFollow extends Component {
+    constructor() {
+        super(...arguments);
+        this._heightFollow = true;
+        this._widthFollow = true;
+        this._heightOffset = 0;
+        this._widthOffset = 0;
+        this._changeSize = new Size();
+    }
+    get target() {
+        return this._target;
+    }
+    set target(value) {
+        this._target = value;
+        this.updateSizeOffset();
+    }
+    set heightFollow(val) {
+        this._heightFollow = val;
+        this.updateSizeOffset();
+    }
+    get heightFollow() {
+        return this._heightFollow;
+    }
+    set widthFollow(val) {
+        this._widthFollow = val;
+        this.updateSizeOffset();
+    }
+    get widthFollow() {
+        return this._widthFollow;
+    }
+    onLoad() {
+        if (this._target == null) {
+            return;
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+    }
+    onDestroy() {
+        if (this._target == null) {
+            return;
+        }
+        if (!this._target.isValid) {
+            this._target = null;
+            return;
+        }
+        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+        this._target = null;
+    }
+    onTargetSizeChange() {
+        let selfTrans = this.node.getComponent(UITransform);
+        let targetTrans = this._target;
+        // console.log('onTargetSizeChange targetTrans', targetTrans);
+        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
+        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
+        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
+        this._changeSize.set(selfTrans.contentSize);
+        if (this._widthFollow) {
+            this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
+        }
+        if (this._heightFollow) {
+            this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
+        }
+        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
+        // console.log('onTargetSizeChange this.node', this.node);
+        selfTrans.setContentSize(this._changeSize);
+        // selfTrans.setContentSize(new Size(this._changeSize));
+        // selfTrans.height = 300;
+    }
+    updateSizeOffset() {
+        if (this._target == null) {
+            return;
+        }
+        let selfTrans = this.node.getComponent(UITransform);
+        let targetTrans = this._target;
+        if (this._widthFollow) {
+            let selfWidth = selfTrans.width;
+            let targetWidth = targetTrans.width;
+            this._widthOffset = selfWidth - targetWidth;
+        }
+        if (this._heightFollow) {
+            let selfHeight = selfTrans.height;
+            let targetHeight = targetTrans.height;
+            this._heightOffset = selfHeight - targetHeight;
+        }
+    }
+};
+__decorate([
+    property({ type: UITransform })
+], SizeFollow.prototype, "target", null);
+__decorate([
+    property({ type: UITransform })
+], SizeFollow.prototype, "_target", void 0);
+__decorate([
+    property
+], SizeFollow.prototype, "heightFollow", null);
+__decorate([
+    property
+], SizeFollow.prototype, "_heightFollow", void 0);
+__decorate([
+    property
+], SizeFollow.prototype, "widthFollow", null);
+__decorate([
+    property
+], SizeFollow.prototype, "_widthFollow", void 0);
+__decorate([
+    property({ type: CCFloat })
+], SizeFollow.prototype, "_heightOffset", void 0);
+__decorate([
+    property({ type: CCFloat })
+], SizeFollow.prototype, "_widthOffset", void 0);
+SizeFollow = __decorate([
+    menu('moye/SizeFollow'),
+    ccclass('SizeFollow')
+], SizeFollow);
+
+export { IdGenerator, Logger, ObjectPool, RoundBoxSprite, SizeFollow, error, log, warn };

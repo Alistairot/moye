@@ -1,0 +1,14 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "RoundBoxSprite",
+
+    "description-explain":"模块描述",
+    "description": "圆角矩形\nfrom https://gitee.com/ruanwujing/cocoscreator-roundbox",
+
+    "entry-explain":"入口文件",
+    "entry": "RoundBoxSprite.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+    ]
+}

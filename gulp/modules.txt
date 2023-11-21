@@ -2,3 +2,12 @@
 [export=true]
 核心模块,不要剔除
 
+[name=RoundBoxSprite]
+[export=true]
+圆角矩形
+from https://gitee.com/ruanwujing/cocoscreator-roundbox
+
+[name=SizeFollow]
+[export=true]
+可以跟随目标节点的大小变化来改变自己的大小
+
