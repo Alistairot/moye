@@ -6,17 +6,16 @@
     "strict": false,
     "strictNullChecks": false,
     "moduleResolution": "Node",
-    "experimentalDecorators": true, 
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "typeRoots": [
-			"node_modules/@types",
-			"../../src/client/lib"
-		]
+      "node_modules/@types",
+      "../lib"
+    ]
   },
   "include": [
-    "../../src/common/**/*",
-    "../../src/client/**/*",
+    "../src/**/*"
   ],
   "exclude": [
     "node_modules"

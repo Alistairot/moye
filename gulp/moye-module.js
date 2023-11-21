@@ -10,7 +10,7 @@ function walk(dir, list) {
         if (stat.isDirectory()) {
             walk(filePath, list);
         } else {
-            if (path.basename(filePath) == 'ct-module.json') {
+            if (path.basename(filePath) == 'module.json') {
                 list.push(filePath);
             }
         }
@@ -144,15 +144,14 @@ function updateImportFile(iniPath, importFilePath, codePaths){
             }
         }
 
-        let state = fs.statSync(info.filepath);
-
         // 获取文件所在路径
         let dir = path.dirname(info.filepath);
         let filename = info.entry;
         filename = filename.substring(0, filename.length - path.extname(filename).length);
+
         let str = `export * from '${dir}/${filename}';\n`;
 
-        str = str.replace(`..\\..\\src\\`, '../../').replace(/\\/g, '/');
+        str = str.replace(`..\\src\\`, './').replace(/\\/g, '/');
 
         content += str;
     }

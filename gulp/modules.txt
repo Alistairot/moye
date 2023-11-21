@@ -1,7 +1,3 @@
-[name=CoreClient]
-[export=true]
-客户端核心模块,不要剔除
-
 [name=Core]
 [export=true]
 核心模块,不要剔除

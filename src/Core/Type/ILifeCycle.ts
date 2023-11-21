@@ -5,4 +5,5 @@ export interface ILifeCycle{
     update?(): void
     lateUpdate?(): void
     destroy?(): void
+    _onPreDestroy(): void
 }

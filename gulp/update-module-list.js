@@ -1,30 +1,28 @@
 const fs = require('fs');
-let ctModule = require('./ct-module');
+let moyeModule = require('./moye-module');
 
-let filePath = '';
 let codePaths = [];
-let exportModuleFile = '../../';
 
 for (let i = 2; i < process.argv.length; i++) {
-    if (process.argv[i] === '--module') {
-        filePath = process.argv[i + 1];
-    } else if (process.argv[i] === '--code') {
+    if (process.argv[i] === '--code') {
         let paths = process.argv[i + 1];
 
         codePaths = paths.split(',');
     }
 }
 
-exportModuleFile = exportModuleFile + filePath + '/modules.txt';
+exportModuleFile = 'modules.txt';
 
 // 获取原有模块列表信息
-let oldExportModule = ctModule.parseINI(exportModuleFile);
+let oldExportModule = moyeModule.parseINI(exportModuleFile);
 
 // 获取模块信息
 let moduleList = []
 
 for (const p of codePaths) {
-    let modules = ctModule.searchModule("../../" + p);
+    let modules = moyeModule.searchModule("../" + p);
+
+    console.log('serchModule', modules, "../" + p);
 
     moduleList = moduleList.concat(modules);
 }
@@ -32,7 +30,7 @@ for (const p of codePaths) {
 let exportContent = '';
 
 for (const m of moduleList) {
-    let info = ctModule.getModuleInfo(m);
+    let info = moyeModule.getModuleInfo(m);
     exportContent += `[name=${info.name}]\n`;
 
     if(oldExportModule[info.name]){

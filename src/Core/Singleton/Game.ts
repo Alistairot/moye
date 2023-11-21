@@ -1,15 +1,15 @@
-import { ILifecycle } from "../../Entity/ILifecycle";
 import { Task } from "../Task/Task";
+import { ILifeCycle } from "../Type/ILifeCycle";
 
 export class Game {
-    private static readonly singletonMap: Map<new () => ILifecycle, ILifecycle> = new Map
-    private static readonly singletons: Array<ILifecycle> = new Array
-    private static readonly destroys: Array<ILifecycle> = new Array
-    private static readonly updates: Array<ILifecycle> = new Array
-    private static readonly lateUpdates: Array<ILifecycle> = new Array
+    private static readonly singletonMap: Map<new () => ILifeCycle, ILifeCycle> = new Map
+    private static readonly singletons: Array<ILifeCycle> = new Array
+    private static readonly destroys: Array<ILifeCycle> = new Array
+    private static readonly updates: Array<ILifeCycle> = new Array
+    private static readonly lateUpdates: Array<ILifeCycle> = new Array
     private static frameFinishTaskQueue: Task<any>[] = new Array
 
-    public static addSingleton<T extends ILifecycle>(singletonCtor: new () => T): T {
+    public static addSingleton<T extends ILifeCycle>(singletonCtor: new () => T): T {
         if (Game.singletonMap.has(singletonCtor)) {
             throw new Error(`already exist singleton: ${singletonCtor.name}`);
         }
