@@ -20,6 +20,5 @@ https://github.com/egametang/ET
 ...
 
 ### Todo
-尝试使用esbuild打包  
 添加demo  
 添加文档  

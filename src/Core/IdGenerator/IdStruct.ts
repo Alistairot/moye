@@ -1,39 +1,50 @@
-import Long from 'long'
 import { Options } from "../Options/Options";
 import { TimeInfo } from "../Time/TimeInfo";
 import { coreError, coreWarn } from '../Logger/CoreLogHelper';
 
+/**
+ * 可用时间 s
+ * 34年
+ */
+const timeBit = 30n;
+/**
+ * 最大进程数量
+ * 16384
+ */
+const processBit = 14n;
+/**
+ * 每秒可以产生的数量
+ * 100w/s
+ */
+const valueBit = 20n;
+
+const powTimeBit = 2n ** timeBit - 1n;
+const powProcessBit = 2n ** processBit - 1n;
+const powValueBit = 2n ** valueBit - 1n;
+
+const epoch = new Date(2023, 4, 1).getTime();
+
 export class IdStruct {
-    public static epoch = new Date(2023, 4, 1).getTime();
-    public static lastTime = 0;
-    public static idCount: number = 0;
-    /**
-     * 可用时间(s)
-     * 8.5年
-     */
-    public static TimeBit = 28;     // 可用时间(s)
-    /**
-     * 最大进程数量
-     * 单区255进程
-     */
-    public static ProcessBit = 8;   // 最大进程数量
-    /**
-     * 每秒可以产生的数量
-     * 13w每秒
-     */
-    public static ValueBit = 17;    // 每秒可以产生的数量
-    public static PowTimeBit = Math.pow(2, IdStruct.TimeBit) - 1;
-    public static PowProcessBit = Math.pow(2, IdStruct.ProcessBit) - 1;
-    public static PowValueBit = Math.pow(2, IdStruct.ValueBit) - 1;
+    private static lastTime = 0;
+    private static idCount: number = 0;
+    
+    private static _inst: IdStruct;
+    private static get inst() {
+        if (IdStruct._inst == null) {
+            IdStruct._inst = new IdStruct();
+        }
 
-    public Time: number;
-    public Process: number;
-    public Value: number;
-    private result: Long;
+        return IdStruct._inst;
+    }
 
-    public static generate() {
+    time: bigint;
+    process: bigint;
+    value: bigint;
+    result: bigint;
+
+    static generate(): bigint {
         if (this.lastTime == 0) {
-            this.lastTime = this.timeSinceEpoch()
+            this.lastTime = this.timeSinceEpoch();
 
             if (this.lastTime <= 0) {
                 coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
@@ -50,7 +61,7 @@ export class IdStruct {
         else {
             ++this.idCount;
 
-            if (this.idCount > IdStruct.PowValueBit) {
+            if (this.idCount > powValueBit) {
                 ++this.lastTime; // 借用下一秒
                 this.idCount = 0;
 
@@ -58,56 +69,70 @@ export class IdStruct {
             }
         }
 
-        let struct = new this();
-        struct.initArgs3(this.lastTime, Options.getInst().process, this.idCount)
+        
+        let struct = IdStruct.inst;
+        struct.init(this.lastTime, Options.getInst().process, this.idCount);
 
-        return struct.ToLong();
+        return struct.result;
+    }
+
+    static convertToId(time: number, process: number, value: number): bigint {
+        let id = IdStruct.inst.init(time, process, value).result;
+
+        return id;
+    }
+
+    /**
+     * convert id to 3 args
+     * not reference return value
+     * @param id bigint
+     * @returns 
+     */
+    static parseId(id: bigint): IdStruct {
+        return IdStruct.inst.initById(id);
     }
 
     private static timeSinceEpoch(): number {
-        let a = (TimeInfo.getInst().frameTime - this.epoch) / 1000;
+        let a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
         return Math.floor(a);
     }
 
-    public ToLong(): number {
-        let result = this.result.toNumber()
+    /**
+     * convert id to 3 args
+     * @param id bigint
+     * @returns 
+     */
+    initById(id: bigint) {
+        this.result = id;
 
-        return result;
+        this.time = id & powTimeBit;
+        id >>= timeBit;
+
+        this.process = id & powProcessBit;
+        id >>= processBit;
+
+        this.value = id & powValueBit;
+
+        return this;
     }
 
-    public initArgs1(id: number) {
-        this.result = Long.fromNumber(id, true)
+    init(time: number, process: number, value: number) {
+        this.time = BigInt(time);
+        this.process = BigInt(process);
+        this.value = BigInt(value);
 
-        this.Time = this.result.and(IdStruct.PowTimeBit).toNumber();
-        this.Process = this.result.shiftRight(IdStruct.TimeBit)
-            .and(IdStruct.PowProcessBit).toNumber();
-        this.Value = this.result.shiftRight(IdStruct.TimeBit + IdStruct.ProcessBit)
-            .and(IdStruct.PowValueBit).toNumber();
+        this.updateResult();
 
-        return this
+        return this;
     }
 
-    public initArgs2(process: number, value: number) {
-        this.Time = 0;
-        this.Process = process;
-        this.Value = value;
+    private updateResult() {
+        this.result = this.value;
 
-        this.updateResult()
-    }
+        this.result <<= processBit;
+        this.result |= this.process;
 
-    public initArgs3(time: number, process: number, value: number) {
-        this.Time = time;
-        this.Process = process;
-        this.Value = value;
-
-        this.updateResult()
-
-        return this
-    }
-
-    public updateResult() {
-        this.result = Long.fromInt(0, true).or(this.Value)
-            .shiftLeft(IdStruct.ProcessBit).or(this.Process)
-            .shiftLeft(IdStruct.TimeBit).or(this.Time)
+        this.result <<= timeBit;
+        this.result |= this.time;
     }
 }

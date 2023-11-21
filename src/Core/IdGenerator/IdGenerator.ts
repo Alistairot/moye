@@ -3,14 +3,11 @@ import { IdStruct } from './IdStruct';
 import { InstanceIdStruct } from './InstanceIdStruct';
 
 export class IdGenerator extends Singleton {
-    awake(): void {
-    }
-
-    public generateInstanceId(): number {
+    public generateInstanceId(): bigint {
         return InstanceIdStruct.generate();
     }
 
-    public generateId(): number {
+    public generateId(): bigint {
         return IdStruct.generate();
     }
 }
