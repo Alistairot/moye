@@ -1,0 +1,17 @@
+export enum DecoratorTypeCore {
+    Event = "Event",
+    Invoke = "Invoke",
+    Message = "Message",
+    MessageParser = "MessageParser",
+    MessageResponse = "MessageResponse",
+    MessageHandler = "MessageHandler",
+    ActorMessageHandler = "ActorMessageHandler",
+    ConsoleHandler = "ConsoleHandler",
+    Transfer = "Transfer",
+    DB = "DB",
+    AIHandler = "AIHandler",
+    UI = "UI",
+    UILoader = "UILoader",
+    NumericWatcher = "NumericWatcher",
+    FrameFinishEvent = "FrameFinishEvent",
+}

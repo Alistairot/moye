@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "declaration": true,
+      "target": "ES2020",
+      "module": "ES2020",
+      "strict": false,
+      "strictNullChecks": false,
+      "moduleResolution": "Node",
+      "experimentalDecorators": true, 
+      "esModuleInterop": true,
+      "skipLibCheck": true
+    },
+    "include": [
+      "./src/**/*",
+      "./test/**/*"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+  }

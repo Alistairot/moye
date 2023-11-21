@@ -1,0 +1,48 @@
+{
+  "name": "cocos-node",
+  "version": "1.0.0",
+  "description": "game framework of cocos creator & nodejs",
+  "main": "dist/cocos-node.mjs",
+  "types": "dist/cocos-node.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Alistairot/cocos-node"
+  },
+  "files": [
+    "dist/cocos-node.mjs",
+    "dist/cocos-node.min.mjs",
+    "dist/cocos-node.d.ts"
+  ],
+  "scripts": {},
+  "author": "Alistairot",
+  "license": "MIT",
+  "homepage": "https://github.com/Alistairot/cocos-node",
+  "dependencies": {
+    "long": "^5.2.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.150",
+    "@types/node": "^14.0.1",
+    "@types/ws": "^8.5.5",
+    "catch-exit": "^1.2.2",
+    "cbor-x": "^1.5.4",
+    "dts-bundle-generator": "^8.0.1",
+    "fairygui-cc": "github:Alistairot/FairyGUI-cocoscreator#v3.7.2.2",
+    "gulp": "^4.0.2",
+    "gulp-rename": "^2.0.0",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-uglify-es": "^2.0.0",
+    "mongodb": "^5.7.0",
+    "mri": "^1.2.0",
+    "Proto2Ts": "github:Alistairot/Proto2Ts.git#v1.0.3",
+    "protobufjs": "^7.2.4",
+    "terser": "^5.18.2",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6",
+    "uglify-es": "^3.3.9",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.30.0",
+    "winston": "^3.9.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "ws": "^8.12.1"
+  }
+}

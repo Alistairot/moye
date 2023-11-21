@@ -1,0 +1,15 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "CoreClient",
+
+    "description-explain":"模块描述",
+    "description": "客户端核心模块,不要剔除",
+
+    "entry-explain":"入口文件",
+    "entry": "CoreClient.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+        "Core"
+    ]
+}

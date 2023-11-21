@@ -1,0 +1,1 @@
+export type Action<T = any> = () => T;

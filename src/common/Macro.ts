@@ -1,0 +1,24 @@
+// 一些宏定义
+
+/**
+ * 是否开发阶段
+ * 可以用来控制一些调试信息的输出
+ * 以及一些开发中容易出错的地方的检查
+ */
+export const DEVELOP = true;
+
+/**
+ * 是否打印框架的输出信息
+ */
+export const CORE_LOG = true;
+export const CORE_WARN = true;
+
+/**
+ * 同一进程优化
+ */
+export const SAME_PROCESS_OPTIMIZATION = true;
+
+/**
+ * 同一机器优化
+ */
+export const SAME_MACHINE_OPTIMIZATION = true;
