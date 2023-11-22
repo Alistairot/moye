@@ -1,4 +1,4 @@
-import { UITransform, CCFloat, _decorator, Component, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, SpriteFrame, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
+import { _decorator, Component, director, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, SpriteFrame, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
 import { EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -9,7 +9,7 @@ class Singleton {
         this._isDisposed = false;
     }
     static getInst() {
-        let self = this;
+        const self = this;
         if (self._inst == null) {
             throw new Error(`Singleton is not initialized or destroyed, name is ${self.name}`);
         }
@@ -39,7 +39,7 @@ class ObjectPool extends Singleton {
         this._pool = new Map;
     }
     fetch(type) {
-        let queue = this._pool.get(type);
+        const queue = this._pool.get(type);
         if (!queue) {
             return new type();
         }
@@ -49,7 +49,7 @@ class ObjectPool extends Singleton {
         return queue.shift();
     }
     recycle(obj) {
-        let type = obj.constructor;
+        const type = obj.constructor;
         let queue = this._pool.get(type);
         if (!queue) {
             queue = [];
@@ -64,11 +64,43 @@ class ObjectPool extends Singleton {
     }
 }
 
+/**
+ * 可回收对象
+ */
+class RecycleObj {
+    constructor() {
+        this._isRecycle = false;
+    }
+    /**
+     * 通过对象池创建
+     * @param this
+     * @param values
+     * @returns
+     */
+    static create(values) {
+        const event = ObjectPool.getInst().fetch(this);
+        if (values) {
+            Object.assign(event, values);
+        }
+        event._isRecycle = true;
+        return event;
+    }
+    /**
+     * 如果是通过create方法创建的
+     * 那么dispose会回收到对象池
+     */
+    dispose() {
+        if (this._isRecycle) {
+            ObjectPool.getInst().recycle(this);
+        }
+    }
+}
+
 class JsHelper {
     static getMethodName() {
-        let e = new Error();
-        let str = e.stack.split("at ")[2];
-        let endPos = str.indexOf(" ");
+        const e = new Error();
+        const str = e.stack.split("at ")[2];
+        const endPos = str.indexOf(" ");
         return str.substring(0, endPos);
     }
     static getRootDirName(path) {
@@ -94,8 +126,8 @@ class JsHelper {
         return hash >>> 0;
     }
     static modeString(str, mode) {
-        let hash = this.getStringHashCode(str);
-        let result = hash % mode;
+        const hash = this.getStringHashCode(str);
+        const result = hash % mode;
         return result;
     }
     /**
@@ -111,11 +143,10 @@ class JsHelper {
      * ```
      */
     static formatStr(str, ...args) {
-        let ret;
         // 开发阶段打印出错误
         if (typeof str != "string") {
             {
-                let err = new Error('formatStr args[0] is not string');
+                const err = new Error('formatStr args[0] is not string');
                 return err.name + err.stack;
             }
         }
@@ -123,7 +154,7 @@ class JsHelper {
             return str;
         }
         // 将{0}{1}替换成对应的参数 同时允许{{}}转化为{} 
-        ret = str.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+        const ret = str.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
             if (m == "{{") {
                 return "{";
             }
@@ -144,46 +175,26 @@ class Options extends Singleton {
          */
         this.isServer = false;
         /**
-         * 进程序号
-         */
-        this.process = 1;
-        /**
-         * 区id
-         */
-        this.zone = 1;
-        /**
          * log等级 越低输出信息越多
          * 不能控制框架层的输出
          */
         this.logLevel = 1;
         /**
          * 是否开发阶段
-         * 开发阶段log会输出到控制台
-         * 所以不要在生产环境设置为true
          */
         this.develop = true;
-        /**
-         * 控制台命令行输入
-         */
-        this.console = false;
-        this._argsMap = new Map();
     }
-    _setArgs(key, value) {
-        this._argsMap.set(key, value);
+}
+
+class LoggerDefault {
+    log(str) {
+        console.log(str);
     }
-    /**
-     * 获取启动参数
-     * key 大小写敏感
-     * @param key
-     * @returns
-     */
-    getArgs(key) {
-        {
-            if (!this._argsMap.has(key)) {
-                throw new Error(`Options.getArgs ${key} not exist`);
-            }
-        }
-        return this._argsMap.get(key);
+    warn(str) {
+        console.warn(str);
+    }
+    error(str) {
+        console.error(str);
     }
 }
 
@@ -192,17 +203,24 @@ class Options extends Singleton {
  */
 class Logger extends Singleton {
     set iLog(value) {
-        this._iLog = value;
+        this._logInst = value;
+    }
+    get _iLog() {
+        if (!this._logInst) {
+            this._logInst = new LoggerDefault();
+            this._logInst.warn('not set iLog, use default logger');
+        }
+        return this._logInst;
     }
     log(str, ...args) {
         if (this.checkLogLevel(Logger.LOG_LEVEL)) {
-            let formatStr = JsHelper.formatStr(str, ...args);
+            const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.log(formatStr);
         }
     }
     warn(str, ...args) {
         if (this.checkLogLevel(Logger.WARN_LEVEL)) {
-            let formatStr = JsHelper.formatStr(str, ...args);
+            const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.warn(formatStr);
         }
     }
@@ -214,9 +232,9 @@ class Logger extends Singleton {
      * @param args
      */
     error(str, ...args) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        let e = new Error();
-        let errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
+        const formatStr = JsHelper.formatStr(str, ...args);
+        const e = new Error();
+        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
         this._iLog.error(errStr);
     }
     checkLogLevel(level) {
@@ -228,7 +246,7 @@ class Logger extends Singleton {
      * @param args
      */
     coreLog(str, ...args) {
-        let formatStr = JsHelper.formatStr(str, ...args);
+        const formatStr = JsHelper.formatStr(str, ...args);
         this._iLog.log(formatStr);
     }
     /**
@@ -237,7 +255,7 @@ class Logger extends Singleton {
      * @param args
      */
     coreWarn(str, ...args) {
-        let formatStr = JsHelper.formatStr(str, ...args);
+        const formatStr = JsHelper.formatStr(str, ...args);
         this._iLog.warn(formatStr);
     }
     /**
@@ -248,9 +266,9 @@ class Logger extends Singleton {
      * @param args
      */
     coreError(str, ...args) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        let e = new Error();
-        let errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
+        const formatStr = JsHelper.formatStr(str, ...args);
+        const e = new Error();
+        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
         this._iLog.error(errStr);
     }
 }
@@ -279,10 +297,10 @@ class TimeInfo extends Singleton {
 }
 
 function coreWarn(str, ...args) {
-    let formatStr = JsHelper.formatStr(str, ...args);
-    let output = `[core]: ${formatStr}`;
+    const formatStr = JsHelper.formatStr(str, ...args);
+    const output = `[core]: ${formatStr}`;
     try {
-        let inst = Logger.getInst();
+        const inst = Logger.getInst();
         inst.coreWarn(output);
     }
     catch (e) {
@@ -290,10 +308,10 @@ function coreWarn(str, ...args) {
     }
 }
 function coreError(str, ...args) {
-    let formatStr = JsHelper.formatStr(str, ...args);
-    let output = `[core]: ${formatStr}`;
+    const formatStr = JsHelper.formatStr(str, ...args);
+    const output = `[core]: ${formatStr}`;
     try {
-        let inst = Logger.getInst();
+        const inst = Logger.getInst();
         inst.coreError(output);
     }
     catch (e) {
@@ -328,32 +346,32 @@ class IdStruct {
         return IdStruct._inst;
     }
     static generate() {
-        if (this.lastTime == 0) {
-            this.lastTime = this.timeSinceEpoch();
-            if (this.lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
-                this.lastTime = 1;
+        if (this._lastTime == 0) {
+            this._lastTime = this.timeSinceEpoch();
+            if (this._lastTime <= 0) {
+                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                this._lastTime = 1;
             }
         }
-        let time = this.timeSinceEpoch();
-        if (time > this.lastTime) {
-            this.lastTime = time;
-            this.idCount = 0;
+        const time = this.timeSinceEpoch();
+        if (time > this._lastTime) {
+            this._lastTime = time;
+            this._idCount = 0;
         }
         else {
-            ++this.idCount;
-            if (this.idCount > powValueBit$1) {
-                ++this.lastTime; // 借用下一秒
-                this.idCount = 0;
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this.lastTime}`);
+            ++this._idCount;
+            if (this._idCount > powValueBit$1) {
+                ++this._lastTime; // 借用下一秒
+                this._idCount = 0;
+                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
             }
         }
-        let struct = IdStruct.inst;
-        struct.init(this.lastTime, Options.getInst().process, this.idCount);
+        const struct = IdStruct.inst;
+        struct.init(this._lastTime, 1, this._idCount);
         return struct.result;
     }
     static convertToId(time, process, value) {
-        let id = IdStruct.inst.init(time, process, value).result;
+        const id = IdStruct.inst.init(time, process, value).result;
         return id;
     }
     /**
@@ -366,7 +384,7 @@ class IdStruct {
         return IdStruct.inst.initById(id);
     }
     static timeSinceEpoch() {
-        let a = (TimeInfo.getInst().clientNow() - epoch$1) / 1000;
+        const a = (TimeInfo.getInst().clientNow() - epoch$1) / 1000;
         return Math.floor(a);
     }
     /**
@@ -398,8 +416,8 @@ class IdStruct {
         this.result |= this.time;
     }
 }
-IdStruct.lastTime = 0;
-IdStruct.idCount = 0;
+IdStruct._lastTime = 0;
+IdStruct._idCount = 0;
 
 /**
  * 可用时间 s
@@ -420,32 +438,32 @@ class InstanceIdStruct {
         return InstanceIdStruct._inst;
     }
     static generate() {
-        if (this.lastTime == 0) {
-            this.lastTime = this.timeSinceEpoch();
-            if (this.lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
-                this.lastTime = 1;
+        if (this._lastTime == 0) {
+            this._lastTime = this.timeSinceEpoch();
+            if (this._lastTime <= 0) {
+                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                this._lastTime = 1;
             }
         }
-        let time = this.timeSinceEpoch();
-        if (time > this.lastTime) {
-            this.lastTime = time;
-            this.idCount = 0;
+        const time = this.timeSinceEpoch();
+        if (time > this._lastTime) {
+            this._lastTime = time;
+            this._idCount = 0;
         }
         else {
-            ++this.idCount;
-            if (this.idCount > powValueBit) {
-                ++this.lastTime; // 借用下一秒
-                this.idCount = 0;
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this.lastTime}`);
+            ++this._idCount;
+            if (this._idCount > powValueBit) {
+                ++this._lastTime; // 借用下一秒
+                this._idCount = 0;
+                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
             }
         }
-        let struct = InstanceIdStruct.inst;
-        struct.init(this.lastTime, this.idCount);
+        const struct = InstanceIdStruct.inst;
+        struct.init(this._lastTime, this._idCount);
         return struct.result;
     }
     static convertToId(time, value) {
-        let id = InstanceIdStruct.inst.init(time, value).result;
+        const id = InstanceIdStruct.inst.init(time, value).result;
         return id;
     }
     /**
@@ -458,7 +476,7 @@ class InstanceIdStruct {
         return InstanceIdStruct.inst.initById(id);
     }
     static timeSinceEpoch() {
-        let a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
+        const a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
         return Math.floor(a);
     }
     /**
@@ -485,8 +503,8 @@ class InstanceIdStruct {
         this.result |= this.time;
     }
 }
-InstanceIdStruct.lastTime = 0;
-InstanceIdStruct.idCount = 0;
+InstanceIdStruct._lastTime = 0;
+InstanceIdStruct._idCount = 0;
 
 class IdGenerator extends Singleton {
     generateInstanceId() {
@@ -494,6 +512,417 @@ class IdGenerator extends Singleton {
     }
     generateId() {
         return IdStruct.generate();
+    }
+}
+
+/**
+ * 事件基类
+ */
+class AEvent extends RecycleObj {
+}
+
+/**
+ * before singleton add
+ *
+ * NOTE: scene is null
+ */
+class BeforeSingletonAdd extends AEvent {
+}
+/**
+ * after singleton add
+ *
+ * NOTE: scene is null
+ */
+class AfterSingletonAdd extends AEvent {
+}
+/**
+ * before program init
+ *
+ * NOTE: scene is null
+ */
+class BeforeProgramInit extends AEvent {
+}
+/**
+ * after program init
+ *
+ * NOTE: scene is null
+ */
+class AfterProgramInit extends AEvent {
+}
+/**
+ * before program start
+ *
+ * NOTE: scene is null
+ */
+class BeforeProgramStart extends AEvent {
+}
+/**
+ * after program start,
+ * you can listen this event and start your game logic
+ *
+ * NOTE: scene is null
+ */
+class AfterProgramStart extends AEvent {
+}
+
+class DecoratorCollector {
+    constructor() {
+        this._decorators = new Map;
+    }
+    static get inst() {
+        if (DecoratorCollector._inst == null) {
+            DecoratorCollector._inst = new DecoratorCollector;
+        }
+        return DecoratorCollector._inst;
+    }
+    add(decoratorType, ...args) {
+        let array = this._decorators.get(decoratorType);
+        if (!array) {
+            array = [];
+            this._decorators.set(decoratorType, array);
+        }
+        array.push(args);
+    }
+    get(decoratorType) {
+        const array = this._decorators.get(decoratorType);
+        return array || [];
+    }
+}
+
+const EventDecoratorType = "EventDecoratorType";
+/**
+ * 事件装饰器
+ * @param eventCls
+ * @param sceneType
+ * @returns
+ */
+function EventDecorator(eventCls, sceneType) {
+    return function (target) {
+        {
+            if (sceneType == null) {
+                console.error(`EventDecorator必须要传 sceneType`);
+            }
+        }
+        DecoratorCollector.inst.add(EventDecoratorType, eventCls, target, sceneType);
+    };
+}
+
+class EventInfo {
+    constructor(handler, sceneType) {
+        this.eventHandler = handler;
+        this.sceneType = sceneType;
+    }
+}
+
+/**
+ * cache all event
+ */
+class MoyeEventCenter {
+    constructor() {
+        this.allEvents = new Map;
+    }
+    static get inst() {
+        if (this._inst == null) {
+            this._inst = new MoyeEventCenter();
+            this._inst.reloadEvent();
+        }
+        return this._inst;
+    }
+    reloadEvent() {
+        const argsList = DecoratorCollector.inst.get(EventDecoratorType);
+        this.allEvents.clear();
+        for (const args of argsList) {
+            const eventType = args[0];
+            const handlerType = args[1];
+            const sceneType = args[2];
+            let list = this.allEvents.get(eventType);
+            if (!list) {
+                list = [];
+                this.allEvents.set(eventType, list);
+            }
+            list.push(new EventInfo(new handlerType(), sceneType));
+        }
+    }
+    publish(event) {
+        const list = this.allEvents.get(event.constructor);
+        if (!list) {
+            return;
+        }
+        for (let i = 0; i < list.length; i++) {
+            const eventInfo = list[i];
+            const handler = eventInfo.eventHandler;
+            handler.handle(null, event);
+        }
+        event.dispose();
+    }
+}
+
+class Task extends Promise {
+    /**
+     * 创建一个新的task
+     * @param type
+     * @returns
+     */
+    static create(type) {
+        let resolveVar;
+        const task = new Task((resolve) => {
+            resolveVar = resolve;
+        });
+        task._resolve = resolveVar;
+        return task;
+    }
+    setResult(result) {
+        if (!this._resolve) {
+            throw new Error(`setResult but task has been disposed`);
+        }
+        this._resolve(result);
+        this.dispose();
+    }
+    /**
+     * 不允许直接new
+     * @param executor
+     */
+    constructor(executor) {
+        super(executor);
+    }
+    dispose() {
+        this._resolve = null;
+    }
+}
+
+class Game {
+    static addSingleton(singletonType, isNotify = true) {
+        if (Game._singletonMap.has(singletonType)) {
+            throw new Error(`already exist singleton: ${singletonType.name}`);
+        }
+        if (isNotify) {
+            MoyeEventCenter.inst.publish(BeforeSingletonAdd.create({ singletonType: singletonType }));
+        }
+        const singleton = new singletonType();
+        singletonType['_inst'] = singleton;
+        Game._singletonMap.set(singletonType, singleton);
+        Game._singletons.push(singleton);
+        const inst = singleton;
+        if (inst.awake) {
+            inst.awake();
+        }
+        Game._destroys.push(inst);
+        if (inst.update) {
+            Game._updates.push(inst);
+        }
+        if (inst.lateUpdate) {
+            Game._lateUpdates.push(inst);
+        }
+        if (isNotify) {
+            MoyeEventCenter.inst.publish(AfterSingletonAdd.create({ singletonType: singletonType }));
+        }
+        return singleton;
+    }
+    static async waitFrameFinish() {
+        const task = Task.create();
+        Game._frameFinishTaskQueue.push(task);
+        await task;
+    }
+    static update() {
+        for (let index = 0; index < Game._updates.length; index++) {
+            const update = Game._updates[index];
+            const singleton = update;
+            if (singleton.isDisposed) {
+                continue;
+            }
+            update.update();
+        }
+    }
+    static lateUpdate() {
+        for (let index = 0; index < Game._lateUpdates.length; index++) {
+            const lateUpdate = Game._lateUpdates[index];
+            const singleton = lateUpdate;
+            if (singleton.isDisposed) {
+                continue;
+            }
+            lateUpdate.lateUpdate();
+        }
+    }
+    static frameFinishUpdate() {
+        const len = Game._frameFinishTaskQueue.length;
+        if (len == 0) {
+            return;
+        }
+        for (let index = 0; index < len; index++) {
+            const task = Game._frameFinishTaskQueue[index];
+            task.setResult();
+        }
+        Game._frameFinishTaskQueue = [];
+    }
+    static dispose() {
+        for (let index = Game._singletons.length - 1; index >= 0; index--) {
+            const inst = Game._singletons[index];
+            if (inst.isDisposed) {
+                continue;
+            }
+            inst._onPreDestroy();
+        }
+    }
+}
+Game._singletonMap = new Map;
+Game._singletons = [];
+Game._destroys = [];
+Game._updates = [];
+Game._lateUpdates = [];
+Game._frameFinishTaskQueue = [];
+
+class EventSystem extends Singleton {
+    async publishAsync(scene, eventType) {
+        const list = MoyeEventCenter.inst.allEvents.get(eventType.constructor);
+        if (!list) {
+            return;
+        }
+        const tasks = [];
+        for (let i = 0; i < list.length; i++) {
+            const eventInfo = list[i];
+            if (eventInfo.sceneType != scene.sceneType && eventInfo.sceneType != "None") {
+                continue;
+            }
+            tasks.push(eventInfo.eventHandler.handleAsync(scene, eventType));
+        }
+        await Promise.all(tasks);
+        eventType.dispose();
+    }
+    /**
+     * 一定要确保事件处理函数不是异步方法
+     * 否则会导致事件处理顺序不一致和错误无法捕获
+     * @param scene
+     * @param eventType
+     * @returns
+     */
+    publish(scene, eventType) {
+        const list = MoyeEventCenter.inst.allEvents.get(eventType.constructor);
+        if (!list) {
+            return;
+        }
+        for (let i = 0; i < list.length; i++) {
+            const eventInfo = list[i];
+            if (eventInfo.sceneType != scene.sceneType && eventInfo.sceneType != "None") {
+                continue;
+            }
+            eventInfo.eventHandler.handle(scene, eventType);
+        }
+        eventType.dispose();
+    }
+}
+
+var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$3, property: property$3 } = _decorator;
+let MoyeRuntime = class MoyeRuntime extends Component {
+    start() {
+        director.addPersistRootNode(this.node);
+    }
+    update(dt) {
+        Game.update();
+    }
+    lateUpdate(dt) {
+        Game.lateUpdate();
+        Game.frameFinishUpdate();
+    }
+    onDestroy() {
+        Game.dispose();
+    }
+};
+MoyeRuntime = __decorate$3([
+    ccclass$3('MoyeRuntime')
+], MoyeRuntime);
+
+class EntityCenter extends Singleton {
+    constructor() {
+        super(...arguments);
+        this._allEntities = new Map;
+    }
+    add(entity) {
+        this._allEntities.set(entity.instanceId, entity);
+    }
+    remove(instanceId) {
+        this._allEntities.delete(instanceId);
+    }
+    get(instanceId) {
+        const component = this._allEntities.get(instanceId);
+        return component;
+    }
+}
+
+class Program {
+    static init(rootNode) {
+        MoyeEventCenter.inst.publish(new BeforeProgramInit());
+        Game.addSingleton(ObjectPool, false);
+        Game.addSingleton(Options);
+        Game.addSingleton(Logger);
+        Game.addSingleton(EventSystem);
+        Game.addSingleton(TimeInfo);
+        Game.addSingleton(IdGenerator);
+        Game.addSingleton(EntityCenter);
+        // add client runtime
+        rootNode.addComponent(MoyeRuntime);
+        MoyeEventCenter.inst.publish(new AfterProgramInit());
+    }
+    /**
+     * 确保所有脚本已经加载之后调用start
+     */
+    static start() {
+        // when loaded new scripts, need reload event
+        MoyeEventCenter.inst.reloadEvent();
+        MoyeEventCenter.inst.publish(new BeforeProgramStart());
+        MoyeEventCenter.inst.publish(new AfterProgramStart());
+    }
+}
+
+/**
+ * 这个方法执行一个promise，如果promise出现异常，会打印异常信息
+ * @param promise
+ * @returns
+ */
+async function safeCall(promise) {
+    try {
+        return await promise;
+    }
+    catch (e) {
+        coreError(e?.stack);
+    }
+}
+
+class AEventHandler {
+    async handleAsync(scene, a) {
+        try {
+            await this.run(scene, a);
+        }
+        catch (e) {
+            if (e instanceof Error) {
+                coreError(e.stack);
+            }
+            else {
+                coreError(e);
+            }
+        }
+    }
+    handle(scene, a) {
+        try {
+            const ret = this.run(scene, a);
+            if (ret instanceof Promise) {
+                coreWarn('{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
+                safeCall(ret);
+            }
+        }
+        catch (e) {
+            if (e instanceof Error) {
+                coreError(e.stack);
+            }
+            else {
+                coreError(e);
+            }
+        }
     }
 }
 
@@ -552,8 +981,8 @@ let SizeFollow = class SizeFollow extends Component {
         this._target = null;
     }
     onTargetSizeChange() {
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
         // console.log('onTargetSizeChange targetTrans', targetTrans);
         // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
         // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
@@ -575,16 +1004,16 @@ let SizeFollow = class SizeFollow extends Component {
         if (this._target == null) {
             return;
         }
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
         if (this._widthFollow) {
-            let selfWidth = selfTrans.width;
-            let targetWidth = targetTrans.width;
+            const selfWidth = selfTrans.width;
+            const targetWidth = targetTrans.width;
             this._widthOffset = selfWidth - targetWidth;
         }
         if (this._heightFollow) {
-            let selfHeight = selfTrans.height;
-            let targetHeight = targetTrans.height;
+            const selfHeight = selfTrans.height;
+            const targetHeight = targetTrans.height;
             this._heightOffset = selfHeight - targetHeight;
         }
     }
@@ -845,14 +1274,14 @@ let CTWidget = class CTWidget extends Component {
     }
     updateSize() {
         if (this._isVertical) {
-            let posChange = this._targetOldPos.y - this._target.node.position.y;
+            const posChange = this._targetOldPos.y - this._target.node.position.y;
             let sizeChange = this._target.height - this._targetOldSize;
-            let anchorY = this._trans.anchorY;
+            const anchorY = this._trans.anchorY;
             this._changePos.set(this._selfOldPos);
             if (this._target.getComponent(Label) && !this._target.node.active) {
                 sizeChange = this._targetOldSize;
             }
-            let realChange = posChange + sizeChange;
+            const realChange = posChange + sizeChange;
             this._trans.height = this._selfOldSize + realChange;
             if (this._dir == WidgetDirection.TOP_EXTEND) {
                 this.node.setPosition(this._changePos);
@@ -864,22 +1293,22 @@ let CTWidget = class CTWidget extends Component {
         }
     }
     updatePos() {
-        let selfTrans = this._trans;
-        let targetTrans = this._target;
-        let targetPos = this.getPos(targetTrans, this._targetDir);
+        const selfTrans = this._trans;
+        const targetTrans = this._target;
+        const targetPos = this.getPos(targetTrans, this._targetDir);
         let pos = targetPos - this._distance;
         this._changePos.set(this.node.worldPosition);
         if (this._isVertical) {
             switch (this._dir) {
                 case WidgetDirection.TOP: {
-                    let height = selfTrans.height;
-                    let anchorY = selfTrans.anchorY;
+                    const height = selfTrans.height;
+                    const anchorY = selfTrans.anchorY;
                     pos -= height * (1 - anchorY);
                     break;
                 }
                 case WidgetDirection.BOTTOM: {
-                    let height = selfTrans.height;
-                    let anchorY = selfTrans.anchorY;
+                    const height = selfTrans.height;
+                    const anchorY = selfTrans.anchorY;
                     pos += height * anchorY;
                     break;
                 }
@@ -917,17 +1346,17 @@ let CTWidget = class CTWidget extends Component {
         if (this._target == null) {
             return;
         }
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
-        let selfPos = this.getPos(selfTrans, this._dir);
-        let targetPos = this.getPos(targetTrans, this._targetDir);
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
+        const selfPos = this.getPos(selfTrans, this._dir);
+        const targetPos = this.getPos(targetTrans, this._targetDir);
         this._distance = targetPos - selfPos;
     }
     getPos(trans, dir) {
         if (this._isVertical) {
             let y = trans.node.worldPosition.y;
-            let height = trans.height;
-            let anchorY = trans.anchorY;
+            const height = trans.height;
+            const anchorY = trans.anchorY;
             switch (dir) {
                 case WidgetDirection.TOP:
                 case WidgetDirection.TOP_EXTEND:
@@ -944,9 +1373,9 @@ let CTWidget = class CTWidget extends Component {
             }
         }
         else {
-            let x = trans.node.worldPosition.x;
-            let width = trans.width;
-            let anchorX = trans.anchorX;
+            const x = trans.node.worldPosition.x;
+            const width = trans.width;
+            const anchorX = trans.anchorX;
             switch (dir) {
                 case WidgetDirection.LEFT:
                     return x - width * anchorX;
@@ -1007,18 +1436,18 @@ CTWidget = __decorate$1([
 const RoundBoxAssembler = {
     // 根据圆角segments参数，构造网格的顶点索引列表
     GetIndexBuffer(sprite) {
-        let indexBuffer = [
+        const indexBuffer = [
             0, 1, 2, 2, 3, 0,
             4, 5, 6, 6, 7, 4,
             8, 9, 10, 10, 11, 8
         ];
         // 为四个角的扇形push进索引值
         let index = 12;
-        let fanIndexBuild = function (center, start, end) {
+        const fanIndexBuild = function (center, start, end) {
             let last = start;
             for (let i = 0; i < sprite.segments - 1; i++) {
                 // 左上角 p2为扇形圆心，p1/p5为两个边界
-                let cur = index;
+                const cur = index;
                 index++;
                 indexBuffer.push(center, last, cur);
                 last = cur;
@@ -1042,10 +1471,10 @@ const RoundBoxAssembler = {
         corner += sprite.leftTop ? 1 : 0;
         corner += sprite.rightTop ? 1 : 0;
         corner += sprite.rightBottom ? 1 : 0;
-        let vNum = 12 + (sprite.segments - 1) * corner;
+        const vNum = 12 + (sprite.segments - 1) * corner;
         renderData.dataLength = vNum;
         renderData.resize(vNum, 18 + sprite.segments * 3 * corner);
-        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
         renderData.chunk.setIndexBuffer(indexBuffer);
         return renderData;
     },
@@ -1105,7 +1534,7 @@ const RoundBoxAssembler = {
         let indexOffset = meshBuffer.indexOffset;
         const vid = vidOrigin;
         // 沿着当前这个位置往后将我们这个对象的index放进去
-        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
         for (let i = 0; i < renderData.indexCount; i++) {
             ib[indexOffset++] = vid + indexBuffer[i];
         }
@@ -1158,11 +1587,11 @@ const RoundBoxAssembler = {
         dataList[11].y = sprite.rightBottom ? bottom_r : bottom;
         // 扇形圆角的顶点
         let index = 12;
-        let fanPosBuild = function (center, startAngle) {
+        const fanPosBuild = function (center, startAngle) {
             for (let i = 1; i < sprite.segments; i++) {
                 // 我这里顶点都是按顺时针分配的，所以角度要从开始角度减
                 // 每个扇形都是90度
-                let angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
+                const angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
                 dataList[index].x = center.x + Math.cos(angle) * sprite.radius;
                 dataList[index].y = center.y + Math.sin(angle) * sprite.radius;
                 index++;
@@ -1580,4 +2009,4 @@ RoundBoxSprite = __decorate([
     menu('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
-export { CTWidget, IdGenerator, Logger, ObjectPool, RoundBoxSprite, SizeFollow, error, log, warn };
+export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, CTWidget, DecoratorCollector, EntityCenter, EventDecorator, EventDecoratorType, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, ObjectPool, Options, Program, RecycleObj, RoundBoxSprite, Singleton, SizeFollow, TimeInfo, error, log, safeCall, warn };

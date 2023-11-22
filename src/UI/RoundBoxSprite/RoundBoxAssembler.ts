@@ -5,25 +5,25 @@ export const RoundBoxAssembler: IAssembler = {
 
     // 根据圆角segments参数，构造网格的顶点索引列表
     GetIndexBuffer(sprite:RoundBoxSprite) {
-        let indexBuffer = [
+        const indexBuffer = [
             0, 1, 2, 2, 3, 0,
             4, 5, 6, 6, 7, 4,
             8, 9, 10, 10, 11, 8
-        ]
+        ];
 
         // 为四个角的扇形push进索引值
-        let index = 12
-        let fanIndexBuild = function(center, start, end) {
+        let index = 12;
+        const fanIndexBuild = function(center, start, end) {
             let last = start;
             for (let i = 0; i < sprite.segments - 1; i++) {
                 // 左上角 p2为扇形圆心，p1/p5为两个边界
-                let cur = index;
+                const cur = index;
                 index++;
                 indexBuffer.push(center, last, cur);
                 last = cur;
             }
-            indexBuffer.push(center, last, end)
-        }
+            indexBuffer.push(center, last, end);
+        };
         if (sprite.leftBottom)
             fanIndexBuild(3, 4, 0);
         if (sprite.leftTop)
@@ -32,7 +32,7 @@ export const RoundBoxAssembler: IAssembler = {
             fanIndexBuild(9, 6, 10);
         if (sprite.rightBottom)
             fanIndexBuild(8, 11, 7);
-        return indexBuffer
+        return indexBuffer;
     },
     createData (sprite: RoundBoxSprite) {
         const renderData = sprite.requestRenderData();
@@ -42,11 +42,11 @@ export const RoundBoxAssembler: IAssembler = {
         corner += sprite.rightTop ? 1: 0;
         corner += sprite.rightBottom ? 1: 0;
 
-        let vNum = 12 + (sprite.segments - 1) * corner;
+        const vNum = 12 + (sprite.segments - 1) * corner;
         renderData.dataLength = vNum;
         renderData.resize(vNum, 18 + sprite.segments * 3 * corner);
 
-        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
         renderData.chunk.setIndexBuffer(indexBuffer);
         return renderData;
     },
@@ -117,7 +117,7 @@ export const RoundBoxAssembler: IAssembler = {
 
         const vid = vidOrigin;
         // 沿着当前这个位置往后将我们这个对象的index放进去
-        let indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
         for (let i = 0; i < renderData.indexCount; i++) {
             ib[indexOffset++] = vid + indexBuffer[i];
         }
@@ -176,16 +176,16 @@ export const RoundBoxAssembler: IAssembler = {
         
         // 扇形圆角的顶点
         let index = 12;
-        let fanPosBuild = function(center, startAngle) {
+        const fanPosBuild = function(center, startAngle) {
             for (let i = 1; i < sprite.segments; i++) {
                 // 我这里顶点都是按顺时针分配的，所以角度要从开始角度减
                 // 每个扇形都是90度
-                let angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
+                const angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
                 dataList[index].x = center.x + Math.cos(angle) * sprite.radius;
                 dataList[index].y = center.y + Math.sin(angle) * sprite.radius;
                 index++;
             }
-        }
+        };
         if (sprite.leftBottom)
             fanPosBuild(dataList[3], 270);
         if (sprite.leftTop)

@@ -13,7 +13,7 @@ export abstract class RecycleObj {
      * @param values 
      * @returns 
      */
-    public static create<T extends RecycleObj>(this: Type<T>, values?: Partial<T>): T {
+    static create<T extends RecycleObj>(this: Type<T>, values?: Partial<T>): T {
         const event = ObjectPool.getInst().fetch(this);
 
         if (values) {
@@ -29,7 +29,7 @@ export abstract class RecycleObj {
      * 如果是通过create方法创建的
      * 那么dispose会回收到对象池
      */
-    public dispose() {
+    dispose() {
         if (this._isRecycle) {
             ObjectPool.getInst().recycle(this);
         }

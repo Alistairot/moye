@@ -18,5 +18,5 @@ gulp build
 ### todo
 add demo  
 add documentation
-apply eslint in moye project  
+add entity  
 add cocos-node module  

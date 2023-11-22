@@ -42,7 +42,7 @@ export class RoundBoxSprite extends UIRenderer {
     }
     // 圆角用三角形模拟扇形的线段数量，越大，则越圆滑
     @property({type:CCInteger, serializable:true})
-    _segments:number = 10
+        _segments:number = 10;
     @property({type:CCInteger, serializable:true, min:1})
     public get segments() {
         return this._segments;
@@ -54,15 +54,15 @@ export class RoundBoxSprite extends UIRenderer {
     }
     // 圆角半径
     @property({type:CCFloat, serializable:true})
-    _radius:number = 20
+        _radius:number = 20;
     @property({type:CCFloat, serializable:true, min:0})
     public get radius() {
-        return this._radius
+        return this._radius;
     }
     public set radius(radius) {
         this._radius = radius;
         this._updateUVs();
-        this.markForUpdateRenderData(true)
+        this.markForUpdateRenderData(true);
     }
 
     @property({serializable:true})
@@ -269,7 +269,7 @@ export class RoundBoxSprite extends UIRenderer {
                     this.node._uiProps.uiTransformComp!.setContentSize(rect.width, rect.height);
                 }
             }
-            this.markForUpdateRenderData(true)
+            this.markForUpdateRenderData(true);
             this._assembler.updateRenderData(this);
         }
     }

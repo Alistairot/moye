@@ -1,45 +1,13 @@
 import { AEvent } from "./AEvent";
-import { DecoratorCollector } from "../Decorator/DecoratorCollector";
-import { coreError } from "../Logger/CoreLogHelper";
 import { Singleton } from "../Singleton/Singleton";
 import { IScene } from "../Type/IScene";
 import { Type } from "../Type/Type";
 import { AEventHandler } from "./AEventHandler";
-import { EventDecoratorType } from "./EventDecorator";
-import { EventInfo } from "./EventInfo";
+import { MoyeEventCenter } from "./MoyeEventCenter";
 
 export class EventSystem extends Singleton {
-    private _allEvents: Map<Type<AEvent>, Array<EventInfo>> = new Map;
-
-    awake(): void {
-        this.initEvent();
-    }
-
-    private initEvent() {
-        const argsList = DecoratorCollector.inst.get(EventDecoratorType);
-
-        for (const args of argsList) {
-            const eventTypeCtor = args[0];
-            const handlerCtor = args[1];
-            const sceneType = args[2];
-
-            let list = this._allEvents.get(eventTypeCtor);
-
-            if (!list) {
-                list = [];
-                this._allEvents.set(eventTypeCtor, list);
-            }
-
-            list.push(new EventInfo(new handlerCtor(), sceneType));
-        }
-    }
-
     async publishAsync<T extends AEvent>(scene: IScene, eventType: T) {
-        if (!scene) {
-            coreError(`发送事件必须传scene`);
-        }
-
-        const list = this._allEvents.get(eventType.constructor as Type<AEvent>);
+        const list = MoyeEventCenter.inst.allEvents.get(eventType.constructor as Type<AEvent>);
 
         if (!list) {
             return;
@@ -70,11 +38,7 @@ export class EventSystem extends Singleton {
      * @returns 
      */
     publish<T extends AEvent>(scene: IScene, eventType: T) {
-        if (!scene) {
-            coreError(`发送事件必须传scene`);
-        }
-
-        const list = this._allEvents.get(eventType.constructor as Type<AEvent>);
+        const list = MoyeEventCenter.inst.allEvents.get(eventType.constructor as Type<AEvent>);
 
         if (!list) {
             return;

@@ -2,27 +2,37 @@ import { JsHelper } from "../JavaScript/JsHelper";
 import { Options } from "../Options/Options";
 import { Singleton } from "../Singleton/Singleton";
 import { ILog } from "./ILog";
+import { LoggerDefault } from "./LoggerDefault";
 
 /**
  * Logger
  */
-export class Logger extends Singleton{
-    private _iLog: ILog;
-    public set iLog(value: ILog) {
-        this._iLog = value;
+export class Logger extends Singleton {
+    set iLog(value: ILog) {
+        this._logInst = value;
     }
-
+    
     static readonly LOG_LEVEL = 1;
     static readonly WARN_LEVEL = 2;
 
-    public log(str: string, ...args: any[]) {
+    private _logInst: ILog;
+    private get _iLog(): ILog {
+        if (!this._logInst) {
+            this._logInst = new LoggerDefault();
+            this._logInst.warn('not set iLog, use default logger');
+        }
+        return this._logInst;
+    }
+    
+
+    log(str: string, ...args: any[]) {
         if (this.checkLogLevel(Logger.LOG_LEVEL)) {
             const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.log(formatStr);
         }
     }
 
-    public warn(str: string, ...args: any[]) {
+    warn(str: string, ...args: any[]) {
         if (this.checkLogLevel(Logger.WARN_LEVEL)) {
             const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.warn(formatStr);
@@ -36,7 +46,7 @@ export class Logger extends Singleton{
      * @param str 
      * @param args 
      */
-    public error(str: string, ...args: any[]) {
+    error(str: string, ...args: any[]) {
         const formatStr = JsHelper.formatStr(str, ...args);
         const e = new Error();
         const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);

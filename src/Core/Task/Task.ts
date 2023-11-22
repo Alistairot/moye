@@ -1,5 +1,4 @@
 
-import { coreError } from "../Logger/CoreLogHelper";
 import { Type } from "../Type/Type";
 
 export class Task<T = any> extends Promise<T> {
@@ -23,8 +22,7 @@ export class Task<T = any> extends Promise<T> {
 
     setResult(result?: T) {
         if (!this._resolve) {
-            coreError(`setResult task has been disposed`);
-            return;
+            throw new Error(`setResult but task has been disposed`);
         }
 
         this._resolve(result);

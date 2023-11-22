@@ -12,13 +12,3 @@ export const DEVELOP = true;
  */
 export const CORE_LOG = true;
 export const CORE_WARN = true;
-
-/**
- * 同一进程优化
- */
-export const SAME_PROCESS_OPTIMIZATION = true;
-
-/**
- * 同一机器优化
- */
-export const SAME_MACHINE_OPTIMIZATION = true;

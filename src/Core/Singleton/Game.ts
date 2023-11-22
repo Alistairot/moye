@@ -1,17 +1,24 @@
+import { AfterSingletonAdd, BeforeSingletonAdd } from "../EventSystem/EventCore";
+import { MoyeEventCenter } from "../EventSystem/MoyeEventCenter";
 import { Task } from "../Task/Task";
 import { ILifeCycle } from "../Type/ILifeCycle";
+import { Singleton } from "./Singleton";
 
 export class Game {
-    private static readonly _singletonMap: Map<new () => ILifeCycle, ILifeCycle> = new Map;
-    private static readonly _singletons: Array<ILifeCycle> = [];
-    private static readonly _destroys: Array<ILifeCycle> = [];
-    private static readonly _updates: Array<ILifeCycle> = [];
-    private static readonly _lateUpdates: Array<ILifeCycle> = [];
+    private static _singletonMap: Map<new () => Singleton, Singleton> = new Map;
+    private static _singletons: Array<Singleton> = [];
+    private static _destroys: Array<ILifeCycle> = [];
+    private static _updates: Array<ILifeCycle> = [];
+    private static _lateUpdates: Array<ILifeCycle> = [];
     private static _frameFinishTaskQueue: Task<any>[] = [];
 
-    public static addSingleton<T extends ILifeCycle>(singletonType: new () => T): T {
+    static addSingleton<T extends Singleton>(singletonType: new () => T, isNotify: boolean = true): T {
         if (Game._singletonMap.has(singletonType)) {
             throw new Error(`already exist singleton: ${singletonType.name}`);
+        }
+
+        if (isNotify) {
+            MoyeEventCenter.inst.publish(BeforeSingletonAdd.create({ singletonType: singletonType }));
         }
 
         const singleton = new singletonType();
@@ -21,24 +28,30 @@ export class Game {
         Game._singletonMap.set(singletonType, singleton);
         Game._singletons.push(singleton);
 
-        if (singleton.awake) {
-            singleton.awake();
+        const inst = singleton as unknown as ILifeCycle;
+
+        if (inst.awake) {
+            inst.awake();
         }
 
-        Game._destroys.push(singleton);
+        Game._destroys.push(inst);
 
-        if (singleton.update) {
-            Game._updates.push(singleton);
+        if (inst.update) {
+            Game._updates.push(inst);
         }
 
-        if (singleton.lateUpdate) {
-            Game._lateUpdates.push(singleton);
+        if (inst.lateUpdate) {
+            Game._lateUpdates.push(inst);
+        }
+
+        if (isNotify) {
+            MoyeEventCenter.inst.publish(AfterSingletonAdd.create({ singletonType: singletonType }));
         }
 
         return singleton as T;
     }
 
-    public static async waitFrameFinish(): Promise<void> {
+    static async waitFrameFinish(): Promise<void> {
         const task = Task.create();
 
         Game._frameFinishTaskQueue.push(task);
@@ -46,7 +59,7 @@ export class Game {
         await task;
     }
 
-    public static update(): void {
+    static update(): void {
         for (let index = 0; index < Game._updates.length; index++) {
             const update = Game._updates[index];
             const singleton = update;
@@ -59,7 +72,7 @@ export class Game {
         }
     }
 
-    public static lateUpdate(): void {
+    static lateUpdate(): void {
         for (let index = 0; index < Game._lateUpdates.length; index++) {
             const lateUpdate = Game._lateUpdates[index];
             const singleton = lateUpdate;
@@ -72,7 +85,7 @@ export class Game {
         }
     }
 
-    public static frameFinishUpdate(): void {
+    static frameFinishUpdate(): void {
         const len = Game._frameFinishTaskQueue.length;
 
         if (len == 0) {
@@ -88,15 +101,15 @@ export class Game {
         Game._frameFinishTaskQueue = [];
     }
 
-    public static dispose() {
+    static dispose() {
         for (let index = Game._singletons.length - 1; index >= 0; index--) {
-            const singleton = Game._singletons[index];
+            const inst = Game._singletons[index] as unknown as ILifeCycle;
 
-            if (singleton.isDisposed) {
+            if (inst.isDisposed) {
                 continue;
             }
 
-            singleton._onPreDestroy();
+            inst._onPreDestroy();
         }
     }
 }

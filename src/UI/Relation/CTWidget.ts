@@ -42,7 +42,7 @@ export class CTWidget extends Component {
         this.updateData();
     }
     @property({ type: UITransform })
-    private _target: UITransform
+    private _target: UITransform;
 
     // 目标方向
     @property({ type: Enum(WidgetBase) })
@@ -54,21 +54,21 @@ export class CTWidget extends Component {
         if (val == WidgetDirection.LEFT ||
             val == WidgetDirection.RIGHT) {
             switch (this._dir) {
-                case WidgetDirection.TOP:
-                case WidgetDirection.TOP_EXTEND:
-                case WidgetDirection.BOTTOM:
-                case WidgetDirection.BOTTOM_EXTEND:
-                    this._dir = WidgetDirection.LEFT;
+            case WidgetDirection.TOP:
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.BOTTOM_EXTEND:
+                this._dir = WidgetDirection.LEFT;
             }
 
             this._isVertical = false;
         } else {
             switch (this._dir) {
-                case WidgetDirection.LEFT:
-                case WidgetDirection.LEFT_EXTEND:
-                case WidgetDirection.RIGHT:
-                case WidgetDirection.RIGHT_EXTEND:
-                    this._dir = WidgetDirection.TOP;
+            case WidgetDirection.LEFT:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT:
+            case WidgetDirection.RIGHT_EXTEND:
+                this._dir = WidgetDirection.TOP;
             }
 
             this._isVertical = true;
@@ -81,7 +81,7 @@ export class CTWidget extends Component {
         return this._targetDir;
     }
     @property
-    private _targetDir: WidgetDirection = WidgetDirection.TOP
+    private _targetDir: WidgetDirection = WidgetDirection.TOP;
 
     // 自身方向
     @property({ type: Enum(WidgetDirection) })
@@ -91,36 +91,36 @@ export class CTWidget extends Component {
         }
 
         switch (val) {
-            case WidgetDirection.LEFT:
-            case WidgetDirection.LEFT_EXTEND:
-            case WidgetDirection.RIGHT:
-            case WidgetDirection.RIGHT_EXTEND: {
-                switch (this._targetDir) {
-                    case WidgetDirection.TOP:
-                    case WidgetDirection.BOTTOM: {
-                        this._targetDir = WidgetDirection.LEFT;
-                    }
-                        break
-                }
-
-                this._isVertical = false;
-                break
-            }
+        case WidgetDirection.LEFT:
+        case WidgetDirection.LEFT_EXTEND:
+        case WidgetDirection.RIGHT:
+        case WidgetDirection.RIGHT_EXTEND: {
+            switch (this._targetDir) {
             case WidgetDirection.TOP:
-            case WidgetDirection.TOP_EXTEND:
-            case WidgetDirection.BOTTOM:
-            case WidgetDirection.BOTTOM_EXTEND: {
-                switch (this._targetDir) {
-                    case WidgetDirection.LEFT:
-                    case WidgetDirection.RIGHT: {
-                        this._targetDir = WidgetDirection.TOP;
-                    }
-                        break
-                }
-
-                this._isVertical = true;
-                break
+            case WidgetDirection.BOTTOM: {
+                this._targetDir = WidgetDirection.LEFT;
             }
+                break;
+            }
+
+            this._isVertical = false;
+            break;
+        }
+        case WidgetDirection.TOP:
+        case WidgetDirection.TOP_EXTEND:
+        case WidgetDirection.BOTTOM:
+        case WidgetDirection.BOTTOM_EXTEND: {
+            switch (this._targetDir) {
+            case WidgetDirection.LEFT:
+            case WidgetDirection.RIGHT: {
+                this._targetDir = WidgetDirection.TOP;
+            }
+                break;
+            }
+
+            this._isVertical = true;
+            break;
+        }
         }
 
         this._dir = val;
@@ -130,16 +130,16 @@ export class CTWidget extends Component {
         return this._dir;
     }
     @property
-    private _dir: WidgetDirection = WidgetDirection.TOP
+    private _dir: WidgetDirection = WidgetDirection.TOP;
 
     @property({ type: CCFloat })
-    visibleOffset: number = 0
+        visibleOffset: number = 0;
 
     @property
-    private _isVertical: boolean = true
+    private _isVertical: boolean = true;
 
     @property
-    private _distance: number = 0
+    private _distance: number = 0;
 
     @property
     private _changePos: Vec3 = new Vec3(0, 0, 0);
@@ -148,13 +148,13 @@ export class CTWidget extends Component {
     private _targetOldPos: Vec3 = new Vec3(0, 0, 0);
 
     @property
-    private _targetOldSize: number = 0
+    private _targetOldSize: number = 0;
 
     @property
     private _selfOldPos: Vec3 = new Vec3(0, 0, 0);
 
     @property
-    private _selfOldSize: number = 0
+    private _selfOldSize: number = 0;
 
     private _trans: UITransform;
 
@@ -241,18 +241,18 @@ export class CTWidget extends Component {
         }
 
         switch (this._dir) {
-            case WidgetDirection.TOP:
-            case WidgetDirection.BOTTOM:
-            case WidgetDirection.LEFT:
-            case WidgetDirection.RIGHT:
-                this.updateDistance();
-                break;
-            case WidgetDirection.TOP_EXTEND:
-            case WidgetDirection.BOTTOM_EXTEND:
-            case WidgetDirection.LEFT_EXTEND:
-            case WidgetDirection.RIGHT_EXTEND:
-                this.updateTargetPos();
-                break;
+        case WidgetDirection.TOP:
+        case WidgetDirection.BOTTOM:
+        case WidgetDirection.LEFT:
+        case WidgetDirection.RIGHT:
+            this.updateDistance();
+            break;
+        case WidgetDirection.TOP_EXTEND:
+        case WidgetDirection.BOTTOM_EXTEND:
+        case WidgetDirection.LEFT_EXTEND:
+        case WidgetDirection.RIGHT_EXTEND:
+            this.updateTargetPos();
+            break;
         }
     }
 
@@ -262,18 +262,18 @@ export class CTWidget extends Component {
         }
 
         switch (this._dir) {
-            case WidgetDirection.TOP:
-            case WidgetDirection.BOTTOM:
-            case WidgetDirection.LEFT:
-            case WidgetDirection.RIGHT:
-                this.updatePos();
-                break;
-            case WidgetDirection.TOP_EXTEND:
-            case WidgetDirection.BOTTOM_EXTEND:
-            case WidgetDirection.LEFT_EXTEND:
-            case WidgetDirection.RIGHT_EXTEND:
-                this.updateSize();
-                break;
+        case WidgetDirection.TOP:
+        case WidgetDirection.BOTTOM:
+        case WidgetDirection.LEFT:
+        case WidgetDirection.RIGHT:
+            this.updatePos();
+            break;
+        case WidgetDirection.TOP_EXTEND:
+        case WidgetDirection.BOTTOM_EXTEND:
+        case WidgetDirection.LEFT_EXTEND:
+        case WidgetDirection.RIGHT_EXTEND:
+            this.updateSize();
+            break;
         }
     }
 
@@ -281,9 +281,9 @@ export class CTWidget extends Component {
 
     private updateSize() {
         if (this._isVertical) {
-            let posChange = this._targetOldPos.y - this._target.node.position.y;
+            const posChange = this._targetOldPos.y - this._target.node.position.y;
             let sizeChange = this._target.height - this._targetOldSize;
-            let anchorY = this._trans.anchorY;
+            const anchorY = this._trans.anchorY;
 
             this._changePos.set(this._selfOldPos);
 
@@ -291,7 +291,7 @@ export class CTWidget extends Component {
                 sizeChange = this._targetOldSize;
             }
 
-            let realChange = posChange + sizeChange;
+            const realChange = posChange + sizeChange;
 
             this._trans.height = this._selfOldSize + realChange;
 
@@ -303,32 +303,31 @@ export class CTWidget extends Component {
                 this.node.setPosition(v3(this._changePos));
             }
 
-        } else {
         }
     }
 
     private updatePos() {
-        let selfTrans = this._trans;
-        let targetTrans = this._target;
-        let targetPos = this.getPos(targetTrans, this._targetDir);
+        const selfTrans = this._trans;
+        const targetTrans = this._target;
+        const targetPos = this.getPos(targetTrans, this._targetDir);
         let pos = targetPos - this._distance;
 
         this._changePos.set(this.node.worldPosition);
 
         if (this._isVertical) {
             switch (this._dir) {
-                case WidgetDirection.TOP: {
-                    let height = selfTrans.height;
-                    let anchorY = selfTrans.anchorY;
-                    pos -= height * (1 - anchorY);
-                    break;
-                }
-                case WidgetDirection.BOTTOM: {
-                    let height = selfTrans.height;
-                    let anchorY = selfTrans.anchorY;
-                    pos += height * anchorY;
-                    break;
-                }
+            case WidgetDirection.TOP: {
+                const height = selfTrans.height;
+                const anchorY = selfTrans.anchorY;
+                pos -= height * (1 - anchorY);
+                break;
+            }
+            case WidgetDirection.BOTTOM: {
+                const height = selfTrans.height;
+                const anchorY = selfTrans.anchorY;
+                pos += height * anchorY;
+                break;
+            }
             }
 
             this._changePos.y = pos;
@@ -370,11 +369,11 @@ export class CTWidget extends Component {
             return;
         }
 
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
 
-        let selfPos = this.getPos(selfTrans, this._dir);
-        let targetPos = this.getPos(targetTrans, this._targetDir);
+        const selfPos = this.getPos(selfTrans, this._dir);
+        const targetPos = this.getPos(targetTrans, this._targetDir);
 
         this._distance = targetPos - selfPos;
     }
@@ -382,35 +381,35 @@ export class CTWidget extends Component {
     private getPos(trans: UITransform, dir: WidgetDirection): number {
         if (this._isVertical) {
             let y = trans.node.worldPosition.y;
-            let height = trans.height;
-            let anchorY = trans.anchorY;
+            const height = trans.height;
+            const anchorY = trans.anchorY;
 
             switch (dir) {
-                case WidgetDirection.TOP:
-                case WidgetDirection.TOP_EXTEND:
-                    if (!trans.node.active) {
-                        y = y - height - this.visibleOffset;
-                    }
+            case WidgetDirection.TOP:
+            case WidgetDirection.TOP_EXTEND:
+                if (!trans.node.active) {
+                    y = y - height - this.visibleOffset;
+                }
 
-                    return y + height * (1 - anchorY);
-                case WidgetDirection.BOTTOM:
-                case WidgetDirection.BOTTOM_EXTEND:
-                    if (!trans.node.active) {
-                        y = y + height + this.visibleOffset;
-                    }
+                return y + height * (1 - anchorY);
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.BOTTOM_EXTEND:
+                if (!trans.node.active) {
+                    y = y + height + this.visibleOffset;
+                }
 
-                    return y - height * anchorY;
+                return y - height * anchorY;
             }
         } else {
-            let x = trans.node.worldPosition.x;
-            let width = trans.width;
-            let anchorX = trans.anchorX;
+            const x = trans.node.worldPosition.x;
+            const width = trans.width;
+            const anchorX = trans.anchorX;
 
             switch (dir) {
-                case WidgetDirection.LEFT:
-                    return x - width * anchorX;
-                case WidgetDirection.RIGHT:
-                    return x + width * (1 - anchorX);
+            case WidgetDirection.LEFT:
+                return x - width * anchorX;
+            case WidgetDirection.RIGHT:
+                return x + width * (1 - anchorX);
             }
         }
     }

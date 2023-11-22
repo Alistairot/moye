@@ -13,7 +13,7 @@ export class SizeFollow extends Component {
         this.updateSizeOffset();
     }
     @property({ type: UITransform })
-    private _target: UITransform
+    private _target: UITransform;
 
     @property
     set heightFollow(val: boolean) {
@@ -24,7 +24,7 @@ export class SizeFollow extends Component {
         return this._heightFollow;
     }
     @property
-    private _heightFollow = true
+    private _heightFollow = true;
 
     @property
     set widthFollow(val: boolean) {
@@ -35,12 +35,12 @@ export class SizeFollow extends Component {
         return this._widthFollow;
     }
     @property
-    private _widthFollow = true
+    private _widthFollow = true;
 
     @property({ type: CCFloat })
-    private _heightOffset: number = 0
+    private _heightOffset: number = 0;
     @property({ type: CCFloat })
-    private _widthOffset: number = 0
+    private _widthOffset: number = 0;
 
     private _changeSize: Size = new Size();
 
@@ -67,8 +67,8 @@ export class SizeFollow extends Component {
     }
 
     private onTargetSizeChange() {
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
         // console.log('onTargetSizeChange targetTrans', targetTrans);
         // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
         // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
@@ -96,19 +96,19 @@ export class SizeFollow extends Component {
             return;
         }
 
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
 
         if (this._widthFollow) {
-            let selfWidth = selfTrans.width;
-            let targetWidth = targetTrans.width;
+            const selfWidth = selfTrans.width;
+            const targetWidth = targetTrans.width;
 
             this._widthOffset = selfWidth - targetWidth;
         }
 
         if (this._heightFollow) {
-            let selfHeight = selfTrans.height;
-            let targetHeight = targetTrans.height;
+            const selfHeight = selfTrans.height;
+            const targetHeight = targetTrans.height;
 
             this._heightOffset = selfHeight - targetHeight;
         }

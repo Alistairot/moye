@@ -1,4 +1,3 @@
-import { Options } from "../Options/Options";
 import { TimeInfo } from "../Time/TimeInfo";
 import { coreError, coreWarn } from '../Logger/CoreLogHelper';
 
@@ -71,7 +70,7 @@ export class IdStruct {
 
         
         const struct = IdStruct.inst;
-        struct.init(this._lastTime, Options.getInst().process, this._idCount);
+        struct.init(this._lastTime, 1, this._idCount);
 
         return struct.result;
     }
