@@ -25,8 +25,8 @@ const powValueBit = 2n ** valueBit - 1n;
 const epoch = new Date(2023, 4, 1).getTime();
 
 export class IdStruct {
-    private static lastTime = 0;
-    private static idCount: number = 0;
+    private static _lastTime = 0;
+    private static _idCount: number = 0;
     
     private static _inst: IdStruct;
     private static get inst() {
@@ -43,41 +43,41 @@ export class IdStruct {
     result: bigint;
 
     static generate(): bigint {
-        if (this.lastTime == 0) {
-            this.lastTime = this.timeSinceEpoch();
+        if (this._lastTime == 0) {
+            this._lastTime = this.timeSinceEpoch();
 
-            if (this.lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this.lastTime}`);
-                this.lastTime = 1;
+            if (this._lastTime <= 0) {
+                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                this._lastTime = 1;
             }
         }
 
-        let time = this.timeSinceEpoch();
+        const time = this.timeSinceEpoch();
 
-        if (time > this.lastTime) {
-            this.lastTime = time;
-            this.idCount = 0;
+        if (time > this._lastTime) {
+            this._lastTime = time;
+            this._idCount = 0;
         }
         else {
-            ++this.idCount;
+            ++this._idCount;
 
-            if (this.idCount > powValueBit) {
-                ++this.lastTime; // 借用下一秒
-                this.idCount = 0;
+            if (this._idCount > powValueBit) {
+                ++this._lastTime; // 借用下一秒
+                this._idCount = 0;
 
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this.lastTime}`);
+                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
             }
         }
 
         
-        let struct = IdStruct.inst;
-        struct.init(this.lastTime, Options.getInst().process, this.idCount);
+        const struct = IdStruct.inst;
+        struct.init(this._lastTime, Options.getInst().process, this._idCount);
 
         return struct.result;
     }
 
     static convertToId(time: number, process: number, value: number): bigint {
-        let id = IdStruct.inst.init(time, process, value).result;
+        const id = IdStruct.inst.init(time, process, value).result;
 
         return id;
     }
@@ -93,7 +93,7 @@ export class IdStruct {
     }
 
     private static timeSinceEpoch(): number {
-        let a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
+        const a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
         return Math.floor(a);
     }
 

@@ -9,5 +9,7 @@
 [name=RoundBoxSprite]
 [export=true]
 圆角矩形
-from https://gitee.com/ruanwujing/cocoscreator-roundbox
+from:
+https://gitee.com/ruanwujing/cocoscreator-roundbox
+https://forum.cocos.org/t/topic/154029
 

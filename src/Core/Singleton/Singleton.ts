@@ -6,7 +6,7 @@ export abstract class Singleton {
     private _isDisposed: boolean = false;
 
     static getInst<T extends Singleton>(this: new () => T): T {
-        let self = this as typeof Singleton & (new () => T);
+        const self = this as typeof Singleton & (new () => T);
 
         if (self._inst == null) {
             throw new Error(`Singleton is not initialized or destroyed, name is ${self.name}`);
@@ -20,14 +20,14 @@ export abstract class Singleton {
     }
 
     dispose() {
-        this._onPreDestroy()
+        this._onPreDestroy();
     }
 
     protected destroy?(): void;
 
     private _onPreDestroy(): void {
         if (this._isDisposed) {
-            return
+            return;
         }
 
         if (this.destroy) {

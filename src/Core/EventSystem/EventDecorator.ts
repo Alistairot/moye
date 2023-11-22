@@ -1,7 +1,7 @@
-import { DEVELOP } from "../../Macro"
+import { DEVELOP } from "../../Macro";
 import { DecoratorCollector } from "../Decorator/DecoratorCollector";
-import { Type } from "../Type/Type"
-import { AEvent } from "./AEvent"
+import { Type } from "../Type/Type";
+import { AEvent } from "./AEvent";
 
 export const EventDecoratorType = "EventDecoratorType";
 
@@ -12,13 +12,13 @@ export const EventDecoratorType = "EventDecoratorType";
  * @returns 
  */
 export function EventDecorator(eventCls: Type<AEvent>, sceneType: string) {
-    return function (target: Function) {
+    return function (target: () => any) {
         if (DEVELOP) {
             if (sceneType == null) {
-                console.error(`EventDecorator必须要传 sceneType`)
+                console.error(`EventDecorator必须要传 sceneType`);
             }
         }
 
-        DecoratorCollector.inst.add(EventDecoratorType, eventCls, target, sceneType)
-    }
+        DecoratorCollector.inst.add(EventDecoratorType, eventCls, target, sceneType);
+    };
 }

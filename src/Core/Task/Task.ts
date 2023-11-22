@@ -11,8 +11,8 @@ export class Task<T = any> extends Promise<T> {
      * @returns
      */
     static create<T = any>(type?: Type<T>): Task<T> {
-        let resolveVar;
-        let task = new Task<T>((resolve, reject) => {
+        let resolveVar: (value: T | PromiseLike<T>) => void;
+        const task = new Task<T>((resolve) => {
             resolveVar = resolve;
         });
 

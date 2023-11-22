@@ -1,29 +1,29 @@
 export class DecoratorCollector {
-    private static _inst: DecoratorCollector
+    private static _inst: DecoratorCollector;
     public static get inst(): DecoratorCollector {
         if (DecoratorCollector._inst == null) {
-            DecoratorCollector._inst = new DecoratorCollector
+            DecoratorCollector._inst = new DecoratorCollector;
         }
 
-        return DecoratorCollector._inst
+        return DecoratorCollector._inst;
     }
 
-    private decorators: Map<string, any> = new Map
+    private _decorators: Map<string, any> = new Map;
 
     public add(decoratorType: string, ...args) {
-        let array = this.decorators.get(decoratorType)
+        let array = this._decorators.get(decoratorType);
 
         if (!array) {
-            array = new Array
-            this.decorators.set(decoratorType, array)
+            array = [];
+            this._decorators.set(decoratorType, array);
         }
 
-        array.push(args)
+        array.push(args);
     }
 
     public get(decoratorType: string): Array<any> {
-        let array = this.decorators.get(decoratorType)
+        const array = this._decorators.get(decoratorType);
 
-        return array || []
+        return array || [];
     }
 }

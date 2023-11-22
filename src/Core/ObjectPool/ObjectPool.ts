@@ -2,10 +2,10 @@ import { Singleton } from "../Singleton/Singleton";
 import { Type } from "../Type/Type";
 
 export class ObjectPool extends Singleton {
-    private _pool: Map<Type, Array<any>> = new Map;
+    private _pool: Map<Type, object[]> = new Map;
 
     public fetch<T>(type: Type<T>): T {
-        let queue = this._pool.get(type)
+        const queue = this._pool.get(type);
 
         if (!queue) {
             return new type();
@@ -19,7 +19,7 @@ export class ObjectPool extends Singleton {
     }
 
     public recycle(obj: object): void {
-        let type: Type = obj.constructor as Type;
+        const type: Type = obj.constructor as Type;
         let queue = this._pool.get(type);
 
         if (!queue) {

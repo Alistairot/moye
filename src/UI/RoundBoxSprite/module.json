@@ -3,7 +3,7 @@
     "name": "RoundBoxSprite",
 
     "description-explain":"模块描述",
-    "description": "圆角矩形\nfrom https://gitee.com/ruanwujing/cocoscreator-roundbox",
+    "description": "圆角矩形\nfrom:\nhttps://gitee.com/ruanwujing/cocoscreator-roundbox\nhttps://forum.cocos.org/t/topic/154029",
 
     "entry-explain":"入口文件",
     "entry": "RoundBoxSprite.ts",

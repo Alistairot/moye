@@ -7,25 +7,25 @@ import { ILog } from "./ILog";
  * Logger
  */
 export class Logger extends Singleton{
-    private _iLog: ILog
+    private _iLog: ILog;
     public set iLog(value: ILog) {
-        this._iLog = value
+        this._iLog = value;
     }
 
-    private static readonly LOG_LEVEL = 1;
-    private static readonly WARN_LEVEL = 2;
+    static readonly LOG_LEVEL = 1;
+    static readonly WARN_LEVEL = 2;
 
     public log(str: string, ...args: any[]) {
         if (this.checkLogLevel(Logger.LOG_LEVEL)) {
-            let formatStr = JsHelper.formatStr(str, ...args);
-            this._iLog.log(formatStr)
+            const formatStr = JsHelper.formatStr(str, ...args);
+            this._iLog.log(formatStr);
         }
     }
 
     public warn(str: string, ...args: any[]) {
         if (this.checkLogLevel(Logger.WARN_LEVEL)) {
-            let formatStr = JsHelper.formatStr(str, ...args);
-            this._iLog.warn(formatStr)
+            const formatStr = JsHelper.formatStr(str, ...args);
+            this._iLog.warn(formatStr);
         }
     }
 
@@ -37,9 +37,9 @@ export class Logger extends Singleton{
      * @param args 
      */
     public error(str: string, ...args: any[]) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        let e = new Error();
-        let errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
+        const formatStr = JsHelper.formatStr(str, ...args);
+        const e = new Error();
+        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
         this._iLog.error(errStr);
     }
 
@@ -53,8 +53,8 @@ export class Logger extends Singleton{
      * @param args 
      */
     private coreLog(str: string, ...args: any[]) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.log(formatStr)
+        const formatStr = JsHelper.formatStr(str, ...args);
+        this._iLog.log(formatStr);
     }
 
     /**
@@ -63,8 +63,8 @@ export class Logger extends Singleton{
      * @param args 
      */
     private coreWarn(str: string, ...args: any[]) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.warn(formatStr)
+        const formatStr = JsHelper.formatStr(str, ...args);
+        this._iLog.warn(formatStr);
     }
 
     /**
@@ -75,21 +75,21 @@ export class Logger extends Singleton{
      * @param args 
      */
     private coreError(str: string, ...args: any[]) {
-        let formatStr = JsHelper.formatStr(str, ...args);
-        let e = new Error();
-        let errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
+        const formatStr = JsHelper.formatStr(str, ...args);
+        const e = new Error();
+        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
         this._iLog.error(errStr);
     }
 }
 
 export function log(str: string, ...args: any[]) {
-    Logger.getInst().log(str, ...args)
+    Logger.getInst().log(str, ...args);
 }
 
 export function warn(str: string, ...args: any[]) {
-    Logger.getInst().warn(str, ...args)
+    Logger.getInst().warn(str, ...args);
 }
 
 export function error(str: string, ...args: any[]) {
-    Logger.getInst().error(str, ...args)
+    Logger.getInst().error(str, ...args);
 }

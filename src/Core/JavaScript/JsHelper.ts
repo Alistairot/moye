@@ -2,11 +2,11 @@ import { DEVELOP } from "../../Macro";
 
 export class JsHelper {
     public static getMethodName(): string {
-        let e = new Error()
-        let str = e.stack.split("at ")[2]
-        let endPos = str.indexOf(" ")
+        const e = new Error();
+        const str = e.stack.split("at ")[2];
+        const endPos = str.indexOf(" ");
 
-        return str.substring(0, endPos)
+        return str.substring(0, endPos);
     }
 
     public static getRootDirName(path: string): string {
@@ -19,11 +19,11 @@ export class JsHelper {
 
     public static isNullOrEmpty(str: string) {
         if (str == null) {
-            return true
+            return true;
         }
 
         if (str.length == 0) {
-            return true
+            return true;
         }
     }
 
@@ -38,10 +38,10 @@ export class JsHelper {
     }
 
     static modeString(str: string, mode: number): number {
-        let hash = this.getStringHashCode(str)
-        let result = hash % mode
+        const hash = this.getStringHashCode(str);
+        const result = hash % mode;
 
-        return result
+        return result;
     }
 
     /**
@@ -57,12 +57,10 @@ export class JsHelper {
      * ```
      */
     static formatStr(str: string, ...args: any[]): string {
-        let ret: string;
-
         // 开发阶段打印出错误
         if (typeof str != "string") {
             if (DEVELOP) {
-                let err = new Error('formatStr args[0] is not string');
+                const err = new Error('formatStr args[0] is not string');
                 return err.name + err.stack;
             } else {
                 return `${str}`;
@@ -74,7 +72,7 @@ export class JsHelper {
         }
 
         // 将{0}{1}替换成对应的参数 同时允许{{}}转化为{} 
-        ret = str.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+        const ret = str.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
             if (m == "{{") {
                 return "{";
             }

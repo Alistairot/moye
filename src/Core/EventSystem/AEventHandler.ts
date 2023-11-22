@@ -19,7 +19,7 @@ export abstract class AEventHandler<T, A>{
 
     handle(scene: T, a: A) {
         try {
-            let ret = this.run(scene, a);
+            const ret = this.run(scene, a);
 
             if (ret instanceof Promise) {
                 coreWarn('{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);

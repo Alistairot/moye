@@ -1,29 +1,29 @@
-import { AEvent } from "./AEvent"
-import { DecoratorCollector } from "../Decorator/DecoratorCollector"
-import { coreError } from "../Logger/CoreLogHelper"
-import { Singleton } from "../Singleton/Singleton"
-import { IScene } from "../Type/IScene"
-import { Type } from "../Type/Type"
-import { AEventHandler } from "./AEventHandler"
-import { EventDecoratorType } from "./EventDecorator"
-import { EventInfo } from "./EventInfo"
+import { AEvent } from "./AEvent";
+import { DecoratorCollector } from "../Decorator/DecoratorCollector";
+import { coreError } from "../Logger/CoreLogHelper";
+import { Singleton } from "../Singleton/Singleton";
+import { IScene } from "../Type/IScene";
+import { Type } from "../Type/Type";
+import { AEventHandler } from "./AEventHandler";
+import { EventDecoratorType } from "./EventDecorator";
+import { EventInfo } from "./EventInfo";
 
 export class EventSystem extends Singleton {
-    private _allEvents: Map<Type<AEvent>, Array<EventInfo>> = new Map
+    private _allEvents: Map<Type<AEvent>, Array<EventInfo>> = new Map;
 
     awake(): void {
-        this.initEvent()
+        this.initEvent();
     }
 
     private initEvent() {
-        let argsList = DecoratorCollector.inst.get(EventDecoratorType);
+        const argsList = DecoratorCollector.inst.get(EventDecoratorType);
 
         for (const args of argsList) {
-            let eventTypeCtor = args[0]
-            let handlerCtor = args[1]
-            let sceneType = args[2]
+            const eventTypeCtor = args[0];
+            const handlerCtor = args[1];
+            const sceneType = args[2];
 
-            let list = this._allEvents.get(eventTypeCtor)
+            let list = this._allEvents.get(eventTypeCtor);
 
             if (!list) {
                 list = [];
@@ -39,19 +39,19 @@ export class EventSystem extends Singleton {
             coreError(`发送事件必须传scene`);
         }
 
-        let list = this._allEvents.get(eventType.constructor as Type<AEvent>);
+        const list = this._allEvents.get(eventType.constructor as Type<AEvent>);
 
         if (!list) {
-            return
+            return;
         }
 
-        let tasks = [];
+        const tasks = [];
 
         for (let i = 0; i < list.length; i++) {
-            let eventInfo = list[i]
+            const eventInfo = list[i];
 
             if (eventInfo.sceneType != scene.sceneType && eventInfo.sceneType != "None") {
-                continue
+                continue;
             }
 
             tasks.push((eventInfo.eventHandler as AEventHandler<any, T>).handleAsync(scene, eventType));
@@ -74,18 +74,18 @@ export class EventSystem extends Singleton {
             coreError(`发送事件必须传scene`);
         }
 
-        let list = this._allEvents.get(eventType.constructor as Type<AEvent>);
+        const list = this._allEvents.get(eventType.constructor as Type<AEvent>);
 
         if (!list) {
-            return
+            return;
         }
 
 
         for (let i = 0; i < list.length; i++) {
-            let eventInfo = list[i];
+            const eventInfo = list[i];
 
             if (eventInfo.sceneType != scene.sceneType && eventInfo.sceneType != "None") {
-                continue
+                continue;
             }
 
             (eventInfo.eventHandler as AEventHandler<any, T>).handle(scene, eventType);

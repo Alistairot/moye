@@ -5,7 +5,7 @@ import { ObjectPool } from "./ObjectPool";
  * 可回收对象
  */
 export abstract class RecycleObj {
-    private _isRecycle: boolean = false
+    private _isRecycle: boolean = false;
 
     /**
      * 通过对象池创建
@@ -14,7 +14,7 @@ export abstract class RecycleObj {
      * @returns 
      */
     public static create<T extends RecycleObj>(this: Type<T>, values?: Partial<T>): T {
-        let event = ObjectPool.getInst().fetch(this);
+        const event = ObjectPool.getInst().fetch(this);
 
         if (values) {
             Object.assign(event, values);

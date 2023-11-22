@@ -2,58 +2,57 @@ import { Task } from "../Task/Task";
 import { ILifeCycle } from "../Type/ILifeCycle";
 
 export class Game {
-    private static readonly singletonMap: Map<new () => ILifeCycle, ILifeCycle> = new Map
-    private static readonly singletons: Array<ILifeCycle> = new Array
-    private static readonly destroys: Array<ILifeCycle> = new Array
-    private static readonly updates: Array<ILifeCycle> = new Array
-    private static readonly lateUpdates: Array<ILifeCycle> = new Array
-    private static frameFinishTaskQueue: Task<any>[] = new Array
+    private static readonly _singletonMap: Map<new () => ILifeCycle, ILifeCycle> = new Map;
+    private static readonly _singletons: Array<ILifeCycle> = [];
+    private static readonly _destroys: Array<ILifeCycle> = [];
+    private static readonly _updates: Array<ILifeCycle> = [];
+    private static readonly _lateUpdates: Array<ILifeCycle> = [];
+    private static _frameFinishTaskQueue: Task<any>[] = [];
 
-    public static addSingleton<T extends ILifeCycle>(singletonCtor: new () => T): T {
-        if (Game.singletonMap.has(singletonCtor)) {
-            throw new Error(`already exist singleton: ${singletonCtor.name}`);
+    public static addSingleton<T extends ILifeCycle>(singletonType: new () => T): T {
+        if (Game._singletonMap.has(singletonType)) {
+            throw new Error(`already exist singleton: ${singletonType.name}`);
         }
 
-        let singleton = new singletonCtor()
+        const singleton = new singletonType();
 
-        ///@ts-ignore
-        singletonCtor._inst = singleton
+        singletonType['_inst'] = singleton;
 
-        Game.singletonMap.set(singletonCtor, singleton)
-        Game.singletons.push(singleton)
+        Game._singletonMap.set(singletonType, singleton);
+        Game._singletons.push(singleton);
 
         if (singleton.awake) {
-            singleton.awake()
+            singleton.awake();
         }
 
-        Game.destroys.push(singleton)
+        Game._destroys.push(singleton);
 
         if (singleton.update) {
-            Game.updates.push(singleton)
+            Game._updates.push(singleton);
         }
 
         if (singleton.lateUpdate) {
-            Game.lateUpdates.push(singleton)
+            Game._lateUpdates.push(singleton);
         }
 
-        return singleton as T
+        return singleton as T;
     }
 
     public static async waitFrameFinish(): Promise<void> {
-        let task = Task.create();
+        const task = Task.create();
 
-        Game.frameFinishTaskQueue.push(task);
+        Game._frameFinishTaskQueue.push(task);
 
         await task;
     }
 
     public static update(): void {
-        for (let index = 0; index < Game.updates.length; index++) {
-            let update = Game.updates[index];
-            let singleton = update;
+        for (let index = 0; index < Game._updates.length; index++) {
+            const update = Game._updates[index];
+            const singleton = update;
 
             if (singleton.isDisposed) {
-                continue
+                continue;
             }
 
             update.update();
@@ -61,12 +60,12 @@ export class Game {
     }
 
     public static lateUpdate(): void {
-        for (let index = 0; index < Game.lateUpdates.length; index++) {
-            let lateUpdate = Game.lateUpdates[index];
-            let singleton = lateUpdate;
+        for (let index = 0; index < Game._lateUpdates.length; index++) {
+            const lateUpdate = Game._lateUpdates[index];
+            const singleton = lateUpdate;
 
             if (singleton.isDisposed) {
-                continue
+                continue;
             }
 
             lateUpdate.lateUpdate();
@@ -74,27 +73,27 @@ export class Game {
     }
 
     public static frameFinishUpdate(): void {
-        let len = Game.frameFinishTaskQueue.length;
+        const len = Game._frameFinishTaskQueue.length;
 
         if (len == 0) {
             return;
         }
 
         for (let index = 0; index < len; index++) {
-            const task = Game.frameFinishTaskQueue[index];
+            const task = Game._frameFinishTaskQueue[index];
 
             task.setResult();
         }
 
-        Game.frameFinishTaskQueue = [];
+        Game._frameFinishTaskQueue = [];
     }
 
     public static dispose() {
-        for (let index = Game.singletons.length - 1; index >= 0; index--) {
-            let singleton = Game.singletons[index]
+        for (let index = Game._singletons.length - 1; index >= 0; index--) {
+            const singleton = Game._singletons[index];
 
             if (singleton.isDisposed) {
-                continue
+                continue;
             }
 
             singleton._onPreDestroy();

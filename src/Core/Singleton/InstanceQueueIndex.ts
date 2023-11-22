@@ -1,6 +1,6 @@
 export enum InstanceQueueIndex {
-    None = -1,
-    Update,
-    LateUpdate,
-    Max,
+    NONE = -1,
+    UPDATE,
+    LATE_UPDATE,
+    MAX,
 }
