@@ -1,8 +1,8 @@
 import { _decorator, CCBoolean, CCFloat, Component, Label, Node, NodeEventType, Size, UITransform } from 'cc';
 const { ccclass, property, menu } = _decorator;
 
-@menu('moye/SizeFollow')
 @ccclass('SizeFollow')
+@menu('moye/SizeFollow')
 export class SizeFollow extends Component {
     get target(): UITransform {
         return this._target;

@@ -1,4 +1,4 @@
-import { dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, CCFloat, SpriteFrame, _decorator, UIRenderer, NodeEventType, cclegacy, InstanceMaterialType, RenderTexture, Material, UITransform, Component, Size } from 'cc';
+import { UITransform, CCFloat, _decorator, Component, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, SpriteFrame, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
 import { EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -497,6 +497,513 @@ class IdGenerator extends Singleton {
     }
 }
 
+var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$2, property: property$2, menu: menu$2 } = _decorator;
+let SizeFollow = class SizeFollow extends Component {
+    constructor() {
+        super(...arguments);
+        this._heightFollow = true;
+        this._widthFollow = true;
+        this._heightOffset = 0;
+        this._widthOffset = 0;
+        this._changeSize = new Size();
+    }
+    get target() {
+        return this._target;
+    }
+    set target(value) {
+        this._target = value;
+        this.updateSizeOffset();
+    }
+    set heightFollow(val) {
+        this._heightFollow = val;
+        this.updateSizeOffset();
+    }
+    get heightFollow() {
+        return this._heightFollow;
+    }
+    set widthFollow(val) {
+        this._widthFollow = val;
+        this.updateSizeOffset();
+    }
+    get widthFollow() {
+        return this._widthFollow;
+    }
+    onLoad() {
+        if (this._target == null) {
+            return;
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+    }
+    onDestroy() {
+        if (this._target == null) {
+            return;
+        }
+        if (!this._target.isValid) {
+            this._target = null;
+            return;
+        }
+        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+        this._target = null;
+    }
+    onTargetSizeChange() {
+        let selfTrans = this.node.getComponent(UITransform);
+        let targetTrans = this._target;
+        // console.log('onTargetSizeChange targetTrans', targetTrans);
+        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
+        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
+        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
+        this._changeSize.set(selfTrans.contentSize);
+        if (this._widthFollow) {
+            this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
+        }
+        if (this._heightFollow) {
+            this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
+        }
+        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
+        // console.log('onTargetSizeChange this.node', this.node);
+        selfTrans.setContentSize(this._changeSize);
+        // selfTrans.setContentSize(new Size(this._changeSize));
+        // selfTrans.height = 300;
+    }
+    updateSizeOffset() {
+        if (this._target == null) {
+            return;
+        }
+        let selfTrans = this.node.getComponent(UITransform);
+        let targetTrans = this._target;
+        if (this._widthFollow) {
+            let selfWidth = selfTrans.width;
+            let targetWidth = targetTrans.width;
+            this._widthOffset = selfWidth - targetWidth;
+        }
+        if (this._heightFollow) {
+            let selfHeight = selfTrans.height;
+            let targetHeight = targetTrans.height;
+            this._heightOffset = selfHeight - targetHeight;
+        }
+    }
+};
+__decorate$2([
+    property$2({ type: UITransform })
+], SizeFollow.prototype, "target", null);
+__decorate$2([
+    property$2({ type: UITransform })
+], SizeFollow.prototype, "_target", void 0);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "heightFollow", null);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "_heightFollow", void 0);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "widthFollow", null);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "_widthFollow", void 0);
+__decorate$2([
+    property$2({ type: CCFloat })
+], SizeFollow.prototype, "_heightOffset", void 0);
+__decorate$2([
+    property$2({ type: CCFloat })
+], SizeFollow.prototype, "_widthOffset", void 0);
+SizeFollow = __decorate$2([
+    ccclass$2('SizeFollow'),
+    menu$2('moye/SizeFollow')
+], SizeFollow);
+
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$1, property: property$1, executeInEditMode, menu: menu$1 } = _decorator;
+var WidgetBase;
+(function (WidgetBase) {
+    WidgetBase[WidgetBase["LEFT"] = 1] = "LEFT";
+    WidgetBase[WidgetBase["RIGHT"] = 2] = "RIGHT";
+    WidgetBase[WidgetBase["TOP"] = 3] = "TOP";
+    WidgetBase[WidgetBase["BOTTOM"] = 4] = "BOTTOM";
+})(WidgetBase || (WidgetBase = {}));
+var WidgetDirection;
+(function (WidgetDirection) {
+    WidgetDirection[WidgetDirection["LEFT"] = 1] = "LEFT";
+    WidgetDirection[WidgetDirection["RIGHT"] = 2] = "RIGHT";
+    WidgetDirection[WidgetDirection["TOP"] = 3] = "TOP";
+    WidgetDirection[WidgetDirection["BOTTOM"] = 4] = "BOTTOM";
+    WidgetDirection[WidgetDirection["LEFT_EXTEND"] = 5] = "LEFT_EXTEND";
+    WidgetDirection[WidgetDirection["RIGHT_EXTEND"] = 6] = "RIGHT_EXTEND";
+    WidgetDirection[WidgetDirection["TOP_EXTEND"] = 7] = "TOP_EXTEND";
+    WidgetDirection[WidgetDirection["BOTTOM_EXTEND"] = 8] = "BOTTOM_EXTEND";
+})(WidgetDirection || (WidgetDirection = {}));
+/**
+ * 关联组件
+ * 不允许直系亲属互相关联
+ * 同父支持size跟pos关联
+ * 异父仅支持pos关联 size关联未做测试
+ */
+let CTWidget = class CTWidget extends Component {
+    constructor() {
+        super(...arguments);
+        this._targetDir = WidgetDirection.TOP;
+        this._dir = WidgetDirection.TOP;
+        this.visibleOffset = 0;
+        this._isVertical = true;
+        this._distance = 0;
+        this._changePos = new Vec3(0, 0, 0);
+        this._targetOldPos = new Vec3(0, 0, 0);
+        this._targetOldSize = 0;
+        this._selfOldPos = new Vec3(0, 0, 0);
+        this._selfOldSize = 0;
+    }
+    get target() {
+        return this._target;
+    }
+    set target(value) {
+        this._target = value;
+        this.unregisterEvt();
+        this.registerEvt();
+        this.updateData();
+    }
+    // 目标方向
+    set targetDir(val) {
+        if (!EDITOR) {
+            return;
+        }
+        if (val == WidgetDirection.LEFT ||
+            val == WidgetDirection.RIGHT) {
+            switch (this._dir) {
+                case WidgetDirection.TOP:
+                case WidgetDirection.TOP_EXTEND:
+                case WidgetDirection.BOTTOM:
+                case WidgetDirection.BOTTOM_EXTEND:
+                    this._dir = WidgetDirection.LEFT;
+            }
+            this._isVertical = false;
+        }
+        else {
+            switch (this._dir) {
+                case WidgetDirection.LEFT:
+                case WidgetDirection.LEFT_EXTEND:
+                case WidgetDirection.RIGHT:
+                case WidgetDirection.RIGHT_EXTEND:
+                    this._dir = WidgetDirection.TOP;
+            }
+            this._isVertical = true;
+        }
+        this._targetDir = val;
+        this.updateData();
+    }
+    get targetDir() {
+        return this._targetDir;
+    }
+    // 自身方向
+    set dir(val) {
+        if (!EDITOR) {
+            return;
+        }
+        switch (val) {
+            case WidgetDirection.LEFT:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT:
+            case WidgetDirection.RIGHT_EXTEND: {
+                switch (this._targetDir) {
+                    case WidgetDirection.TOP:
+                    case WidgetDirection.BOTTOM:
+                        {
+                            this._targetDir = WidgetDirection.LEFT;
+                        }
+                        break;
+                }
+                this._isVertical = false;
+                break;
+            }
+            case WidgetDirection.TOP:
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.BOTTOM_EXTEND: {
+                switch (this._targetDir) {
+                    case WidgetDirection.LEFT:
+                    case WidgetDirection.RIGHT:
+                        {
+                            this._targetDir = WidgetDirection.TOP;
+                        }
+                        break;
+                }
+                this._isVertical = true;
+                break;
+            }
+        }
+        this._dir = val;
+        this.updateData();
+    }
+    get dir() {
+        return this._dir;
+    }
+    onEnable() {
+        if (!EDITOR) {
+            return;
+        }
+        this.registerEvt();
+        this.updateData();
+    }
+    onDisable() {
+        if (!EDITOR) {
+            return;
+        }
+        this.unregisterEvt();
+    }
+    onLoad() {
+        this._trans = this.node.getComponent(UITransform);
+        if (EDITOR) {
+            return;
+        }
+        this.registerEvt();
+    }
+    onDestroy() {
+        if (EDITOR) {
+            return;
+        }
+        this.unregisterEvt();
+        this._trans = null;
+        this._target = null;
+        this._changePos = null;
+    }
+    registerEvt() {
+        if (!this._target) {
+            return;
+        }
+        if (EDITOR) {
+            this._target.node.on(NodeEventType.ANCHOR_CHANGED, this.updateData, this);
+            this.node.on(NodeEventType.TRANSFORM_CHANGED, this.updateData, this);
+            this.node.on(NodeEventType.SIZE_CHANGED, this.updateData, this);
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetChange, this);
+        this._target.node.on(NodeEventType.TRANSFORM_CHANGED, this.onTargetChange, this);
+        this._target.node.on(NodeEventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onTargetChange, this);
+    }
+    unregisterEvt() {
+        if (!this._target) {
+            return;
+        }
+        if (!this._target.isValid) {
+            return;
+        }
+        if (EDITOR) {
+            this._target.node.off(NodeEventType.ANCHOR_CHANGED, this.updateData, this);
+            this.node.off(NodeEventType.TRANSFORM_CHANGED, this.updateData, this);
+            this.node.off(NodeEventType.SIZE_CHANGED, this.updateData, this);
+        }
+        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetChange, this);
+        this._target.node.off(NodeEventType.TRANSFORM_CHANGED, this.onTargetChange, this);
+        this._target.node.off(NodeEventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onTargetChange, this);
+    }
+    updateData() {
+        if (this._target == null) {
+            return;
+        }
+        switch (this._dir) {
+            case WidgetDirection.TOP:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.LEFT:
+            case WidgetDirection.RIGHT:
+                this.updateDistance();
+                break;
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM_EXTEND:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT_EXTEND:
+                this.updateTargetPos();
+                break;
+        }
+    }
+    onTargetChange() {
+        if (this._target == null) {
+            return;
+        }
+        switch (this._dir) {
+            case WidgetDirection.TOP:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.LEFT:
+            case WidgetDirection.RIGHT:
+                this.updatePos();
+                break;
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM_EXTEND:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT_EXTEND:
+                this.updateSize();
+                break;
+        }
+    }
+    updateSize() {
+        if (this._isVertical) {
+            let posChange = this._targetOldPos.y - this._target.node.position.y;
+            let sizeChange = this._target.height - this._targetOldSize;
+            let anchorY = this._trans.anchorY;
+            this._changePos.set(this._selfOldPos);
+            if (this._target.getComponent(Label) && !this._target.node.active) {
+                sizeChange = this._targetOldSize;
+            }
+            let realChange = posChange + sizeChange;
+            this._trans.height = this._selfOldSize + realChange;
+            if (this._dir == WidgetDirection.TOP_EXTEND) {
+                this.node.setPosition(this._changePos);
+            }
+            else if (this._dir == WidgetDirection.BOTTOM_EXTEND) {
+                this._changePos.y -= (realChange * (1 - anchorY));
+                this.node.setPosition(v3(this._changePos));
+            }
+        }
+    }
+    updatePos() {
+        let selfTrans = this._trans;
+        let targetTrans = this._target;
+        let targetPos = this.getPos(targetTrans, this._targetDir);
+        let pos = targetPos - this._distance;
+        this._changePos.set(this.node.worldPosition);
+        if (this._isVertical) {
+            switch (this._dir) {
+                case WidgetDirection.TOP: {
+                    let height = selfTrans.height;
+                    let anchorY = selfTrans.anchorY;
+                    pos -= height * (1 - anchorY);
+                    break;
+                }
+                case WidgetDirection.BOTTOM: {
+                    let height = selfTrans.height;
+                    let anchorY = selfTrans.anchorY;
+                    pos += height * anchorY;
+                    break;
+                }
+            }
+            this._changePos.y = pos;
+        }
+        else {
+            this._changePos.x = pos;
+            // todo
+        }
+        this.node.worldPosition = this._changePos;
+    }
+    updateTargetPos() {
+        if (EDITOR) {
+            if (this._changePos == null) {
+                console.error('编辑器数据错乱, 请重新添加本组件');
+                this._changePos = v3();
+            }
+        }
+        this.target.node.getPosition(this._targetOldPos);
+        this.node.getPosition(this._selfOldPos);
+        if (this._isVertical) {
+            this._selfOldSize = this._trans.height;
+            this._targetOldSize = this._target.height;
+        }
+        else {
+            this._selfOldSize = this._trans.width;
+            this._targetOldSize = this._target.height;
+        }
+    }
+    updateDistance() {
+        if (!EDITOR) {
+            return;
+        }
+        if (this._target == null) {
+            return;
+        }
+        let selfTrans = this.node.getComponent(UITransform);
+        let targetTrans = this._target;
+        let selfPos = this.getPos(selfTrans, this._dir);
+        let targetPos = this.getPos(targetTrans, this._targetDir);
+        this._distance = targetPos - selfPos;
+    }
+    getPos(trans, dir) {
+        if (this._isVertical) {
+            let y = trans.node.worldPosition.y;
+            let height = trans.height;
+            let anchorY = trans.anchorY;
+            switch (dir) {
+                case WidgetDirection.TOP:
+                case WidgetDirection.TOP_EXTEND:
+                    if (!trans.node.active) {
+                        y = y - height - this.visibleOffset;
+                    }
+                    return y + height * (1 - anchorY);
+                case WidgetDirection.BOTTOM:
+                case WidgetDirection.BOTTOM_EXTEND:
+                    if (!trans.node.active) {
+                        y = y + height + this.visibleOffset;
+                    }
+                    return y - height * anchorY;
+            }
+        }
+        else {
+            let x = trans.node.worldPosition.x;
+            let width = trans.width;
+            let anchorX = trans.anchorX;
+            switch (dir) {
+                case WidgetDirection.LEFT:
+                    return x - width * anchorX;
+                case WidgetDirection.RIGHT:
+                    return x + width * (1 - anchorX);
+            }
+        }
+    }
+};
+__decorate$1([
+    property$1({ type: UITransform })
+], CTWidget.prototype, "target", null);
+__decorate$1([
+    property$1({ type: UITransform })
+], CTWidget.prototype, "_target", void 0);
+__decorate$1([
+    property$1({ type: Enum(WidgetBase) })
+], CTWidget.prototype, "targetDir", null);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetDir", void 0);
+__decorate$1([
+    property$1({ type: Enum(WidgetDirection) })
+], CTWidget.prototype, "dir", null);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_dir", void 0);
+__decorate$1([
+    property$1({ type: CCFloat })
+], CTWidget.prototype, "visibleOffset", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_isVertical", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_distance", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_changePos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetOldPos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetOldSize", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_selfOldPos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_selfOldSize", void 0);
+CTWidget = __decorate$1([
+    ccclass$1('CTWidget'),
+    menu$1('moye/CTWidget'),
+    executeInEditMode
+], CTWidget);
+
 const RoundBoxAssembler = {
     // 根据圆角segments参数，构造网格的顶点索引列表
     GetIndexBuffer(sprite) {
@@ -717,13 +1224,13 @@ const RoundBoxAssembler = {
     },
 };
 
-var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$1, property: property$1, type, menu: menu$1 } = _decorator;
+const { ccclass, property, type, menu } = _decorator;
 var EventType;
 (function (EventType) {
     EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
@@ -1014,184 +1521,63 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
         }
     }
 };
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_sizeMode", void 0);
-__decorate$1([
+__decorate([
     type(Sprite.SizeMode)
 ], RoundBoxSprite.prototype, "sizeMode", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_atlas", void 0);
-__decorate$1([
+__decorate([
     type(SpriteAtlas)
 ], RoundBoxSprite.prototype, "spriteAtlas", null);
-__decorate$1([
-    property$1({ type: CCInteger, serializable: true })
+__decorate([
+    property({ type: CCInteger, serializable: true })
 ], RoundBoxSprite.prototype, "_segments", void 0);
-__decorate$1([
-    property$1({ type: CCInteger, serializable: true, min: 1 })
+__decorate([
+    property({ type: CCInteger, serializable: true, min: 1 })
 ], RoundBoxSprite.prototype, "segments", null);
-__decorate$1([
-    property$1({ type: CCFloat, serializable: true })
+__decorate([
+    property({ type: CCFloat, serializable: true })
 ], RoundBoxSprite.prototype, "_radius", void 0);
-__decorate$1([
-    property$1({ type: CCFloat, serializable: true, min: 0 })
+__decorate([
+    property({ type: CCFloat, serializable: true, min: 0 })
 ], RoundBoxSprite.prototype, "radius", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_spriteFrame", void 0);
-__decorate$1([
+__decorate([
     type(SpriteFrame)
 ], RoundBoxSprite.prototype, "spriteFrame", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftTop", void 0);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "leftTop", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightTop", void 0);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "rightTop", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftBottom", void 0);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "leftBottom", null);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightBottom", void 0);
-__decorate$1([
-    property$1({ serializable: true })
+__decorate([
+    property({ serializable: true })
 ], RoundBoxSprite.prototype, "rightBottom", null);
-RoundBoxSprite = __decorate$1([
-    menu$1('moye/RoundBoxSprite'),
-    ccclass$1('RoundBoxSprite')
+RoundBoxSprite = __decorate([
+    ccclass('RoundBoxSprite'),
+    menu('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-const { ccclass, property, menu } = _decorator;
-let SizeFollow = class SizeFollow extends Component {
-    constructor() {
-        super(...arguments);
-        this._heightFollow = true;
-        this._widthFollow = true;
-        this._heightOffset = 0;
-        this._widthOffset = 0;
-        this._changeSize = new Size();
-    }
-    get target() {
-        return this._target;
-    }
-    set target(value) {
-        this._target = value;
-        this.updateSizeOffset();
-    }
-    set heightFollow(val) {
-        this._heightFollow = val;
-        this.updateSizeOffset();
-    }
-    get heightFollow() {
-        return this._heightFollow;
-    }
-    set widthFollow(val) {
-        this._widthFollow = val;
-        this.updateSizeOffset();
-    }
-    get widthFollow() {
-        return this._widthFollow;
-    }
-    onLoad() {
-        if (this._target == null) {
-            return;
-        }
-        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
-    }
-    onDestroy() {
-        if (this._target == null) {
-            return;
-        }
-        if (!this._target.isValid) {
-            this._target = null;
-            return;
-        }
-        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
-        this._target = null;
-    }
-    onTargetSizeChange() {
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
-        // console.log('onTargetSizeChange targetTrans', targetTrans);
-        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
-        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
-        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
-        this._changeSize.set(selfTrans.contentSize);
-        if (this._widthFollow) {
-            this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
-        }
-        if (this._heightFollow) {
-            this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
-        }
-        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
-        // console.log('onTargetSizeChange this.node', this.node);
-        selfTrans.setContentSize(this._changeSize);
-        // selfTrans.setContentSize(new Size(this._changeSize));
-        // selfTrans.height = 300;
-    }
-    updateSizeOffset() {
-        if (this._target == null) {
-            return;
-        }
-        let selfTrans = this.node.getComponent(UITransform);
-        let targetTrans = this._target;
-        if (this._widthFollow) {
-            let selfWidth = selfTrans.width;
-            let targetWidth = targetTrans.width;
-            this._widthOffset = selfWidth - targetWidth;
-        }
-        if (this._heightFollow) {
-            let selfHeight = selfTrans.height;
-            let targetHeight = targetTrans.height;
-            this._heightOffset = selfHeight - targetHeight;
-        }
-    }
-};
-__decorate([
-    property({ type: UITransform })
-], SizeFollow.prototype, "target", null);
-__decorate([
-    property({ type: UITransform })
-], SizeFollow.prototype, "_target", void 0);
-__decorate([
-    property
-], SizeFollow.prototype, "heightFollow", null);
-__decorate([
-    property
-], SizeFollow.prototype, "_heightFollow", void 0);
-__decorate([
-    property
-], SizeFollow.prototype, "widthFollow", null);
-__decorate([
-    property
-], SizeFollow.prototype, "_widthFollow", void 0);
-__decorate([
-    property({ type: CCFloat })
-], SizeFollow.prototype, "_heightOffset", void 0);
-__decorate([
-    property({ type: CCFloat })
-], SizeFollow.prototype, "_widthOffset", void 0);
-SizeFollow = __decorate([
-    menu('moye/SizeFollow'),
-    ccclass('SizeFollow')
-], SizeFollow);
-
-export { IdGenerator, Logger, ObjectPool, RoundBoxSprite, SizeFollow, error, log, warn };
+export { CTWidget, IdGenerator, Logger, ObjectPool, RoundBoxSprite, SizeFollow, error, log, warn };

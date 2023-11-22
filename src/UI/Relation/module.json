@@ -1,12 +1,12 @@
 {
     "name-explain":"唯一模块名",
-    "name": "SizeFollow",
+    "name": "Relation",
 
     "description-explain":"模块描述",
-    "description": "可以跟随目标节点的大小变化来改变自己的大小",
+    "description": "仿写fairygui的relation模块",
 
     "entry-explain":"入口文件",
-    "entry": "SizeFollow.ts",
+    "entry": "Relation.ts",
 
     "deps-explain":"依赖的模块",
     "deps": [

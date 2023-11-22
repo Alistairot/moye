@@ -7,8 +7,8 @@ enum EventType {
     SPRITE_FRAME_CHANGED = 'spriteframe-changed',
 }
 
-@menu('moye/RoundBoxSprite')
 @ccclass('RoundBoxSprite')
+@menu('moye/RoundBoxSprite')
 export class RoundBoxSprite extends UIRenderer {
     // 尺寸模式，可以看枚举原本定义的地方有注释说明
     @property({serializable:true})

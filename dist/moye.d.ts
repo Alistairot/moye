@@ -74,6 +74,73 @@ export declare class IdGenerator extends Singleton {
 	generateInstanceId(): bigint;
 	generateId(): bigint;
 }
+export declare class SizeFollow extends Component {
+	get target(): UITransform;
+	set target(value: UITransform);
+	private _target;
+	set heightFollow(val: boolean);
+	get heightFollow(): boolean;
+	private _heightFollow;
+	set widthFollow(val: boolean);
+	get widthFollow(): boolean;
+	private _widthFollow;
+	private _heightOffset;
+	private _widthOffset;
+	private _changeSize;
+	protected onLoad(): void;
+	protected onDestroy(): void;
+	private onTargetSizeChange;
+	private updateSizeOffset;
+}
+declare enum WidgetDirection {
+	LEFT = 1,
+	RIGHT = 2,
+	TOP = 3,
+	BOTTOM = 4,
+	LEFT_EXTEND = 5,
+	RIGHT_EXTEND = 6,
+	TOP_EXTEND = 7,
+	BOTTOM_EXTEND = 8
+}
+/**
+ * 关联组件
+ * 不允许直系亲属互相关联
+ * 同父支持size跟pos关联
+ * 异父仅支持pos关联 size关联未做测试
+ */
+export declare class CTWidget extends Component {
+	get target(): UITransform;
+	set target(value: UITransform);
+	private _target;
+	set targetDir(val: WidgetDirection);
+	get targetDir(): WidgetDirection;
+	private _targetDir;
+	set dir(val: WidgetDirection);
+	get dir(): WidgetDirection;
+	private _dir;
+	visibleOffset: number;
+	private _isVertical;
+	private _distance;
+	private _changePos;
+	private _targetOldPos;
+	private _targetOldSize;
+	private _selfOldPos;
+	private _selfOldSize;
+	private _trans;
+	protected onEnable(): void;
+	protected onDisable(): void;
+	protected onLoad(): void;
+	protected onDestroy(): void;
+	private registerEvt;
+	private unregisterEvt;
+	private updateData;
+	private onTargetChange;
+	private updateSize;
+	private updatePos;
+	private updateTargetPos;
+	private updateDistance;
+	private getPos;
+}
 export declare class RoundBoxSprite extends UIRenderer {
 	protected _sizeMode: import("cc").__private._cocos_2d_components_sprite__SizeMode;
 	get sizeMode(): import("cc").__private._cocos_2d_components_sprite__SizeMode;
@@ -130,24 +197,6 @@ export declare class RoundBoxSprite extends UIRenderer {
 	private _activateMaterial;
 	private _updateUVs;
 	private _applySpriteFrame;
-}
-export declare class SizeFollow extends Component {
-	get target(): UITransform;
-	set target(value: UITransform);
-	private _target;
-	set heightFollow(val: boolean);
-	get heightFollow(): boolean;
-	private _heightFollow;
-	set widthFollow(val: boolean);
-	get widthFollow(): boolean;
-	private _widthFollow;
-	private _heightOffset;
-	private _widthOffset;
-	private _changeSize;
-	protected onLoad(): void;
-	protected onDestroy(): void;
-	private onTargetSizeChange;
-	private updateSizeOffset;
 }
 
 export {};
