@@ -13,10 +13,6 @@ export class TimeHelper {
         return Math.floor(TimeHelper.clientNow() / 1000);
     }
 
-    static dateTimeNow(): Date {
-        return new Date();
-    }
-
     static serverNow(): number {
         return TimeInfo.getInst().serverNow();
     }

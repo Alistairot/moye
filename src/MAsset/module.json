@@ -1,14 +1,15 @@
 {
     "name-explain":"唯一模块名",
-    "name": "RoundBoxSprite",
+    "name": "MAsset",
 
     "description-explain":"模块描述",
-    "description": "圆角矩形",
+    "description": "资源管理",
 
     "entry-explain":"入口文件",
-    "entry": "RoundBoxSprite.ts",
+    "entry": "Index.ts",
 
     "deps-explain":"依赖的模块",
     "deps": [
+        "Core"
     ]
 }

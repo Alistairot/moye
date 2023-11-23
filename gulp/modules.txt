@@ -2,14 +2,15 @@
 [export=true]
 核心模块,不要剔除
 
+[name=MAsset]
+[export=true]
+资源管理
+
 [name=Relation]
-[export=false]
+[export=true]
 仿写fairygui的relation模块
 
 [name=RoundBoxSprite]
-[export=false]
+[export=true]
 圆角矩形
-from:
-https://gitee.com/ruanwujing/cocoscreator-roundbox
-https://forum.cocos.org/t/topic/154029
 

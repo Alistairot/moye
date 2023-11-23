@@ -1,4 +1,5 @@
-import { _decorator, Component, director } from 'cc';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager } from 'cc';
+import { NATIVE } from 'cc/env';
 
 /**
  * 单例基类
@@ -1324,7 +1325,7 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1346,7 +1347,7 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate([
+MoyeRuntime = __decorate$1([
     ccclass('MoyeRuntime')
 ], MoyeRuntime);
 
@@ -1369,6 +1370,250 @@ class Root extends Singleton {
     }
 }
 
+class TimeHelper {
+    static clientNow() {
+        return TimeInfo.getInst().clientNow();
+    }
+    static clientNowSeconds() {
+        return Math.floor(TimeHelper.clientNow() / 1000);
+    }
+    static serverNow() {
+        return TimeInfo.getInst().serverNow();
+    }
+}
+TimeHelper.OneDay = 86400000;
+TimeHelper.Hour = 3600000;
+TimeHelper.Minute = 60000;
+
+var TimerType;
+(function (TimerType) {
+    TimerType[TimerType["ONCE"] = 0] = "ONCE";
+    TimerType[TimerType["REPEAT"] = 1] = "REPEAT";
+})(TimerType || (TimerType = {}));
+class Timer {
+    static create() {
+        const timer = ObjectPool.getInst().fetch(Timer);
+        timer.reset();
+        timer.id = Timer.getId();
+        return timer;
+    }
+    static getId() {
+        return ++this._idGenerator;
+    }
+    reset() {
+        this.cb = null;
+        this.tcs = null;
+        this.id = 0;
+        this.expireTime = 0;
+        this.interval = 0;
+    }
+    dispose() {
+        this.reset();
+        ObjectPool.getInst().recycle(this);
+    }
+}
+Timer._idGenerator = 1000;
+
+class TimerMgr extends Singleton {
+    constructor() {
+        super(...arguments);
+        this._timerMap = new Map;
+        this._timers = [];
+    }
+    /**
+     * 不断重复的定时器
+     * @param interval ms
+     * @param callback
+     * @param immediately 是否立即执行
+     * @returns
+     */
+    newRepeatedTimer(interval, callback, immediately = false) {
+        const timer = Timer.create();
+        timer.type = TimerType.REPEAT;
+        timer.cb = callback;
+        timer.interval = interval;
+        timer.expireTime = interval + TimeHelper.clientNow();
+        this._timerMap.set(timer.id, timer);
+        this._timers.push(timer);
+        return timer.id;
+    }
+    /**
+     *
+     * @param timeout ms
+     * @param callback
+     * @returns
+     */
+    newOnceTimer(timeout, callback) {
+        const timer = Timer.create();
+        timer.type = TimerType.ONCE;
+        timer.cb = callback;
+        timer.expireTime = timeout + TimeHelper.clientNow();
+        this._timerMap.set(timer.id, timer);
+        this._timers.push(timer);
+        return timer.id;
+    }
+    newFrameTimer(callback) {
+        const timer = Timer.create();
+        timer.type = TimerType.REPEAT;
+        timer.cb = callback;
+        timer.interval = 1;
+        timer.expireTime = timer.interval + TimeHelper.clientNow();
+        this._timerMap.set(timer.id, timer);
+        this._timers.push(timer);
+        return timer.id;
+    }
+    remove(id) {
+        const timer = this._timerMap.get(id);
+        if (!timer) {
+            return false;
+        }
+        timer.id = 0;
+        this._timerMap.delete(id);
+        return true;
+    }
+    /**
+     * 浏览器上会有一个问题
+     * 就是cocos的update后台不执行,但是js脚本依然执行，导致大量的timer没回收
+     * 暂时不处理这个问题 应该没什么影响
+     */
+    update() {
+        const nowTime = TimeHelper.clientNow();
+        for (let i = this._timers.length - 1; i >= 0; i--) {
+            const timer = this._timers[i];
+            if (timer.id == 0) {
+                this._timers.splice(i, 1);
+                timer.dispose();
+                continue;
+            }
+            if (timer.expireTime > nowTime) {
+                continue;
+            }
+            if (timer.cb != null) {
+                timer.cb();
+            }
+            if (timer.tcs != null) {
+                timer.tcs.setResult();
+            }
+            if (timer.type == TimerType.REPEAT) {
+                timer.expireTime += timer.interval;
+            }
+            else {
+                this.remove(timer.id);
+                continue;
+            }
+        }
+    }
+    /**
+     *
+     * @param time ms
+     * @param cancellationToken
+     * @returns
+     */
+    async waitAsync(time, cancellationToken) {
+        if (time <= 0) {
+            return;
+        }
+        const tcs = Task.create();
+        const timer = Timer.create();
+        timer.type = TimerType.ONCE;
+        timer.tcs = tcs;
+        timer.expireTime = time + TimeHelper.clientNow();
+        this._timerMap.set(timer.id, timer);
+        this._timers.push(timer);
+        let cancelAction;
+        if (cancellationToken) {
+            cancelAction = () => {
+                if (this.remove(timer.id)) {
+                    tcs.setResult();
+                }
+            };
+            cancellationToken.add(cancelAction);
+        }
+        try {
+            await tcs;
+        }
+        finally {
+            cancellationToken?.remove(cancelAction);
+            cancelAction = null;
+        }
+    }
+}
+
+class CoroutineLockItem {
+    init(key) {
+        this.key = key;
+        this.task = Task.create();
+        // 开发阶段进行检查 60s还没解锁一般都是bug了
+        if (Options.getInst().develop) {
+            this.setTimeout(60 * 1000, 'CoroutineLock timeout');
+        }
+    }
+    /**
+     * timeout tips
+     * @param timeout ms
+     * @param info
+     * @returns
+     */
+    setTimeout(timeout, info) {
+        this.deleteTimeout();
+        this._timerId = TimerMgr.getInst().newOnceTimer(timeout, this.timeout.bind(this));
+        this._timeoutInfo = info;
+    }
+    deleteTimeout() {
+        if (this._timerId == null) {
+            return;
+        }
+        TimerMgr.getInst().remove(this._timerId);
+        this._timerId = null;
+    }
+    async timeout() {
+        coreWarn(`CoroutineLock timeout key: ${this.key}, info: ${this._timeoutInfo}`);
+    }
+    dispose() {
+        if (this.key == null) {
+            coreWarn('repeat dispose CoroutineLockItem');
+            return;
+        }
+        this.deleteTimeout();
+        CoroutineLock.getInst().runNextLock(this);
+        this.key = null;
+        this.task = null;
+    }
+}
+class CoroutineLock extends Singleton {
+    constructor() {
+        super(...arguments);
+        this._lockMap = new Map;
+    }
+    async wait(lockType, key) {
+        const newKey = `${lockType}_${key}`;
+        let lockSet = this._lockMap.get(newKey);
+        if (!lockSet) {
+            lockSet = new Set;
+            this._lockMap.set(newKey, lockSet);
+        }
+        const lock = ObjectPool.getInst().fetch(CoroutineLockItem);
+        lock.init(newKey);
+        lockSet.add(lock);
+        if (lockSet.size > 1) {
+            await lock.task;
+        }
+        else {
+            lock.task.setResult();
+        }
+        return lock;
+    }
+    runNextLock(lock) {
+        const lockSet = this._lockMap.get(lock.key);
+        lockSet.delete(lock);
+        ObjectPool.getInst().recycle(lock);
+        for (const nextLock of Array.from(lockSet.values())) {
+            nextLock.task.setResult();
+            break;
+        }
+    }
+}
+
 class Program {
     static init(rootNode) {
         MoyeEventCenter.inst.publish(new BeforeProgramInit());
@@ -1377,6 +1622,8 @@ class Program {
         Game.addSingleton(Logger);
         Game.addSingleton(EventSystem);
         Game.addSingleton(TimeInfo);
+        Game.addSingleton(TimerMgr);
+        Game.addSingleton(CoroutineLock);
         Game.addSingleton(IdGenerator);
         Game.addSingleton(EntityCenter);
         Game.addSingleton(EntityLifiCycleMgr);
@@ -1443,4 +1690,357 @@ class AEventHandler {
     }
 }
 
-export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, ObjectPool, Options, Program, RecycleObj, Scene, SceneType, Singleton, TimeInfo, error, log, safeCall, warn };
+/**
+ * cancel token
+ */
+class CancellationToken {
+    constructor() {
+        this._actions = new Set();
+    }
+    /**
+     * add one cancel action
+     * @param callback 添加取消动作
+     * @returns
+     */
+    add(callback) {
+        if (callback == null) {
+            coreError(`CancellationToken add error, callback is null`);
+            return;
+        }
+        this._actions.add(callback);
+    }
+    remove(callback) {
+        this._actions.delete(callback);
+    }
+    /**
+     * 执行取消动作
+     * @returns
+     */
+    cancel() {
+        if (this._actions == null) {
+            coreError(`CancellationToken cancel error, repeat cancel`);
+            return;
+        }
+        this.invoke();
+    }
+    isCancel() {
+        return this._actions == null;
+    }
+    invoke() {
+        const runActions = this._actions;
+        this._actions = null;
+        try {
+            for (const action of runActions) {
+                action();
+            }
+            runActions.clear();
+        }
+        catch (e) {
+            coreError(e);
+        }
+    }
+}
+
+class AssetInfo {
+    init(assetType, location) {
+        location = this.parseLocation(assetType, location);
+        const strs = location.split("/");
+        let assetPath = '';
+        for (let i = 1; i < strs.length; i++) {
+            assetPath += strs[i];
+            if (i != strs.length - 1) {
+                assetPath += "/";
+            }
+        }
+        this.bundleName = strs[0];
+        this.assetPath = assetPath;
+        this.assetType = assetType;
+        this.uuid = `${location}.${assetType.name}`;
+    }
+    parseLocation(assetType, location) {
+        if (assetType.name == SpriteFrame.name) {
+            if (!location.endsWith("spriteFrame")) {
+                location += '/spriteFrame';
+            }
+        }
+        else if (assetType.name == Texture2D.name) {
+            if (!location.endsWith("texture")) {
+                location += '/texture';
+            }
+        }
+        return location;
+    }
+}
+
+class AssetSystem {
+    constructor() {
+        this._waitLoads = [];
+        this._loadingSet = new Set;
+        this._frameAddCount = 0;
+    }
+    update() {
+        this._frameAddCount = 0;
+        this.updateLoadingSet();
+    }
+    addProvider(provider) {
+        this._waitLoads.push(provider);
+        this.updateLoadingSet();
+    }
+    updateLoadingSet() {
+        // 这一帧添加的到达上限
+        if (this._frameAddCount >= AssetSystem._frameMaxAddQueueProvider) {
+            return;
+        }
+        // 同时加载的到达上限
+        if (this._loadingSet.size >= AssetSystem._maxLoadingProvider) {
+            return;
+        }
+        // 没有需要加载的
+        if (this._waitLoads.length == 0) {
+            return;
+        }
+        const provider = this._waitLoads.shift();
+        this._loadingSet.add(provider);
+        provider.internalLoad();
+    }
+    removeProvider(provider) {
+        this._loadingSet.delete(provider);
+        this.updateLoadingSet();
+    }
+}
+/**
+ * 同时加载的最大数量
+ */
+AssetSystem._maxLoadingProvider = 1;
+/**
+ * 每一帧最多添加几个到加载列表
+ */
+AssetSystem._frameMaxAddQueueProvider = 1;
+
+class AssetOperationHandle {
+    constructor() {
+        this.isDisposed = false;
+    }
+    getAsset(assetType) {
+        return this.provider.asset;
+    }
+    dispose() {
+        if (this.isDisposed) {
+            coreError(`重复销毁AssetOperationHandle`);
+            return;
+        }
+        this.isDisposed = true;
+        this.provider.releaseHandle(this);
+    }
+    instantiateSync() {
+        const node = instantiate(this.provider.asset);
+        return node;
+    }
+    async instantiateAsync() {
+        const node = instantiate(this.provider.asset);
+        return node;
+    }
+}
+
+class BundleAssetProvider {
+    constructor() {
+        this.refCount = 0;
+        this._handleSet = new Set;
+    }
+    async internalLoad() {
+        const assetPath = this.assetInfo.assetPath;
+        const assetType = this.assetInfo.assetType;
+        this.bundleAsset.bundle.load(assetPath, assetType, (err, asset) => {
+            if (err) {
+                coreError(`加载资源错误:${this.assetInfo.uuid}`, err);
+            }
+            else {
+                this.asset = asset;
+            }
+            this._task.setResult();
+            this.assetSystem.removeProvider(this);
+        });
+    }
+    async load() {
+        this._task = Task.create();
+        this.assetSystem.addProvider(this);
+        await this._task;
+    }
+    createHandle() {
+        // 引用计数增加
+        this.refCount++;
+        const handle = new AssetOperationHandle;
+        handle.provider = this;
+        this._handleSet.add(handle);
+        return handle;
+    }
+    releaseHandle(handle) {
+        if (this.refCount <= 0) {
+            coreWarn("Asset provider reference count is already zero. There may be resource leaks !");
+        }
+        if (this._handleSet.delete(handle) == false) {
+            coreError("Should never get here !");
+        }
+        // 引用计数减少
+        this.refCount--;
+    }
+}
+
+var AssetLockType;
+(function (AssetLockType) {
+    AssetLockType["BUNDLE_ASSET_LOAD"] = "bundle_asset_load";
+    AssetLockType["BUNDLE_LOAD"] = "bundle_load";
+})(AssetLockType || (AssetLockType = {}));
+
+class BundleAsset {
+    constructor() {
+        this.refCount = 0;
+        this.isAutoRelease = true;
+        this._providerMap = new Map;
+    }
+    async loadAssetAsync(assetInfo) {
+        let provider = this._providerMap.get(assetInfo.uuid);
+        if (!provider) {
+            provider = await this.createProvider(assetInfo);
+        }
+        const handle = provider.createHandle();
+        return handle;
+    }
+    async createProvider(assetInfo) {
+        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_ASSET_LOAD, assetInfo.uuid);
+        try {
+            let provider = this._providerMap.get(assetInfo.uuid);
+            if (provider) {
+                return provider;
+            }
+            provider = new BundleAssetProvider;
+            provider.assetInfo = assetInfo;
+            provider.assetSystem = this.assetSystem;
+            provider.bundleAsset = this;
+            this.refCount++;
+            await provider.load();
+            this._providerMap.set(assetInfo.uuid, provider);
+            return provider;
+        }
+        finally {
+            lock.dispose();
+        }
+    }
+    unloadUnusedAssets() {
+        for (const [key, provider] of this._providerMap) {
+            if (provider.refCount != 0) {
+                continue;
+            }
+            this.bundle.release(provider.assetInfo.assetPath, provider.assetInfo.assetType);
+            this._providerMap.delete(key);
+            this.refCount--;
+        }
+    }
+}
+
+class MAssets extends Singleton {
+    awake() {
+        MAssets.assetSystem = new AssetSystem;
+    }
+    update() {
+        MAssets.assetSystem.update();
+    }
+    static async loadAssetAsync(assetType, location) {
+        try {
+            const assetInfo = new AssetInfo();
+            assetInfo.init(assetType, location);
+            const bundleName = assetInfo.bundleName;
+            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            if (!bundleAsset) {
+                bundleAsset = await this.loadBundleAsync(bundleName);
+            }
+            const assetOperationHandle = await bundleAsset.loadAssetAsync(assetInfo);
+            return assetOperationHandle;
+        }
+        catch (e) {
+            coreError(e);
+        }
+    }
+    static async loadBundleAsync(bundleName) {
+        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_LOAD, bundleName);
+        try {
+            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            if (bundleAsset) {
+                return bundleAsset;
+            }
+            const task = Task.create();
+            if (!this._bundlePathMap.has(bundleName)) {
+                this._bundlePathMap.set(bundleName, bundleName);
+                if (NATIVE) {
+                    const writePath = native.fileUtils.getWritablePath();
+                    const bundlePath = `${writePath}hot/${bundleName}`;
+                    if (native.fileUtils.isDirectoryExist(bundlePath)) {
+                        this._bundlePathMap.set(bundleName, bundlePath);
+                    }
+                }
+            }
+            const bundlePath = this._bundlePathMap.get(bundleName);
+            coreLog(`加载bundle: ${bundlePath}`);
+            assetManager.loadBundle(bundlePath, (err, bundle) => {
+                if (err) {
+                    coreLog(`加载Bundle错误, bundle=${bundleName}, error=${err}`);
+                }
+                else {
+                    coreLog(`加载Bundle完成, bundle=${bundleName}`);
+                }
+                task.setResult(bundle);
+            });
+            const bundle = await task;
+            bundleAsset = new BundleAsset;
+            bundleAsset.bundle = bundle;
+            bundleAsset.bundleName = bundleName;
+            bundleAsset.assetSystem = MAssets.assetSystem;
+            MAssets._bundleMap.set(bundleName, bundleAsset);
+            return bundleAsset;
+        }
+        finally {
+            lock.dispose();
+        }
+    }
+    static releaseBundle(bundleAsset) {
+        if (bundleAsset.refCount != 0) {
+            coreError(`释放的bundle:${bundleAsset.bundleName}引用计数不为0`);
+            return;
+        }
+        this._bundleMap.delete(bundleAsset.bundleName);
+        assetManager.removeBundle(bundleAsset.bundle);
+        coreLog(`卸载bundle:${bundleAsset.bundleName}`);
+    }
+    static unloadUnusedAssets() {
+        for (const [name, bundleAsset] of this._bundleMap) {
+            bundleAsset.unloadUnusedAssets();
+            if (bundleAsset.refCount != 0) {
+                continue;
+            }
+            if (!bundleAsset.isAutoRelease) {
+                continue;
+            }
+            MAssets.releaseBundle(bundleAsset);
+        }
+    }
+}
+MAssets._bundleMap = new Map();
+MAssets._bundlePathMap = new Map();
+
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandler {
+    run(scene, args) {
+        Game.addSingleton(MAssets);
+        console.log('add Massets');
+    }
+};
+AfterProgramInitHandler = __decorate([
+    EventDecorator(AfterProgramInit, SceneType.NONE)
+], AfterProgramInitHandler);
+
+export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CancellationToken, CoroutineLock, CoroutineLockItem, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MAssets, ObjectPool, Options, Program, RecycleObj, Scene, SceneType, Singleton, TimeInfo, TimerMgr, error, log, safeCall, warn };

@@ -18,5 +18,5 @@ gulp build
 ### todo
 add demo  
 add documentation
-add entity  
+corelog with tag  
 add cocos-node module  

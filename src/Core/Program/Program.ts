@@ -12,6 +12,8 @@ import { IdGenerator } from "../IdGenerator/IdGenerator";
 import { EntityCenter } from "../Entity/EntityCenter";
 import { EntityLifiCycleMgr } from "../Entity/EntityLifiCycleMgr";
 import { Root } from "../Entity/Root";
+import { TimerMgr } from "../Timer/TimerMgr";
+import { CoroutineLock } from "../CoroutineLock/CoroutineLock";
 
 export class Program {
     static init(rootNode: Node) {
@@ -22,6 +24,8 @@ export class Program {
         Game.addSingleton(Logger);
         Game.addSingleton(EventSystem);
         Game.addSingleton(TimeInfo);
+        Game.addSingleton(TimerMgr);
+        Game.addSingleton(CoroutineLock);
         Game.addSingleton(IdGenerator);
         Game.addSingleton(EntityCenter);
         Game.addSingleton(EntityLifiCycleMgr);
