@@ -1,0 +1,6 @@
+[submodule "client"]
+	path = client
+	url = https://github.com/Alistairot/moye-client.git
+[submodule "example"]
+	path = example
+	url = https://github.com/Alistairot/moye-example.git
