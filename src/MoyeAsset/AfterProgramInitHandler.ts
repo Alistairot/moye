@@ -4,12 +4,11 @@ import { AEventHandler } from "../Core/EventSystem/AEventHandler";
 import { AfterProgramInit } from "../Core/EventSystem/EventCore";
 import { EventDecorator } from "../Core/EventSystem/EventDecorator";
 import { Game } from "../Core/Singleton/Game";
-import { MAssets } from "./MAssets";
+import { MoyeAssets } from "./MoyeAssets";
 
 @EventDecorator(AfterProgramInit, SceneType.NONE)
 class AfterProgramInitHandler extends AEventHandler<AfterProgramInit>{
     protected run(scene: Scene, args: AfterProgramInit) {
-        Game.addSingleton(MAssets);
-        console.log('add Massets');
+        Game.addSingleton(MoyeAssets);
     }
 }

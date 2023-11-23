@@ -48,9 +48,7 @@ export class Logger extends Singleton {
      */
     error(str: string, ...args: any[]) {
         const formatStr = JsHelper.formatStr(str, ...args);
-        const e = new Error();
-        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
-        this._iLog.error(errStr);
+        this._iLog.error(formatStr);
     }
 
     private checkLogLevel(level: number): boolean {
@@ -62,9 +60,8 @@ export class Logger extends Singleton {
      * @param str 
      * @param args 
      */
-    private coreLog(str: string, ...args: any[]) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.log(formatStr);
+    private coreLog(str: string) {
+        this._iLog.log(str);
     }
 
     /**
@@ -72,9 +69,8 @@ export class Logger extends Singleton {
      * @param str 
      * @param args 
      */
-    private coreWarn(str: string, ...args: any[]) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.warn(formatStr);
+    private coreWarn(str: string) {
+        this._iLog.warn(str);
     }
 
     /**
@@ -84,22 +80,46 @@ export class Logger extends Singleton {
      * @param str 
      * @param args 
      */
-    private coreError(str: string, ...args: any[]) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        const e = new Error();
-        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
-        this._iLog.error(errStr);
+    private coreError(str: string) {
+        this._iLog.error(str);
     }
 }
 
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str 
+ * @param args 
+ */
 export function log(str: string, ...args: any[]) {
     Logger.getInst().log(str, ...args);
 }
 
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str 
+ * @param args 
+ */
 export function warn(str: string, ...args: any[]) {
     Logger.getInst().warn(str, ...args);
 }
 
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str 
+ * @param args 
+ */
 export function error(str: string, ...args: any[]) {
     Logger.getInst().error(str, ...args);
 }

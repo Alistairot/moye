@@ -1,6 +1,8 @@
 import { coreError } from "../Logger/CoreLogHelper";
 import { Action } from "../Type/Action";
 
+export const CancellationTokenTag = "CancellationToken";
+
 /**
  * cancel token
  */
@@ -14,7 +16,7 @@ export class CancellationToken {
      */
     add(callback: Action) {
         if (callback == null) {
-            coreError(`CancellationToken add error, callback is null`);
+            coreError(CancellationTokenTag, 'CancellationToken add error, callback is null');
             return;
         }
 
@@ -31,7 +33,7 @@ export class CancellationToken {
      */
     cancel() {
         if (this._actions == null) {
-            coreError(`CancellationToken cancel error, repeat cancel`);
+            coreError(CancellationTokenTag, 'CancellationToken cancel error, repeat cancel');
             return;
         }
 
@@ -54,7 +56,7 @@ export class CancellationToken {
             runActions.clear();
         }
         catch (e) {
-            coreError(e);
+            coreError(CancellationTokenTag, e);
         }
     }
 }

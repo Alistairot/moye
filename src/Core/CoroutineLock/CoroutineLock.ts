@@ -7,6 +7,8 @@ import { Singleton } from "../Singleton/Singleton";
 import { Task } from "../Task/Task";
 import { TimerMgr } from "../Timer/TimerMgr";
 
+export const CoroutineLockTag = 'CoroutineLock';
+
 export class CoroutineLockItem {
     key: string;
     task: Task;
@@ -46,12 +48,12 @@ export class CoroutineLockItem {
     }
 
     private async timeout() {
-        coreWarn(`CoroutineLock timeout key: ${this.key}, info: ${this._timeoutInfo}`);
+        coreWarn(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
     }
 
     dispose() {
         if(this.key == null){
-            coreWarn('repeat dispose CoroutineLockItem');
+            coreWarn(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
             return;
         }
 

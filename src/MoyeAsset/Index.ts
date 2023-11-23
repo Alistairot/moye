@@ -1,3 +1,3 @@
 import './AfterProgramInitHandler';
-export * from './MAssets';
+export * from './MoyeAssets';
 export * from './BundleAsset';

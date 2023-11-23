@@ -9,6 +9,6 @@ export async function safeCall(promise: Promise<any>) {
     try {
         return await promise;
     } catch (e) {
-        coreError(e?.stack);
+        coreError('safeCall', e);
     }
 }

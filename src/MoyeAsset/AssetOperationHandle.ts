@@ -2,6 +2,7 @@ import { Asset, instantiate, Node, Prefab } from "cc";
 import { IBundleAssetProvider } from "./IBundleAssetProvider";
 import { coreError } from "../Core/Logger/CoreLogHelper";
 import { Type } from "../Core/Type/Type";
+import { MoyeAssetTag } from "./LogTag";
 
 export class AssetOperationHandle {
     public provider: IBundleAssetProvider;
@@ -13,7 +14,7 @@ export class AssetOperationHandle {
 
     public dispose() {
         if (this.isDisposed) {
-            coreError(`重复销毁AssetOperationHandle`);
+            coreError(MoyeAssetTag, '重复销毁AssetOperationHandle');
             return;
         }
 

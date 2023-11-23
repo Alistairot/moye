@@ -5,6 +5,8 @@ import { IScene } from "../Type/IScene";
 
 type T = Scene
 
+export const EventHandlerTag = 'EventHandler';
+
 export abstract class AEventHandler<A>{
     protected abstract run(scene: T, args: A): any;
 
@@ -13,11 +15,7 @@ export abstract class AEventHandler<A>{
             await this.run(scene as T, a);
         }
         catch (e) {
-            if (e instanceof Error) {
-                coreError(e.stack);
-            } else {
-                coreError(e);
-            }
+            coreError(EventHandlerTag, e);
         }
     }
 
@@ -26,16 +24,12 @@ export abstract class AEventHandler<A>{
             const ret = this.run(scene as T, a);
 
             if (ret instanceof Promise) {
-                coreWarn('{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
+                coreWarn(EventHandlerTag, '{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
                 safeCall(ret);
             }
         }
         catch (e) {
-            if (e instanceof Error) {
-                coreError(e.stack);
-            } else {
-                coreError(e);
-            }
+            coreError(EventHandlerTag, e);
         }
     }
 }

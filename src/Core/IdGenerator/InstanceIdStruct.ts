@@ -1,5 +1,6 @@
 import { TimeInfo } from "../Time/TimeInfo";
 import { coreError, coreWarn } from '../Logger/CoreLogHelper';
+import { IdGeneratorTag } from "./LogTag";
 
 /**
  * 可用时间 s
@@ -38,7 +39,7 @@ export class InstanceIdStruct {
             this._lastTime = this.timeSinceEpoch();
 
             if (this._lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -56,7 +57,7 @@ export class InstanceIdStruct {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
 
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
+                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
 

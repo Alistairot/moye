@@ -1,5 +1,5 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager } from 'cc';
-import { NATIVE } from 'cc/env';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
+import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
  * 单例基类
@@ -182,9 +182,7 @@ class Logger extends Singleton {
      */
     error(str, ...args) {
         const formatStr = JsHelper.formatStr(str, ...args);
-        const e = new Error();
-        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
-        this._iLog.error(errStr);
+        this._iLog.error(formatStr);
     }
     checkLogLevel(level) {
         return Options.getInst().logLevel <= level;
@@ -194,18 +192,16 @@ class Logger extends Singleton {
      * @param str
      * @param args
      */
-    coreLog(str, ...args) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.log(formatStr);
+    coreLog(str) {
+        this._iLog.log(str);
     }
     /**
      * 不受logLevel影响的log
      * @param str
      * @param args
      */
-    coreWarn(str, ...args) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        this._iLog.warn(formatStr);
+    coreWarn(str) {
+        this._iLog.warn(str);
     }
     /**
      * 错误打印会带上堆栈 用于定位错误
@@ -214,29 +210,53 @@ class Logger extends Singleton {
      * @param str
      * @param args
      */
-    coreError(str, ...args) {
-        const formatStr = JsHelper.formatStr(str, ...args);
-        const e = new Error();
-        const errStr = JsHelper.formatStr('{0}, stack: {1}', formatStr, e.stack);
-        this._iLog.error(errStr);
+    coreError(str) {
+        this._iLog.error(str);
     }
 }
 Logger.LOG_LEVEL = 1;
 Logger.WARN_LEVEL = 2;
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
 function log(str, ...args) {
     Logger.getInst().log(str, ...args);
 }
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
 function warn(str, ...args) {
     Logger.getInst().warn(str, ...args);
 }
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
 function error(str, ...args) {
     Logger.getInst().error(str, ...args);
 }
 
 // 框架内部用这个log 区分外部的log 不进行导出
-function coreLog(str, ...args) {
+function coreLog(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
-    const output = `[core]: ${formatStr}`;
+    const output = `[${tag}]: ${formatStr}`;
     try {
         const inst = Logger.getInst();
         inst.coreLog(output);
@@ -245,9 +265,9 @@ function coreLog(str, ...args) {
         console.log(output);
     }
 }
-function coreWarn(str, ...args) {
+function coreWarn(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
-    const output = `[core]: ${formatStr}`;
+    const output = `[${tag}]: ${formatStr}`;
     try {
         const inst = Logger.getInst();
         inst.coreWarn(output);
@@ -256,9 +276,9 @@ function coreWarn(str, ...args) {
         console.warn(output);
     }
 }
-function coreError(str, ...args) {
+function coreError(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
-    const output = `[core]: ${formatStr}`;
+    const output = `[${tag}]: ${formatStr}`;
     try {
         const inst = Logger.getInst();
         inst.coreError(output);
@@ -267,6 +287,8 @@ function coreError(str, ...args) {
         console.error(output);
     }
 }
+
+const IdGeneratorTag = "IdGenerator";
 
 /**
  * 可用时间 s
@@ -298,7 +320,7 @@ class IdStruct {
         if (this._lastTime == 0) {
             this._lastTime = this.timeSinceEpoch();
             if (this._lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -312,7 +334,7 @@ class IdStruct {
             if (this._idCount > powValueBit$1) {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
+                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
         const struct = IdStruct.inst;
@@ -390,7 +412,7 @@ class InstanceIdStruct {
         if (this._lastTime == 0) {
             this._lastTime = this.timeSinceEpoch();
             if (this._lastTime <= 0) {
-                coreWarn(`${(new this).constructor.name}: lastTime less than 0: ${this._lastTime}`);
+                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -404,7 +426,7 @@ class InstanceIdStruct {
             if (this._idCount > powValueBit) {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
-                coreError(`${(new this).constructor.name}: idCount per sec overflow: ${time} ${this._lastTime}`);
+                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
         const struct = InstanceIdStruct.inst;
@@ -985,7 +1007,7 @@ class Scene extends Entity {
         this.isNew = true;
         this.domain = this;
         this.isRegister = true;
-        coreLog(`scene create sceneType = {0}, name = {1}, id = {2}`, this.sceneType, this.name, this.id);
+        coreLog('scene', 'scene create sceneType = {0}, name = {1}, id = {2}', this.sceneType, this.name, this.id);
     }
 }
 
@@ -1325,13 +1347,13 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass, property } = _decorator;
+const { ccclass: ccclass$3, property: property$3 } = _decorator;
 let MoyeRuntime = class MoyeRuntime extends Component {
     start() {
         director.addPersistRootNode(this.node);
@@ -1347,8 +1369,8 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$1([
-    ccclass('MoyeRuntime')
+MoyeRuntime = __decorate$4([
+    ccclass$3('MoyeRuntime')
 ], MoyeRuntime);
 
 /**
@@ -1539,6 +1561,7 @@ class TimerMgr extends Singleton {
     }
 }
 
+const CoroutineLockTag = 'CoroutineLock';
 class CoroutineLockItem {
     init(key) {
         this.key = key;
@@ -1567,11 +1590,11 @@ class CoroutineLockItem {
         this._timerId = null;
     }
     async timeout() {
-        coreWarn(`CoroutineLock timeout key: ${this.key}, info: ${this._timeoutInfo}`);
+        coreWarn(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
     }
     dispose() {
         if (this.key == null) {
-            coreWarn('repeat dispose CoroutineLockItem');
+            coreWarn(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
             return;
         }
         this.deleteTimeout();
@@ -1653,43 +1676,35 @@ async function safeCall(promise) {
         return await promise;
     }
     catch (e) {
-        coreError(e?.stack);
+        coreError('safeCall', e);
     }
 }
 
+const EventHandlerTag = 'EventHandler';
 class AEventHandler {
     async handleAsync(scene, a) {
         try {
             await this.run(scene, a);
         }
         catch (e) {
-            if (e instanceof Error) {
-                coreError(e.stack);
-            }
-            else {
-                coreError(e);
-            }
+            coreError(EventHandlerTag, e);
         }
     }
     handle(scene, a) {
         try {
             const ret = this.run(scene, a);
             if (ret instanceof Promise) {
-                coreWarn('{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
+                coreWarn(EventHandlerTag, '{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
                 safeCall(ret);
             }
         }
         catch (e) {
-            if (e instanceof Error) {
-                coreError(e.stack);
-            }
-            else {
-                coreError(e);
-            }
+            coreError(EventHandlerTag, e);
         }
     }
 }
 
+const CancellationTokenTag = "CancellationToken";
 /**
  * cancel token
  */
@@ -1704,7 +1719,7 @@ class CancellationToken {
      */
     add(callback) {
         if (callback == null) {
-            coreError(`CancellationToken add error, callback is null`);
+            coreError(CancellationTokenTag, 'CancellationToken add error, callback is null');
             return;
         }
         this._actions.add(callback);
@@ -1718,7 +1733,7 @@ class CancellationToken {
      */
     cancel() {
         if (this._actions == null) {
-            coreError(`CancellationToken cancel error, repeat cancel`);
+            coreError(CancellationTokenTag, 'CancellationToken cancel error, repeat cancel');
             return;
         }
         this.invoke();
@@ -1736,7 +1751,7 @@ class CancellationToken {
             runActions.clear();
         }
         catch (e) {
-            coreError(e);
+            coreError(CancellationTokenTag, e);
         }
     }
 }
@@ -1817,6 +1832,8 @@ AssetSystem._maxLoadingProvider = 1;
  */
 AssetSystem._frameMaxAddQueueProvider = 1;
 
+const MoyeAssetTag = "MoyeAsset";
+
 class AssetOperationHandle {
     constructor() {
         this.isDisposed = false;
@@ -1826,7 +1843,7 @@ class AssetOperationHandle {
     }
     dispose() {
         if (this.isDisposed) {
-            coreError(`重复销毁AssetOperationHandle`);
+            coreError(MoyeAssetTag, '重复销毁AssetOperationHandle');
             return;
         }
         this.isDisposed = true;
@@ -1852,7 +1869,7 @@ class BundleAssetProvider {
         const assetType = this.assetInfo.assetType;
         this.bundleAsset.bundle.load(assetPath, assetType, (err, asset) => {
             if (err) {
-                coreError(`加载资源错误:${this.assetInfo.uuid}`, err);
+                coreError(MoyeAssetTag, '加载资源错误:{0},{1}', this.assetInfo.uuid, err);
             }
             else {
                 this.asset = asset;
@@ -1876,10 +1893,10 @@ class BundleAssetProvider {
     }
     releaseHandle(handle) {
         if (this.refCount <= 0) {
-            coreWarn("Asset provider reference count is already zero. There may be resource leaks !");
+            coreWarn(MoyeAssetTag, "Asset provider reference count is already zero. There may be resource leaks !");
         }
         if (this._handleSet.delete(handle) == false) {
-            coreError("Should never get here !");
+            coreError(MoyeAssetTag, "Should never get here !");
         }
         // 引用计数减少
         this.refCount--;
@@ -1938,19 +1955,19 @@ class BundleAsset {
     }
 }
 
-class MAssets extends Singleton {
+class MoyeAssets extends Singleton {
     awake() {
-        MAssets.assetSystem = new AssetSystem;
+        MoyeAssets.assetSystem = new AssetSystem;
     }
     update() {
-        MAssets.assetSystem.update();
+        MoyeAssets.assetSystem.update();
     }
     static async loadAssetAsync(assetType, location) {
         try {
             const assetInfo = new AssetInfo();
             assetInfo.init(assetType, location);
             const bundleName = assetInfo.bundleName;
-            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            let bundleAsset = MoyeAssets._bundleMap.get(bundleName);
             if (!bundleAsset) {
                 bundleAsset = await this.loadBundleAsync(bundleName);
             }
@@ -1958,13 +1975,13 @@ class MAssets extends Singleton {
             return assetOperationHandle;
         }
         catch (e) {
-            coreError(e);
+            coreError(MoyeAssetTag, e);
         }
     }
     static async loadBundleAsync(bundleName) {
         const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_LOAD, bundleName);
         try {
-            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            let bundleAsset = MoyeAssets._bundleMap.get(bundleName);
             if (bundleAsset) {
                 return bundleAsset;
             }
@@ -1980,13 +1997,13 @@ class MAssets extends Singleton {
                 }
             }
             const bundlePath = this._bundlePathMap.get(bundleName);
-            coreLog(`加载bundle: ${bundlePath}`);
+            coreLog(MoyeAssetTag, '加载bundle: {0}', bundlePath);
             assetManager.loadBundle(bundlePath, (err, bundle) => {
                 if (err) {
-                    coreLog(`加载Bundle错误, bundle=${bundleName}, error=${err}`);
+                    coreLog(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
                 }
                 else {
-                    coreLog(`加载Bundle完成, bundle=${bundleName}`);
+                    coreLog(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
                 }
                 task.setResult(bundle);
             });
@@ -1994,8 +2011,8 @@ class MAssets extends Singleton {
             bundleAsset = new BundleAsset;
             bundleAsset.bundle = bundle;
             bundleAsset.bundleName = bundleName;
-            bundleAsset.assetSystem = MAssets.assetSystem;
-            MAssets._bundleMap.set(bundleName, bundleAsset);
+            bundleAsset.assetSystem = MoyeAssets.assetSystem;
+            MoyeAssets._bundleMap.set(bundleName, bundleAsset);
             return bundleAsset;
         }
         finally {
@@ -2004,12 +2021,12 @@ class MAssets extends Singleton {
     }
     static releaseBundle(bundleAsset) {
         if (bundleAsset.refCount != 0) {
-            coreError(`释放的bundle:${bundleAsset.bundleName}引用计数不为0`);
+            coreError(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
             return;
         }
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
-        coreLog(`卸载bundle:${bundleAsset.bundleName}`);
+        coreLog('卸载bundle:{0}', bundleAsset.bundleName);
     }
     static unloadUnusedAssets() {
         for (const [name, bundleAsset] of this._bundleMap) {
@@ -2020,14 +2037,14 @@ class MAssets extends Singleton {
             if (!bundleAsset.isAutoRelease) {
                 continue;
             }
-            MAssets.releaseBundle(bundleAsset);
+            MoyeAssets.releaseBundle(bundleAsset);
         }
     }
 }
-MAssets._bundleMap = new Map();
-MAssets._bundlePathMap = new Map();
+MoyeAssets._bundleMap = new Map();
+MoyeAssets._bundlePathMap = new Map();
 
-var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2035,12 +2052,1094 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
 };
 let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandler {
     run(scene, args) {
-        Game.addSingleton(MAssets);
-        console.log('add Massets');
+        Game.addSingleton(MoyeAssets);
     }
 };
-AfterProgramInitHandler = __decorate([
+AfterProgramInitHandler = __decorate$3([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
 
-export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CancellationToken, CoroutineLock, CoroutineLockItem, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MAssets, ObjectPool, Options, Program, RecycleObj, Scene, SceneType, Singleton, TimeInfo, TimerMgr, error, log, safeCall, warn };
+var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$2, property: property$2, menu: menu$2 } = _decorator;
+let SizeFollow = class SizeFollow extends Component {
+    constructor() {
+        super(...arguments);
+        this._heightFollow = true;
+        this._widthFollow = true;
+        this._heightOffset = 0;
+        this._widthOffset = 0;
+        this._changeSize = new Size();
+    }
+    get target() {
+        return this._target;
+    }
+    set target(value) {
+        this._target = value;
+        this.updateSizeOffset();
+    }
+    set heightFollow(val) {
+        this._heightFollow = val;
+        this.updateSizeOffset();
+    }
+    get heightFollow() {
+        return this._heightFollow;
+    }
+    set widthFollow(val) {
+        this._widthFollow = val;
+        this.updateSizeOffset();
+    }
+    get widthFollow() {
+        return this._widthFollow;
+    }
+    onLoad() {
+        if (this._target == null) {
+            return;
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+    }
+    onDestroy() {
+        if (this._target == null) {
+            return;
+        }
+        if (!this._target.isValid) {
+            this._target = null;
+            return;
+        }
+        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+        this._target = null;
+    }
+    onTargetSizeChange() {
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
+        // console.log('onTargetSizeChange targetTrans', targetTrans);
+        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
+        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
+        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
+        this._changeSize.set(selfTrans.contentSize);
+        if (this._widthFollow) {
+            this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
+        }
+        if (this._heightFollow) {
+            this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
+        }
+        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
+        // console.log('onTargetSizeChange this.node', this.node);
+        selfTrans.setContentSize(this._changeSize);
+        // selfTrans.setContentSize(new Size(this._changeSize));
+        // selfTrans.height = 300;
+    }
+    updateSizeOffset() {
+        if (this._target == null) {
+            return;
+        }
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
+        if (this._widthFollow) {
+            const selfWidth = selfTrans.width;
+            const targetWidth = targetTrans.width;
+            this._widthOffset = selfWidth - targetWidth;
+        }
+        if (this._heightFollow) {
+            const selfHeight = selfTrans.height;
+            const targetHeight = targetTrans.height;
+            this._heightOffset = selfHeight - targetHeight;
+        }
+    }
+};
+__decorate$2([
+    property$2({ type: UITransform })
+], SizeFollow.prototype, "target", null);
+__decorate$2([
+    property$2({ type: UITransform })
+], SizeFollow.prototype, "_target", void 0);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "heightFollow", null);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "_heightFollow", void 0);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "widthFollow", null);
+__decorate$2([
+    property$2
+], SizeFollow.prototype, "_widthFollow", void 0);
+__decorate$2([
+    property$2({ type: CCFloat })
+], SizeFollow.prototype, "_heightOffset", void 0);
+__decorate$2([
+    property$2({ type: CCFloat })
+], SizeFollow.prototype, "_widthOffset", void 0);
+SizeFollow = __decorate$2([
+    ccclass$2('SizeFollow'),
+    menu$2('moye/SizeFollow')
+], SizeFollow);
+
+var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$1, property: property$1, executeInEditMode, menu: menu$1 } = _decorator;
+var WidgetBase;
+(function (WidgetBase) {
+    WidgetBase[WidgetBase["LEFT"] = 1] = "LEFT";
+    WidgetBase[WidgetBase["RIGHT"] = 2] = "RIGHT";
+    WidgetBase[WidgetBase["TOP"] = 3] = "TOP";
+    WidgetBase[WidgetBase["BOTTOM"] = 4] = "BOTTOM";
+})(WidgetBase || (WidgetBase = {}));
+var WidgetDirection;
+(function (WidgetDirection) {
+    WidgetDirection[WidgetDirection["LEFT"] = 1] = "LEFT";
+    WidgetDirection[WidgetDirection["RIGHT"] = 2] = "RIGHT";
+    WidgetDirection[WidgetDirection["TOP"] = 3] = "TOP";
+    WidgetDirection[WidgetDirection["BOTTOM"] = 4] = "BOTTOM";
+    WidgetDirection[WidgetDirection["LEFT_EXTEND"] = 5] = "LEFT_EXTEND";
+    WidgetDirection[WidgetDirection["RIGHT_EXTEND"] = 6] = "RIGHT_EXTEND";
+    WidgetDirection[WidgetDirection["TOP_EXTEND"] = 7] = "TOP_EXTEND";
+    WidgetDirection[WidgetDirection["BOTTOM_EXTEND"] = 8] = "BOTTOM_EXTEND";
+})(WidgetDirection || (WidgetDirection = {}));
+/**
+ * 关联组件
+ * 不允许直系亲属互相关联
+ * 同父支持size跟pos关联
+ * 异父仅支持pos关联 size关联未做测试
+ */
+let CTWidget = class CTWidget extends Component {
+    constructor() {
+        super(...arguments);
+        this._targetDir = WidgetDirection.TOP;
+        this._dir = WidgetDirection.TOP;
+        this.visibleOffset = 0;
+        this._isVertical = true;
+        this._distance = 0;
+        this._changePos = new Vec3(0, 0, 0);
+        this._targetOldPos = new Vec3(0, 0, 0);
+        this._targetOldSize = 0;
+        this._selfOldPos = new Vec3(0, 0, 0);
+        this._selfOldSize = 0;
+    }
+    get target() {
+        return this._target;
+    }
+    set target(value) {
+        this._target = value;
+        this.unregisterEvt();
+        this.registerEvt();
+        this.updateData();
+    }
+    // 目标方向
+    set targetDir(val) {
+        if (!EDITOR) {
+            return;
+        }
+        if (val == WidgetDirection.LEFT ||
+            val == WidgetDirection.RIGHT) {
+            switch (this._dir) {
+                case WidgetDirection.TOP:
+                case WidgetDirection.TOP_EXTEND:
+                case WidgetDirection.BOTTOM:
+                case WidgetDirection.BOTTOM_EXTEND:
+                    this._dir = WidgetDirection.LEFT;
+            }
+            this._isVertical = false;
+        }
+        else {
+            switch (this._dir) {
+                case WidgetDirection.LEFT:
+                case WidgetDirection.LEFT_EXTEND:
+                case WidgetDirection.RIGHT:
+                case WidgetDirection.RIGHT_EXTEND:
+                    this._dir = WidgetDirection.TOP;
+            }
+            this._isVertical = true;
+        }
+        this._targetDir = val;
+        this.updateData();
+    }
+    get targetDir() {
+        return this._targetDir;
+    }
+    // 自身方向
+    set dir(val) {
+        if (!EDITOR) {
+            return;
+        }
+        switch (val) {
+            case WidgetDirection.LEFT:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT:
+            case WidgetDirection.RIGHT_EXTEND: {
+                switch (this._targetDir) {
+                    case WidgetDirection.TOP:
+                    case WidgetDirection.BOTTOM:
+                        {
+                            this._targetDir = WidgetDirection.LEFT;
+                        }
+                        break;
+                }
+                this._isVertical = false;
+                break;
+            }
+            case WidgetDirection.TOP:
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.BOTTOM_EXTEND: {
+                switch (this._targetDir) {
+                    case WidgetDirection.LEFT:
+                    case WidgetDirection.RIGHT:
+                        {
+                            this._targetDir = WidgetDirection.TOP;
+                        }
+                        break;
+                }
+                this._isVertical = true;
+                break;
+            }
+        }
+        this._dir = val;
+        this.updateData();
+    }
+    get dir() {
+        return this._dir;
+    }
+    onEnable() {
+        if (!EDITOR) {
+            return;
+        }
+        this.registerEvt();
+        this.updateData();
+    }
+    onDisable() {
+        if (!EDITOR) {
+            return;
+        }
+        this.unregisterEvt();
+    }
+    onLoad() {
+        this._trans = this.node.getComponent(UITransform);
+        if (EDITOR) {
+            return;
+        }
+        this.registerEvt();
+    }
+    onDestroy() {
+        if (EDITOR) {
+            return;
+        }
+        this.unregisterEvt();
+        this._trans = null;
+        this._target = null;
+        this._changePos = null;
+    }
+    registerEvt() {
+        if (!this._target) {
+            return;
+        }
+        if (EDITOR) {
+            this._target.node.on(NodeEventType.ANCHOR_CHANGED, this.updateData, this);
+            this.node.on(NodeEventType.TRANSFORM_CHANGED, this.updateData, this);
+            this.node.on(NodeEventType.SIZE_CHANGED, this.updateData, this);
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetChange, this);
+        this._target.node.on(NodeEventType.TRANSFORM_CHANGED, this.onTargetChange, this);
+        this._target.node.on(NodeEventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onTargetChange, this);
+    }
+    unregisterEvt() {
+        if (!this._target) {
+            return;
+        }
+        if (!this._target.isValid) {
+            return;
+        }
+        if (EDITOR) {
+            this._target.node.off(NodeEventType.ANCHOR_CHANGED, this.updateData, this);
+            this.node.off(NodeEventType.TRANSFORM_CHANGED, this.updateData, this);
+            this.node.off(NodeEventType.SIZE_CHANGED, this.updateData, this);
+        }
+        this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetChange, this);
+        this._target.node.off(NodeEventType.TRANSFORM_CHANGED, this.onTargetChange, this);
+        this._target.node.off(NodeEventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onTargetChange, this);
+    }
+    updateData() {
+        if (this._target == null) {
+            return;
+        }
+        switch (this._dir) {
+            case WidgetDirection.TOP:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.LEFT:
+            case WidgetDirection.RIGHT:
+                this.updateDistance();
+                break;
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM_EXTEND:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT_EXTEND:
+                this.updateTargetPos();
+                break;
+        }
+    }
+    onTargetChange() {
+        if (this._target == null) {
+            return;
+        }
+        switch (this._dir) {
+            case WidgetDirection.TOP:
+            case WidgetDirection.BOTTOM:
+            case WidgetDirection.LEFT:
+            case WidgetDirection.RIGHT:
+                this.updatePos();
+                break;
+            case WidgetDirection.TOP_EXTEND:
+            case WidgetDirection.BOTTOM_EXTEND:
+            case WidgetDirection.LEFT_EXTEND:
+            case WidgetDirection.RIGHT_EXTEND:
+                this.updateSize();
+                break;
+        }
+    }
+    updateSize() {
+        if (this._isVertical) {
+            const posChange = this._targetOldPos.y - this._target.node.position.y;
+            let sizeChange = this._target.height - this._targetOldSize;
+            const anchorY = this._trans.anchorY;
+            this._changePos.set(this._selfOldPos);
+            if (this._target.getComponent(Label) && !this._target.node.active) {
+                sizeChange = this._targetOldSize;
+            }
+            const realChange = posChange + sizeChange;
+            this._trans.height = this._selfOldSize + realChange;
+            if (this._dir == WidgetDirection.TOP_EXTEND) {
+                this.node.setPosition(this._changePos);
+            }
+            else if (this._dir == WidgetDirection.BOTTOM_EXTEND) {
+                this._changePos.y -= (realChange * (1 - anchorY));
+                this.node.setPosition(v3(this._changePos));
+            }
+        }
+    }
+    updatePos() {
+        const selfTrans = this._trans;
+        const targetTrans = this._target;
+        const targetPos = this.getPos(targetTrans, this._targetDir);
+        let pos = targetPos - this._distance;
+        this._changePos.set(this.node.worldPosition);
+        if (this._isVertical) {
+            switch (this._dir) {
+                case WidgetDirection.TOP: {
+                    const height = selfTrans.height;
+                    const anchorY = selfTrans.anchorY;
+                    pos -= height * (1 - anchorY);
+                    break;
+                }
+                case WidgetDirection.BOTTOM: {
+                    const height = selfTrans.height;
+                    const anchorY = selfTrans.anchorY;
+                    pos += height * anchorY;
+                    break;
+                }
+            }
+            this._changePos.y = pos;
+        }
+        else {
+            this._changePos.x = pos;
+            // todo
+        }
+        this.node.worldPosition = this._changePos;
+    }
+    updateTargetPos() {
+        if (EDITOR) {
+            if (this._changePos == null) {
+                console.error('编辑器数据错乱, 请重新添加本组件');
+                this._changePos = v3();
+            }
+        }
+        this.target.node.getPosition(this._targetOldPos);
+        this.node.getPosition(this._selfOldPos);
+        if (this._isVertical) {
+            this._selfOldSize = this._trans.height;
+            this._targetOldSize = this._target.height;
+        }
+        else {
+            this._selfOldSize = this._trans.width;
+            this._targetOldSize = this._target.height;
+        }
+    }
+    updateDistance() {
+        if (!EDITOR) {
+            return;
+        }
+        if (this._target == null) {
+            return;
+        }
+        const selfTrans = this.node.getComponent(UITransform);
+        const targetTrans = this._target;
+        const selfPos = this.getPos(selfTrans, this._dir);
+        const targetPos = this.getPos(targetTrans, this._targetDir);
+        this._distance = targetPos - selfPos;
+    }
+    getPos(trans, dir) {
+        if (this._isVertical) {
+            let y = trans.node.worldPosition.y;
+            const height = trans.height;
+            const anchorY = trans.anchorY;
+            switch (dir) {
+                case WidgetDirection.TOP:
+                case WidgetDirection.TOP_EXTEND:
+                    if (!trans.node.active) {
+                        y = y - height - this.visibleOffset;
+                    }
+                    return y + height * (1 - anchorY);
+                case WidgetDirection.BOTTOM:
+                case WidgetDirection.BOTTOM_EXTEND:
+                    if (!trans.node.active) {
+                        y = y + height + this.visibleOffset;
+                    }
+                    return y - height * anchorY;
+            }
+        }
+        else {
+            const x = trans.node.worldPosition.x;
+            const width = trans.width;
+            const anchorX = trans.anchorX;
+            switch (dir) {
+                case WidgetDirection.LEFT:
+                    return x - width * anchorX;
+                case WidgetDirection.RIGHT:
+                    return x + width * (1 - anchorX);
+            }
+        }
+    }
+};
+__decorate$1([
+    property$1({ type: UITransform })
+], CTWidget.prototype, "target", null);
+__decorate$1([
+    property$1({ type: UITransform })
+], CTWidget.prototype, "_target", void 0);
+__decorate$1([
+    property$1({ type: Enum(WidgetBase) })
+], CTWidget.prototype, "targetDir", null);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetDir", void 0);
+__decorate$1([
+    property$1({ type: Enum(WidgetDirection) })
+], CTWidget.prototype, "dir", null);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_dir", void 0);
+__decorate$1([
+    property$1({ type: CCFloat })
+], CTWidget.prototype, "visibleOffset", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_isVertical", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_distance", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_changePos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetOldPos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_targetOldSize", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_selfOldPos", void 0);
+__decorate$1([
+    property$1
+], CTWidget.prototype, "_selfOldSize", void 0);
+CTWidget = __decorate$1([
+    ccclass$1('CTWidget'),
+    menu$1('moye/CTWidget'),
+    executeInEditMode
+], CTWidget);
+
+const RoundBoxAssembler = {
+    // 根据圆角segments参数，构造网格的顶点索引列表
+    GetIndexBuffer(sprite) {
+        const indexBuffer = [
+            0, 1, 2, 2, 3, 0,
+            4, 5, 6, 6, 7, 4,
+            8, 9, 10, 10, 11, 8
+        ];
+        // 为四个角的扇形push进索引值
+        let index = 12;
+        const fanIndexBuild = function (center, start, end) {
+            let last = start;
+            for (let i = 0; i < sprite.segments - 1; i++) {
+                // 左上角 p2为扇形圆心，p1/p5为两个边界
+                const cur = index;
+                index++;
+                indexBuffer.push(center, last, cur);
+                last = cur;
+            }
+            indexBuffer.push(center, last, end);
+        };
+        if (sprite.leftBottom)
+            fanIndexBuild(3, 4, 0);
+        if (sprite.leftTop)
+            fanIndexBuild(2, 1, 5);
+        if (sprite.rightTop)
+            fanIndexBuild(9, 6, 10);
+        if (sprite.rightBottom)
+            fanIndexBuild(8, 11, 7);
+        return indexBuffer;
+    },
+    createData(sprite) {
+        const renderData = sprite.requestRenderData();
+        let corner = 0;
+        corner += sprite.leftBottom ? 1 : 0;
+        corner += sprite.leftTop ? 1 : 0;
+        corner += sprite.rightTop ? 1 : 0;
+        corner += sprite.rightBottom ? 1 : 0;
+        const vNum = 12 + (sprite.segments - 1) * corner;
+        renderData.dataLength = vNum;
+        renderData.resize(vNum, 18 + sprite.segments * 3 * corner);
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        renderData.chunk.setIndexBuffer(indexBuffer);
+        return renderData;
+    },
+    // 照抄simple的
+    updateRenderData(sprite) {
+        const frame = sprite.spriteFrame;
+        dynamicAtlasManager.packToDynamicAtlas(sprite, frame);
+        this.updateUVs(sprite); // dirty need
+        //this.updateColor(sprite);// dirty need
+        const renderData = sprite.renderData;
+        if (renderData && frame) {
+            if (renderData.vertDirty) {
+                this.updateVertexData(sprite);
+            }
+            renderData.updateRenderData(sprite, frame);
+        }
+    },
+    // 局部坐标转世界坐标 照抄的，不用改
+    updateWorldVerts(sprite, chunk) {
+        const renderData = sprite.renderData;
+        const vData = chunk.vb;
+        const dataList = renderData.data;
+        const node = sprite.node;
+        const m = node.worldMatrix;
+        const stride = renderData.floatStride;
+        let offset = 0;
+        const length = dataList.length;
+        for (let i = 0; i < length; i++) {
+            const curData = dataList[i];
+            const x = curData.x;
+            const y = curData.y;
+            let rhw = m.m03 * x + m.m07 * y + m.m15;
+            rhw = rhw ? 1 / rhw : 1;
+            offset = i * stride;
+            vData[offset + 0] = (m.m00 * x + m.m04 * y + m.m12) * rhw;
+            vData[offset + 1] = (m.m01 * x + m.m05 * y + m.m13) * rhw;
+            vData[offset + 2] = (m.m02 * x + m.m06 * y + m.m14) * rhw;
+        }
+    },
+    // 每帧调用的，把数据和到一整个meshbuffer里
+    fillBuffers(sprite) {
+        if (sprite === null) {
+            return;
+        }
+        const renderData = sprite.renderData;
+        const chunk = renderData.chunk;
+        if (sprite.node.hasChangedFlags || renderData.vertDirty) {
+            // const vb = chunk.vertexAccessor.getVertexBuffer(chunk.bufferId);
+            this.updateWorldVerts(sprite, chunk);
+            renderData.vertDirty = false;
+        }
+        // quick version
+        chunk.bufferId;
+        const vidOrigin = chunk.vertexOffset;
+        const meshBuffer = chunk.meshBuffer;
+        const ib = chunk.meshBuffer.iData;
+        let indexOffset = meshBuffer.indexOffset;
+        const vid = vidOrigin;
+        // 沿着当前这个位置往后将我们这个对象的index放进去
+        const indexBuffer = RoundBoxAssembler.GetIndexBuffer(sprite);
+        for (let i = 0; i < renderData.indexCount; i++) {
+            ib[indexOffset++] = vid + indexBuffer[i];
+        }
+        meshBuffer.indexOffset += renderData.indexCount;
+    },
+    // 计算每个顶点相对于sprite坐标的位置
+    updateVertexData(sprite) {
+        const renderData = sprite.renderData;
+        if (!renderData) {
+            return;
+        }
+        const uiTrans = sprite.node._uiProps.uiTransformComp;
+        const dataList = renderData.data;
+        const cw = uiTrans.width;
+        const ch = uiTrans.height;
+        const appX = uiTrans.anchorX * cw;
+        const appY = uiTrans.anchorY * ch;
+        const left = 0 - appX;
+        const right = cw - appX;
+        const top = ch - appY;
+        const bottom = 0 - appY;
+        const left_r = left + sprite.radius;
+        const bottom_r = bottom + sprite.radius;
+        const top_r = top - sprite.radius;
+        const right_r = right - sprite.radius;
+        // 三个矩形的顶点
+        dataList[0].x = left;
+        dataList[0].y = sprite.leftBottom ? bottom_r : bottom;
+        dataList[1].x = left;
+        dataList[1].y = sprite.leftTop ? top_r : top;
+        dataList[2].x = left_r;
+        dataList[2].y = sprite.leftTop ? top_r : top;
+        dataList[3].x = left_r;
+        dataList[3].y = sprite.leftBottom ? bottom_r : bottom;
+        dataList[4].x = left_r;
+        dataList[4].y = bottom;
+        dataList[5].x = left_r;
+        dataList[5].y = top;
+        dataList[6].x = right_r;
+        dataList[6].y = top;
+        dataList[7].x = right_r;
+        dataList[7].y = bottom;
+        dataList[8].x = right_r;
+        dataList[8].y = sprite.rightBottom ? bottom_r : bottom;
+        dataList[9].x = right_r;
+        dataList[9].y = sprite.rightTop ? top_r : top;
+        dataList[10].x = right;
+        dataList[10].y = sprite.rightTop ? top_r : top;
+        dataList[11].x = right;
+        dataList[11].y = sprite.rightBottom ? bottom_r : bottom;
+        // 扇形圆角的顶点
+        let index = 12;
+        const fanPosBuild = function (center, startAngle) {
+            for (let i = 1; i < sprite.segments; i++) {
+                // 我这里顶点都是按顺时针分配的，所以角度要从开始角度减
+                // 每个扇形都是90度
+                const angle = startAngle * Math.PI / 180 - i / sprite.segments * 0.5 * Math.PI;
+                dataList[index].x = center.x + Math.cos(angle) * sprite.radius;
+                dataList[index].y = center.y + Math.sin(angle) * sprite.radius;
+                index++;
+            }
+        };
+        if (sprite.leftBottom)
+            fanPosBuild(dataList[3], 270);
+        if (sprite.leftTop)
+            fanPosBuild(dataList[2], 180);
+        if (sprite.rightTop)
+            fanPosBuild(dataList[9], 90);
+        if (sprite.rightBottom)
+            fanPosBuild(dataList[8], 0);
+        renderData.vertDirty = true;
+    },
+    // 更新计算uv
+    updateUVs(sprite) {
+        if (!sprite.spriteFrame)
+            return;
+        const renderData = sprite.renderData;
+        const vData = renderData.chunk.vb;
+        const uv = sprite.spriteFrame.uv;
+        // 这里我打印了一下uv的值，第一个看上去是左上角，但其实，opengl端的纹理存在上下颠倒问题，所以这里其实还是左下角
+        // 左下，右下，左上，右上
+        const uv_l = uv[0];
+        const uv_b = uv[1];
+        const uv_r = uv[2];
+        const uv_t = uv[5];
+        const uv_w = Math.abs(uv_r - uv_l);
+        const uv_h = uv_t - uv_b;
+        const uiTrans = sprite.node._uiProps.uiTransformComp;
+        const dataList = renderData.data;
+        const cw = uiTrans.width;
+        const ch = uiTrans.height;
+        const appX = uiTrans.anchorX * cw;
+        const appY = uiTrans.anchorY * ch;
+        // 用相对坐标，计算uv
+        for (let i = 0; i < renderData.dataLength; i++) {
+            vData[i * renderData.floatStride + 3] = uv_l + (dataList[i].x + appX) / cw * uv_w;
+            vData[i * renderData.floatStride + 4] = uv_b + (dataList[i].y + appY) / ch * uv_h;
+        }
+    },
+    // 照抄，不用改
+    updateColor(sprite) {
+        const renderData = sprite.renderData;
+        const vData = renderData.chunk.vb;
+        let colorOffset = 5;
+        const color = sprite.color;
+        const colorR = color.r / 255;
+        const colorG = color.g / 255;
+        const colorB = color.b / 255;
+        const colorA = color.a / 255;
+        for (let i = 0; i < renderData.dataLength; i++, colorOffset += renderData.floatStride) {
+            vData[colorOffset] = colorR;
+            vData[colorOffset + 1] = colorG;
+            vData[colorOffset + 2] = colorB;
+            vData[colorOffset + 3] = colorA;
+        }
+    },
+};
+
+var __decorate = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass, property, type, menu } = _decorator;
+var EventType;
+(function (EventType) {
+    EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
+})(EventType || (EventType = {}));
+let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
+    constructor() {
+        super(...arguments);
+        // 尺寸模式，可以看枚举原本定义的地方有注释说明
+        this._sizeMode = Sprite.SizeMode.TRIMMED;
+        // 图集
+        this._atlas = null;
+        // 圆角用三角形模拟扇形的线段数量，越大，则越圆滑
+        this._segments = 10;
+        // 圆角半径
+        this._radius = 20;
+        this._spriteFrame = null;
+        this._leftTop = true;
+        this._rightTop = true;
+        this._leftBottom = true;
+        this._rightBottom = true;
+    }
+    get sizeMode() {
+        return this._sizeMode;
+    }
+    set sizeMode(value) {
+        if (this._sizeMode === value) {
+            return;
+        }
+        this._sizeMode = value;
+        if (value !== Sprite.SizeMode.CUSTOM) {
+            this._applySpriteSize();
+        }
+    }
+    get spriteAtlas() {
+        return this._atlas;
+    }
+    set spriteAtlas(value) {
+        if (this._atlas === value) {
+            return;
+        }
+        this._atlas = value;
+    }
+    get segments() {
+        return this._segments;
+    }
+    set segments(segments) {
+        this._segments = segments;
+        this._renderData = null;
+        this._flushAssembler();
+    }
+    get radius() {
+        return this._radius;
+    }
+    set radius(radius) {
+        this._radius = radius;
+        this._updateUVs();
+        this.markForUpdateRenderData(true);
+    }
+    get spriteFrame() {
+        return this._spriteFrame;
+    }
+    set spriteFrame(value) {
+        if (this._spriteFrame === value) {
+            return;
+        }
+        const lastSprite = this._spriteFrame;
+        this._spriteFrame = value;
+        this.markForUpdateRenderData();
+        this._applySpriteFrame(lastSprite);
+        if (EDITOR) {
+            this.node.emit(EventType.SPRITE_FRAME_CHANGED, this);
+        }
+    }
+    get leftTop() {
+        return this._leftTop;
+    }
+    set leftTop(value) {
+        this._leftTop = value;
+        this.resetAssembler();
+    }
+    get rightTop() {
+        return this._rightTop;
+    }
+    set rightTop(value) {
+        this._rightTop = value;
+        this.resetAssembler();
+    }
+    get leftBottom() {
+        return this._leftBottom;
+    }
+    set leftBottom(value) {
+        this._leftBottom = value;
+        this.resetAssembler();
+    }
+    get rightBottom() {
+        return this._rightBottom;
+    }
+    set rightBottom(value) {
+        this._rightBottom = value;
+        this.resetAssembler();
+    }
+    onLoad() {
+        this._flushAssembler();
+    }
+    __preload() {
+        this.changeMaterialForDefine();
+        super.__preload();
+        if (EDITOR) {
+            this._resized();
+            this.node.on(NodeEventType.SIZE_CHANGED, this._resized, this);
+        }
+    }
+    onEnable() {
+        super.onEnable();
+        // Force update uv, material define, active material, etc
+        this._activateMaterial();
+        const spriteFrame = this._spriteFrame;
+        if (spriteFrame) {
+            this._updateUVs();
+        }
+    }
+    onDestroy() {
+        if (EDITOR) {
+            this.node.off(NodeEventType.SIZE_CHANGED, this._resized, this);
+        }
+        super.onDestroy();
+    }
+    /**
+     * @en
+     * Quickly switch to other sprite frame in the sprite atlas.
+     * If there is no atlas, the switch fails.
+     *
+     * @zh
+     * 选取使用精灵图集中的其他精灵。
+     * @param name @en Name of the spriteFrame to switch. @zh 要切换的 spriteFrame 名字。
+     */
+    changeSpriteFrameFromAtlas(name) {
+        if (!this._atlas) {
+            console.warn('SpriteAtlas is null.');
+            return;
+        }
+        const sprite = this._atlas.getSpriteFrame(name);
+        this.spriteFrame = sprite;
+    }
+    /**
+     * @deprecated Since v3.7.0, this is an engine private interface that will be removed in the future.
+     */
+    changeMaterialForDefine() {
+        let texture;
+        const lastInstanceMaterialType = this._instanceMaterialType;
+        if (this._spriteFrame) {
+            texture = this._spriteFrame.texture;
+        }
+        let value = false;
+        if (texture instanceof cclegacy.TextureBase) {
+            const format = texture.getPixelFormat();
+            value = (format === cclegacy.TextureBase.PixelFormat.RGBA_ETC1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_4BPPV1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_2BPPV1);
+        }
+        if (value) {
+            this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED;
+        }
+        else {
+            this._instanceMaterialType = InstanceMaterialType.ADD_COLOR_AND_TEXTURE;
+        }
+        if (lastInstanceMaterialType !== this._instanceMaterialType) {
+            // this.updateMaterial();
+            // d.ts里没有注上这个函数，直接调用会表红。
+            this["updateMaterial"]();
+        }
+    }
+    _updateBuiltinMaterial() {
+        let mat = super._updateBuiltinMaterial();
+        if (this.spriteFrame && this.spriteFrame.texture instanceof RenderTexture) {
+            const defines = { SAMPLE_FROM_RT: true, ...mat.passes[0].defines };
+            const renderMat = new Material();
+            renderMat.initialize({
+                effectAsset: mat.effectAsset,
+                defines,
+            });
+            mat = renderMat;
+        }
+        return mat;
+    }
+    _render(render) {
+        render.commitComp(this, this.renderData, this._spriteFrame, this._assembler, null);
+    }
+    _canRender() {
+        if (!super._canRender()) {
+            return false;
+        }
+        const spriteFrame = this._spriteFrame;
+        if (!spriteFrame || !spriteFrame.texture) {
+            return false;
+        }
+        return true;
+    }
+    resetAssembler() {
+        this._assembler = null;
+        this._flushAssembler();
+    }
+    _flushAssembler() {
+        const assembler = RoundBoxAssembler;
+        if (this._assembler !== assembler) {
+            this.destroyRenderData();
+            this._assembler = assembler;
+        }
+        if (!this._renderData) {
+            if (this._assembler && this._assembler.createData) {
+                this._renderData = this._assembler.createData(this);
+                this._renderData.material = this.getRenderMaterial(0);
+                this.markForUpdateRenderData();
+                if (this.spriteFrame) {
+                    this._assembler.updateRenderData(this);
+                }
+                this._updateColor();
+            }
+        }
+    }
+    _applySpriteSize() {
+        if (this._spriteFrame) {
+            if (BUILD || !this._spriteFrame) {
+                if (Sprite.SizeMode.RAW === this._sizeMode) {
+                    const size = this._spriteFrame.originalSize;
+                    this.node._uiProps.uiTransformComp.setContentSize(size);
+                }
+                else if (Sprite.SizeMode.TRIMMED === this._sizeMode) {
+                    const rect = this._spriteFrame.rect;
+                    this.node._uiProps.uiTransformComp.setContentSize(rect.width, rect.height);
+                }
+            }
+            this.markForUpdateRenderData(true);
+            this._assembler.updateRenderData(this);
+        }
+    }
+    _resized() {
+        if (!EDITOR) {
+            return;
+        }
+        if (this._spriteFrame) {
+            const actualSize = this.node._uiProps.uiTransformComp.contentSize;
+            let expectedW = actualSize.width;
+            let expectedH = actualSize.height;
+            if (this._sizeMode === Sprite.SizeMode.RAW) {
+                const size = this._spriteFrame.originalSize;
+                expectedW = size.width;
+                expectedH = size.height;
+            }
+            else if (this._sizeMode === Sprite.SizeMode.TRIMMED) {
+                const rect = this._spriteFrame.rect;
+                expectedW = rect.width;
+                expectedH = rect.height;
+            }
+            if (expectedW !== actualSize.width || expectedH !== actualSize.height) {
+                this._sizeMode = Sprite.SizeMode.CUSTOM;
+            }
+        }
+    }
+    _activateMaterial() {
+        const spriteFrame = this._spriteFrame;
+        const material = this.getRenderMaterial(0);
+        if (spriteFrame) {
+            if (material) {
+                this.markForUpdateRenderData();
+            }
+        }
+        if (this.renderData) {
+            this.renderData.material = material;
+        }
+    }
+    _updateUVs() {
+        if (this._assembler) {
+            this._assembler.updateUVs(this);
+        }
+    }
+    _applySpriteFrame(oldFrame) {
+        const spriteFrame = this._spriteFrame;
+        let textureChanged = false;
+        if (spriteFrame) {
+            if (!oldFrame || oldFrame.texture !== spriteFrame.texture) {
+                textureChanged = true;
+            }
+            if (textureChanged) {
+                if (this.renderData)
+                    this.renderData.textureDirty = true;
+                this.changeMaterialForDefine();
+            }
+            this._applySpriteSize();
+        }
+    }
+};
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_sizeMode", void 0);
+__decorate([
+    type(Sprite.SizeMode)
+], RoundBoxSprite.prototype, "sizeMode", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_atlas", void 0);
+__decorate([
+    type(SpriteAtlas)
+], RoundBoxSprite.prototype, "spriteAtlas", null);
+__decorate([
+    property({ type: CCInteger, serializable: true })
+], RoundBoxSprite.prototype, "_segments", void 0);
+__decorate([
+    property({ type: CCInteger, serializable: true, min: 1 })
+], RoundBoxSprite.prototype, "segments", null);
+__decorate([
+    property({ type: CCFloat, serializable: true })
+], RoundBoxSprite.prototype, "_radius", void 0);
+__decorate([
+    property({ type: CCFloat, serializable: true, min: 0 })
+], RoundBoxSprite.prototype, "radius", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_spriteFrame", void 0);
+__decorate([
+    type(SpriteFrame)
+], RoundBoxSprite.prototype, "spriteFrame", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_leftTop", void 0);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "leftTop", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_rightTop", void 0);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "rightTop", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_leftBottom", void 0);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "leftBottom", null);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "_rightBottom", void 0);
+__decorate([
+    property({ serializable: true })
+], RoundBoxSprite.prototype, "rightBottom", null);
+RoundBoxSprite = __decorate([
+    ccclass('RoundBoxSprite'),
+    menu('moye/RoundBoxSprite')
+], RoundBoxSprite);
+
+export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, ObjectPool, Options, Program, RecycleObj, RoundBoxSprite, Scene, SceneType, Singleton, SizeFollow, TimeInfo, TimerMgr, error, log, safeCall, warn };

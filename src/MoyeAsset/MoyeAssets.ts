@@ -9,18 +9,19 @@ import { CoroutineLock } from "../Core/CoroutineLock/CoroutineLock";
 import { AssetLockType } from "./AssetLockType";
 import { Task } from "../Core/Task/Task";
 import { coreError, coreLog } from "../Core/Logger/CoreLogHelper";
+import { MoyeAssetTag } from "./LogTag";
 
-export class MAssets extends Singleton {
+export class MoyeAssets extends Singleton {
     static assetSystem: AssetSystem;
     private static readonly _bundleMap: Map<string, BundleAsset> = new Map();
     private static readonly _bundlePathMap: Map<string, string> = new Map();
 
     awake() {
-        MAssets.assetSystem = new AssetSystem;
+        MoyeAssets.assetSystem = new AssetSystem;
     }
 
     update(): void {
-        MAssets.assetSystem.update();
+        MoyeAssets.assetSystem.update();
     }
 
     static async loadAssetAsync<T extends Asset>(assetType: new () => T, location: string): Promise<AssetOperationHandle> {
@@ -29,7 +30,7 @@ export class MAssets extends Singleton {
             assetInfo.init(assetType, location);
     
             const bundleName = assetInfo.bundleName;
-            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            let bundleAsset = MoyeAssets._bundleMap.get(bundleName);
     
             if (!bundleAsset) {
                 bundleAsset = await this.loadBundleAsync(bundleName);
@@ -39,7 +40,7 @@ export class MAssets extends Singleton {
 
             return assetOperationHandle as unknown as AssetOperationHandle;
         }catch(e){
-            coreError(e);
+            coreError(MoyeAssetTag, e);
         }
     }
 
@@ -47,7 +48,7 @@ export class MAssets extends Singleton {
         const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_LOAD, bundleName);
 
         try {
-            let bundleAsset = MAssets._bundleMap.get(bundleName);
+            let bundleAsset = MoyeAssets._bundleMap.get(bundleName);
 
             if (bundleAsset) {
                 return bundleAsset;
@@ -70,13 +71,13 @@ export class MAssets extends Singleton {
 
             const bundlePath = this._bundlePathMap.get(bundleName);
 
-            coreLog(`加载bundle: ${bundlePath}`);
+            coreLog(MoyeAssetTag, '加载bundle: {0}', bundlePath);
 
             assetManager.loadBundle(bundlePath, (err, bundle) => {
                 if (err) {
-                    coreLog(`加载Bundle错误, bundle=${bundleName}, error=${err}`);
+                    coreLog(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
                 } else {
-                    coreLog(`加载Bundle完成, bundle=${bundleName}`);
+                    coreLog(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
                 }
 
                 task.setResult(bundle);
@@ -86,9 +87,9 @@ export class MAssets extends Singleton {
             bundleAsset = new BundleAsset;
             bundleAsset.bundle = bundle;
             bundleAsset.bundleName = bundleName;
-            bundleAsset.assetSystem = MAssets.assetSystem;
+            bundleAsset.assetSystem = MoyeAssets.assetSystem;
 
-            MAssets._bundleMap.set(bundleName, bundleAsset);
+            MoyeAssets._bundleMap.set(bundleName, bundleAsset);
             return bundleAsset;
         } finally {
             lock.dispose();
@@ -97,14 +98,14 @@ export class MAssets extends Singleton {
 
     static releaseBundle(bundleAsset: BundleAsset) {
         if (bundleAsset.refCount != 0) {
-            coreError(`释放的bundle:${bundleAsset.bundleName}引用计数不为0`);
+            coreError(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
             return;
         }
 
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
 
-        coreLog(`卸载bundle:${bundleAsset.bundleName}`);
+        coreLog('卸载bundle:{0}', bundleAsset.bundleName);
     }
 
     static unloadUnusedAssets() {
@@ -119,7 +120,7 @@ export class MAssets extends Singleton {
                 continue;
             }
 
-            MAssets.releaseBundle(bundleAsset);
+            MoyeAssets.releaseBundle(bundleAsset);
         }
     }
 }
