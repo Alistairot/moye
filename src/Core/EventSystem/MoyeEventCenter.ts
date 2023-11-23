@@ -52,7 +52,7 @@ export class MoyeEventCenter{
 
         for (let i = 0; i < list.length; i++) {
             const eventInfo = list[i];
-            const handler = eventInfo.eventHandler as AEventHandler<any, T>;
+            const handler = eventInfo.eventHandler as AEventHandler<T>;
 
             handler.handle(null, event);
         }

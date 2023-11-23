@@ -1,3 +1,6 @@
+export * from "./Entity/Entity";
+export * from "./Entity/Scene";
+export * from "./Entity/SceneType";
 export * from "./ObjectPool/ObjectPool";
 export * from "./ObjectPool/RecycleObj";
 export * from "./Logger/Logger"; 
@@ -6,7 +9,7 @@ export * from "./IdGenerator/IdStruct";
 export * from "./IdGenerator/InstanceIdStruct";
 export * from "./Program/Program";
 export * from "./Singleton/Game";
-export * from "./Singleton/EntityCenter";
+export * from "./Entity/EntityCenter";
 export * from "./Singleton/Singleton";
 export * from "./EventSystem/AEventHandler";
 export * from "./EventSystem/AEvent";

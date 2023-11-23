@@ -1,6 +1,6 @@
 export interface ILifeCycle{
     get isDisposed(): boolean;
-    instanceId?: number
+    instanceId?: bigint
     _inst: any
     awake?(): void
     update?(): void

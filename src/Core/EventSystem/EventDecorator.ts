@@ -7,18 +7,18 @@ export const EventDecoratorType = "EventDecoratorType";
 
 /**
  * 事件装饰器
- * @param eventCls 
+ * @param event 
  * @param sceneType 
  * @returns 
  */
-export function EventDecorator(eventCls: Type<AEvent>, sceneType: string) {
-    return function (target: () => any) {
+export function EventDecorator(event: Type<AEvent>, sceneType: string) {
+    return function (target: Type) {
         if (DEVELOP) {
             if (sceneType == null) {
                 console.error(`EventDecorator必须要传 sceneType`);
             }
         }
 
-        DecoratorCollector.inst.add(EventDecoratorType, eventCls, target, sceneType);
+        DecoratorCollector.inst.add(EventDecoratorType, event, target, sceneType);
     };
 }

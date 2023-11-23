@@ -3,11 +3,11 @@
 核心模块,不要剔除
 
 [name=Relation]
-[export=true]
+[export=false]
 仿写fairygui的relation模块
 
 [name=RoundBoxSprite]
-[export=true]
+[export=false]
 圆角矩形
 from:
 https://gitee.com/ruanwujing/cocoscreator-roundbox

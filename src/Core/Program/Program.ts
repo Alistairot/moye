@@ -9,7 +9,9 @@ import { AfterProgramInit, AfterProgramStart, BeforeProgramInit, BeforeProgramSt
 import { MoyeRuntime } from "./MoyeRuntime";
 import { ObjectPool } from "../ObjectPool/ObjectPool";
 import { IdGenerator } from "../IdGenerator/IdGenerator";
-import { EntityCenter } from "../Singleton/EntityCenter";
+import { EntityCenter } from "../Entity/EntityCenter";
+import { EntityLifiCycleMgr } from "../Entity/EntityLifiCycleMgr";
+import { Root } from "../Entity/Root";
 
 export class Program {
     static init(rootNode: Node) {
@@ -22,6 +24,8 @@ export class Program {
         Game.addSingleton(TimeInfo);
         Game.addSingleton(IdGenerator);
         Game.addSingleton(EntityCenter);
+        Game.addSingleton(EntityLifiCycleMgr);
+        Game.addSingleton(Root);
 
         // add client runtime
         rootNode.addComponent(MoyeRuntime);

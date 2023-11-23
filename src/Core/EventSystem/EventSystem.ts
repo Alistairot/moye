@@ -22,7 +22,7 @@ export class EventSystem extends Singleton {
                 continue;
             }
 
-            tasks.push((eventInfo.eventHandler as AEventHandler<any, T>).handleAsync(scene, eventType));
+            tasks.push((eventInfo.eventHandler as AEventHandler<T>).handleAsync(scene, eventType));
         }
 
         await Promise.all(tasks);
@@ -52,7 +52,7 @@ export class EventSystem extends Singleton {
                 continue;
             }
 
-            (eventInfo.eventHandler as AEventHandler<any, T>).handle(scene, eventType);
+            (eventInfo.eventHandler as AEventHandler<T>).handle(scene, eventType);
         }
 
         eventType.dispose();
