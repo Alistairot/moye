@@ -4,3 +4,6 @@
 [submodule "example"]
 	path = example
 	url = https://github.com/Alistairot/moye-example.git
+[submodule "server"]
+	path = server
+	url = https://github.com/Alistairot/moye-server.git
