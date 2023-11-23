@@ -96,9 +96,12 @@ export declare enum SceneType {
 export declare abstract class Singleton {
 	private static _inst;
 	private _isDisposed;
-	static getInst<T extends Singleton>(this: new () => T): T;
+	static get<T extends Singleton>(this: new () => T): T;
 	get isDisposed(): boolean;
 	dispose(): void;
+	protected awake?(): void;
+	protected update?(): void;
+	protected lateUpdate?(): void;
 	protected destroy?(): void;
 	private _onPreDestroy;
 }
@@ -355,6 +358,16 @@ export declare class BeforeProgramStart extends AEvent {
  */
 export declare class AfterProgramStart extends AEvent {
 }
+/**
+ * 创建ClientScene后
+ */
+export declare class AfterCreateClientScene extends AEvent {
+}
+/**
+ * 创建CurrentScene后
+ */
+export declare class AfterCreateCurrentScene extends AEvent {
+}
 export declare const EventDecoratorType = "EventDecoratorType";
 /**
  * 事件装饰器
@@ -379,7 +392,7 @@ export declare class TimeInfo extends Singleton {
 	 * server time - client time
 	 */
 	serverMinusClientTime: number;
-	awake(): void;
+	protected awake(): void;
 	clientNow(): number;
 	serverNow(): number;
 }
@@ -526,6 +539,16 @@ export declare class CoroutineLock extends Singleton {
 	private _lockMap;
 	wait(lockType: string, key: string): Promise<CoroutineLockItem>;
 	runNextLock(lock: CoroutineLockItem): void;
+}
+export declare class SceneFactory {
+	static createClientScene(): Scene;
+	static createCurrentScene(id: bigint, name: string): Scene;
+}
+/**
+ * manage client scene
+ */
+export declare class SceneRefCom extends Entity {
+	scene: Scene;
 }
 export interface IAssetOperationHandle {
 }

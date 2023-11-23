@@ -14,6 +14,8 @@ import { EntityLifiCycleMgr } from "../Entity/EntityLifiCycleMgr";
 import { Root } from "../Entity/Root";
 import { TimerMgr } from "../Timer/TimerMgr";
 import { CoroutineLock } from "../CoroutineLock/CoroutineLock";
+import { SceneRefCom } from "../Scene/SceneRefCom";
+import { SceneFactory } from "../Scene/SceneFactory";
 
 export class Program {
     static init(rootNode: Node) {
@@ -44,7 +46,10 @@ export class Program {
         // when loaded new scripts, need reload event
         MoyeEventCenter.inst.reloadEvent();
         MoyeEventCenter.inst.publish(new BeforeProgramStart());
-
         MoyeEventCenter.inst.publish(new AfterProgramStart());
+
+        // create client scene
+        Root.get().scene.addCom(SceneRefCom);
+        SceneFactory.createClientScene();
     }
 }

@@ -24,3 +24,5 @@ export * from "./Decorator/DecoratorCollector";
 export * from "./Timer/CancellationToken";
 export * from "./Timer/TimerMgr";
 export * from "./CoroutineLock/CoroutineLock";
+export * from "./Scene/SceneFactory";
+export * from "./Scene/SceneRefCom";

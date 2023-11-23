@@ -16,7 +16,7 @@ export class Timer {
     tcs: Task;
 
     static create() {
-        const timer = ObjectPool.getInst().fetch(Timer);
+        const timer = ObjectPool.get().fetch(Timer);
         timer.reset();
         timer.id = Timer.getId();
 
@@ -38,6 +38,6 @@ export class Timer {
 
     dispose() {
         this.reset();
-        ObjectPool.getInst().recycle(this);
+        ObjectPool.get().recycle(this);
     }
 }

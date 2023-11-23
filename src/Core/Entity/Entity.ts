@@ -65,7 +65,7 @@ export abstract class Entity {
         this._domain = value;
 
         if (preDomain == null) {
-            this.instanceId = IdGenerator.getInst().generateInstanceId();
+            this.instanceId = IdGenerator.get().generateInstanceId();
             this.isRegister = true;
         }
 
@@ -95,11 +95,11 @@ export abstract class Entity {
     }
 
     get children(): Map<bigint, Entity> {
-        return this._children ??= ObjectPool.getInst().fetch(Map<bigint, Entity>);
+        return this._children ??= ObjectPool.get().fetch(Map<bigint, Entity>);
     }
 
     get components(): Map<Type<Entity>, Entity> {
-        return this._components ??= ObjectPool.getInst().fetch(Map<Type<Entity>, Entity>);
+        return this._components ??= ObjectPool.get().fetch(Map<Type<Entity>, Entity>);
     }
 
     protected _domain: Entity;
@@ -171,12 +171,12 @@ export abstract class Entity {
         }
 
         if (!value) {
-            EntityCenter.getInst().remove(this.instanceId);
+            EntityCenter.get().remove(this.instanceId);
         }
         else {
             const self = this as unknown as IEntity;
-            EntityCenter.getInst().add(self);
-            EntityLifiCycleMgr.getInst().registerSystem(self);
+            EntityCenter.get().add(self);
+            EntityLifiCycleMgr.get().registerSystem(self);
         }
     }
 
@@ -257,7 +257,7 @@ export abstract class Entity {
         com.componentParent = this;
 
         if (com.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(com as unknown as IEntity);
+            EntityLifiCycleMgr.get().awakeComEvent(com as unknown as IEntity);
         }
 
         return com as T;
@@ -280,7 +280,7 @@ export abstract class Entity {
         entity.parent = this;
 
         if (entity.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(entity as unknown as IEntity);
+            EntityLifiCycleMgr.get().awakeComEvent(entity as unknown as IEntity);
         }
 
         return entity as T;
@@ -293,11 +293,11 @@ export abstract class Entity {
 
     private addChildByType<T extends Entity>(type: Type<T>, isFromPool: boolean = false): T {
         const entity = this.create(type, isFromPool);
-        entity.id = IdGenerator.getInst().generateId();
+        entity.id = IdGenerator.get().generateId();
         entity.parent = this;
 
         if (entity.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(entity as unknown as IEntity);
+            EntityLifiCycleMgr.get().awakeComEvent(entity as unknown as IEntity);
         }
 
         return entity as T;
@@ -307,7 +307,7 @@ export abstract class Entity {
         let inst: Entity;
 
         if (isFromPool) {
-            inst = ObjectPool.getInst().fetch(type);
+            inst = ObjectPool.get().fetch(type);
         }
         else {
             inst = new type();
@@ -329,7 +329,7 @@ export abstract class Entity {
         this._children.delete(entity.id);
 
         if (this._children.size == 0) {
-            ObjectPool.getInst().recycle(this._children);
+            ObjectPool.get().recycle(this._children);
             this._children = null;
         }
     }
@@ -342,7 +342,7 @@ export abstract class Entity {
         this._components.delete(component.constructor as Type);
 
         if (this._components.size == 0) {
-            ObjectPool.getInst().recycle(this._components);
+            ObjectPool.get().recycle(this._components);
             this._components = null;
         }
     }
@@ -434,7 +434,7 @@ export abstract class Entity {
             }
 
             this._children.clear();
-            ObjectPool.getInst().recycle(this._children);
+            ObjectPool.get().recycle(this._children);
             this._children = null;
         }
 
@@ -445,13 +445,13 @@ export abstract class Entity {
             }
 
             this._components.clear();
-            ObjectPool.getInst().recycle(this._components);
+            ObjectPool.get().recycle(this._components);
             this._components = null;
         }
 
         // 触发Destroy事件
         if (this.destroy) {
-            EntityLifiCycleMgr.getInst().destroyComEvent(this as unknown as IEntity);
+            EntityLifiCycleMgr.get().destroyComEvent(this as unknown as IEntity);
         }
 
         this._domain = null;
@@ -468,7 +468,7 @@ export abstract class Entity {
         this._parent = null;
 
         if (this.isFromPool) {
-            ObjectPool.getInst().recycle(this);
+            ObjectPool.get().recycle(this);
         }
 
         this._status = EntityStatus.NONE;

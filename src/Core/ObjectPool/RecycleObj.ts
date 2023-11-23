@@ -14,7 +14,7 @@ export abstract class RecycleObj {
      * @returns 
      */
     static create<T extends RecycleObj>(this: Type<T>, values?: Partial<T>): T {
-        const event = ObjectPool.getInst().fetch(this);
+        const event = ObjectPool.get().fetch(this);
 
         if (values) {
             Object.assign(event, values);
@@ -31,7 +31,7 @@ export abstract class RecycleObj {
      */
     dispose() {
         if (this._isRecycle) {
-            ObjectPool.getInst().recycle(this);
+            ObjectPool.get().recycle(this);
         }
     }
 }

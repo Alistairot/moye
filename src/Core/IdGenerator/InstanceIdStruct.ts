@@ -85,7 +85,7 @@ export class InstanceIdStruct {
     }
 
     private static timeSinceEpoch(): number {
-        const a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
+        const a = (TimeInfo.get().clientNow() - epoch) / 1000;
         return Math.floor(a);
     }
 

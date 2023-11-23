@@ -28,7 +28,7 @@ export class BundleAsset {
     }
 
     private async createProvider(assetInfo: AssetInfo): Promise<BundleAssetProvider> {
-        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_ASSET_LOAD, assetInfo.uuid);
+        const lock = await CoroutineLock.get().wait(AssetLockType.BUNDLE_ASSET_LOAD, assetInfo.uuid);
         try {
             let provider = this._providerMap.get(assetInfo.uuid);
 

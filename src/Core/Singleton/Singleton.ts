@@ -5,7 +5,7 @@ export abstract class Singleton {
     private static _inst: any;
     private _isDisposed: boolean = false;
 
-    static getInst<T extends Singleton>(this: new () => T): T {
+    static get<T extends Singleton>(this: new () => T): T {
         const self = this as typeof Singleton & (new () => T);
 
         if (self._inst == null) {
@@ -23,6 +23,9 @@ export abstract class Singleton {
         this._onPreDestroy();
     }
 
+    protected awake?(): void;
+    protected update?(): void;
+    protected lateUpdate?(): void;
     protected destroy?(): void;
 
     private _onPreDestroy(): void {

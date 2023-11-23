@@ -20,7 +20,7 @@ export class Root extends Singleton {
             id: 0n,
             sceneType: SceneType.PROCESS,
             name: "Process",
-            instanceId: IdGenerator.getInst().generateInstanceId(),
+            instanceId: IdGenerator.get().generateInstanceId(),
         });
 
         this._scene = scene;

@@ -52,7 +52,7 @@ export class Logger extends Singleton {
     }
 
     private checkLogLevel(level: number): boolean {
-        return Options.getInst().logLevel <= level;
+        return Options.get().logLevel <= level;
     }
 
     /**
@@ -95,7 +95,7 @@ export class Logger extends Singleton {
  * @param args 
  */
 export function log(str: string, ...args: any[]) {
-    Logger.getInst().log(str, ...args);
+    Logger.get().log(str, ...args);
 }
 
 /**
@@ -108,7 +108,7 @@ export function log(str: string, ...args: any[]) {
  * @param args 
  */
 export function warn(str: string, ...args: any[]) {
-    Logger.getInst().warn(str, ...args);
+    Logger.get().warn(str, ...args);
 }
 
 /**
@@ -121,5 +121,5 @@ export function warn(str: string, ...args: any[]) {
  * @param args 
  */
 export function error(str: string, ...args: any[]) {
-    Logger.getInst().error(str, ...args);
+    Logger.get().error(str, ...args);
 }

@@ -6,7 +6,7 @@ export class TimeInfo extends Singleton {
      */
     serverMinusClientTime: number;
 
-    awake() {
+    protected awake() {
         this.serverMinusClientTime = 0;
     }
 

@@ -35,7 +35,7 @@ export class EntityLifiCycleMgr extends Singleton {
 
     update(): void {
         const queue = this._queues[InstanceQueueIndex.UPDATE];
-        const entityCenter = EntityCenter.getInst();
+        const entityCenter = EntityCenter.get();
 
         for (let i = queue.length - 1; i >= 0; i--) {
             const instanceId = queue[i];
@@ -57,7 +57,7 @@ export class EntityLifiCycleMgr extends Singleton {
 
     lateUpdate(): void {
         const queue = this._queues[InstanceQueueIndex.LATE_UPDATE];
-        const entityCenter = EntityCenter.getInst();
+        const entityCenter = EntityCenter.get();
 
         for (let i = queue.length - 1; i >= 0; i--) {
             const instanceId = queue[i];

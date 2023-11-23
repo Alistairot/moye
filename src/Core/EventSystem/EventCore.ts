@@ -52,3 +52,15 @@ export class BeforeProgramStart extends AEvent {
  */
 export class AfterProgramStart extends AEvent {
 }
+
+/**
+ * 创建ClientScene后
+ */
+export class AfterCreateClientScene extends AEvent {
+}
+
+/**
+ * 创建CurrentScene后
+ */
+export class AfterCreateCurrentScene extends AEvent {
+}

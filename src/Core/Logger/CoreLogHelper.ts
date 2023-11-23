@@ -14,7 +14,7 @@ export function coreLog(tag: string, str: string, ...args: any[]) {
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.getInst() as unknown as ICoreLog;
+        const inst = Logger.get() as unknown as ICoreLog;
         inst.coreLog(output);
     }catch(e){
         console.log(output);
@@ -30,7 +30,7 @@ export function coreWarn(tag: string, str: string, ...args: any[]) {
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.getInst() as unknown as ICoreLog;
+        const inst = Logger.get() as unknown as ICoreLog;
         inst.coreWarn(output);
     }catch(e){
         console.warn(output);
@@ -42,7 +42,7 @@ export function coreError(tag: string, str: string, ...args: any[]) {
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.getInst() as unknown as ICoreLog;
+        const inst = Logger.get() as unknown as ICoreLog;
         inst.coreError(output);
     }catch(e){
         console.error(output);

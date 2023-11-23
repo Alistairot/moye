@@ -20,7 +20,7 @@ export class CoroutineLockItem {
         this.task = Task.create();
 
         // 开发阶段进行检查 60s还没解锁一般都是bug了
-        if(Options.getInst().develop){
+        if(Options.get().develop){
             this.setTimeout(60 * 1000, 'CoroutineLock timeout');
         }
     }
@@ -34,7 +34,7 @@ export class CoroutineLockItem {
     private setTimeout(timeout: number, info: string) {
         this.deleteTimeout();
 
-        this._timerId = TimerMgr.getInst().newOnceTimer(timeout, this.timeout.bind(this));
+        this._timerId = TimerMgr.get().newOnceTimer(timeout, this.timeout.bind(this));
         this._timeoutInfo = info;
     }
 
@@ -43,7 +43,7 @@ export class CoroutineLockItem {
             return;
         }
 
-        TimerMgr.getInst().remove(this._timerId);
+        TimerMgr.get().remove(this._timerId);
         this._timerId = null;
     }
 
@@ -59,7 +59,7 @@ export class CoroutineLockItem {
 
         this.deleteTimeout();
 
-        CoroutineLock.getInst().runNextLock(this);
+        CoroutineLock.get().runNextLock(this);
 
         this.key = null;
         this.task = null;
@@ -79,7 +79,7 @@ export class CoroutineLock extends Singleton {
             this._lockMap.set(newKey, lockSet);
         }
 
-        const lock = ObjectPool.getInst().fetch(CoroutineLockItem);
+        const lock = ObjectPool.get().fetch(CoroutineLockItem);
 
         lock.init(newKey);
 
@@ -98,7 +98,7 @@ export class CoroutineLock extends Singleton {
         const lockSet = this._lockMap.get(lock.key);
 
         lockSet.delete(lock);
-        ObjectPool.getInst().recycle(lock);
+        ObjectPool.get().recycle(lock);
 
         for (const nextLock of Array.from(lockSet.values())) {
             nextLock.task.setResult();

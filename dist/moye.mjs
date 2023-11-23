@@ -8,7 +8,7 @@ class Singleton {
     constructor() {
         this._isDisposed = false;
     }
-    static getInst() {
+    static get() {
         const self = this;
         if (self._inst == null) {
             throw new Error(`Singleton is not initialized or destroyed, name is ${self.name}`);
@@ -185,7 +185,7 @@ class Logger extends Singleton {
         this._iLog.error(formatStr);
     }
     checkLogLevel(level) {
-        return Options.getInst().logLevel <= level;
+        return Options.get().logLevel <= level;
     }
     /**
      * 不受logLevel影响的log
@@ -226,7 +226,7 @@ Logger.WARN_LEVEL = 2;
  * @param args
  */
 function log(str, ...args) {
-    Logger.getInst().log(str, ...args);
+    Logger.get().log(str, ...args);
 }
 /**
  * ```
@@ -238,7 +238,7 @@ function log(str, ...args) {
  * @param args
  */
 function warn(str, ...args) {
-    Logger.getInst().warn(str, ...args);
+    Logger.get().warn(str, ...args);
 }
 /**
  * ```
@@ -250,7 +250,7 @@ function warn(str, ...args) {
  * @param args
  */
 function error(str, ...args) {
-    Logger.getInst().error(str, ...args);
+    Logger.get().error(str, ...args);
 }
 
 // 框架内部用这个log 区分外部的log 不进行导出
@@ -258,7 +258,7 @@ function coreLog(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.getInst();
+        const inst = Logger.get();
         inst.coreLog(output);
     }
     catch (e) {
@@ -269,7 +269,7 @@ function coreWarn(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.getInst();
+        const inst = Logger.get();
         inst.coreWarn(output);
     }
     catch (e) {
@@ -280,7 +280,7 @@ function coreError(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.getInst();
+        const inst = Logger.get();
         inst.coreError(output);
     }
     catch (e) {
@@ -355,7 +355,7 @@ class IdStruct {
         return IdStruct.inst.initById(id);
     }
     static timeSinceEpoch() {
-        const a = (TimeInfo.getInst().clientNow() - epoch$1) / 1000;
+        const a = (TimeInfo.get().clientNow() - epoch$1) / 1000;
         return Math.floor(a);
     }
     /**
@@ -447,7 +447,7 @@ class InstanceIdStruct {
         return InstanceIdStruct.inst.initById(id);
     }
     static timeSinceEpoch() {
-        const a = (TimeInfo.getInst().clientNow() - epoch) / 1000;
+        const a = (TimeInfo.get().clientNow() - epoch) / 1000;
         return Math.floor(a);
     }
     /**
@@ -571,7 +571,7 @@ class EntityLifiCycleMgr extends Singleton {
     }
     update() {
         const queue = this._queues[InstanceQueueIndex.UPDATE];
-        const entityCenter = EntityCenter.getInst();
+        const entityCenter = EntityCenter.get();
         for (let i = queue.length - 1; i >= 0; i--) {
             const instanceId = queue[i];
             const entity = entityCenter.get(instanceId);
@@ -588,7 +588,7 @@ class EntityLifiCycleMgr extends Singleton {
     }
     lateUpdate() {
         const queue = this._queues[InstanceQueueIndex.LATE_UPDATE];
-        const entityCenter = EntityCenter.getInst();
+        const entityCenter = EntityCenter.get();
         for (let i = queue.length - 1; i >= 0; i--) {
             const instanceId = queue[i];
             const entity = entityCenter.get(instanceId);
@@ -657,7 +657,7 @@ class Entity {
         const preDomain = this._domain;
         this._domain = value;
         if (preDomain == null) {
-            this.instanceId = IdGenerator.getInst().generateInstanceId();
+            this.instanceId = IdGenerator.get().generateInstanceId();
             this.isRegister = true;
         }
         // 递归设置孩子的Domain
@@ -679,10 +679,10 @@ class Entity {
         return this.instanceId == 0n;
     }
     get children() {
-        return this._children ?? (this._children = ObjectPool.getInst().fetch((Map)));
+        return this._children ?? (this._children = ObjectPool.get().fetch((Map)));
     }
     get components() {
-        return this._components ?? (this._components = ObjectPool.getInst().fetch((Map)));
+        return this._components ?? (this._components = ObjectPool.get().fetch((Map)));
     }
     get isFromPool() {
         return (this._status & EntityStatus.IS_FROM_POOL) == EntityStatus.IS_FROM_POOL;
@@ -742,12 +742,12 @@ class Entity {
             this._status &= ~EntityStatus.IS_REGISTER;
         }
         if (!value) {
-            EntityCenter.getInst().remove(this.instanceId);
+            EntityCenter.get().remove(this.instanceId);
         }
         else {
             const self = this;
-            EntityCenter.getInst().add(self);
-            EntityLifiCycleMgr.getInst().registerSystem(self);
+            EntityCenter.get().add(self);
+            EntityLifiCycleMgr.get().registerSystem(self);
         }
     }
     set componentParent(value) {
@@ -810,7 +810,7 @@ class Entity {
         com.id = this.id;
         com.componentParent = this;
         if (com.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(com);
+            EntityLifiCycleMgr.get().awakeComEvent(com);
         }
         return com;
     }
@@ -827,7 +827,7 @@ class Entity {
         entity.id = id;
         entity.parent = this;
         if (entity.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(entity);
+            EntityLifiCycleMgr.get().awakeComEvent(entity);
         }
         return entity;
     }
@@ -837,17 +837,17 @@ class Entity {
     }
     addChildByType(type, isFromPool = false) {
         const entity = this.create(type, isFromPool);
-        entity.id = IdGenerator.getInst().generateId();
+        entity.id = IdGenerator.get().generateId();
         entity.parent = this;
         if (entity.awake) {
-            EntityLifiCycleMgr.getInst().awakeComEvent(entity);
+            EntityLifiCycleMgr.get().awakeComEvent(entity);
         }
         return entity;
     }
     create(type, isFromPool) {
         let inst;
         if (isFromPool) {
-            inst = ObjectPool.getInst().fetch(type);
+            inst = ObjectPool.get().fetch(type);
         }
         else {
             inst = new type();
@@ -864,7 +864,7 @@ class Entity {
         }
         this._children.delete(entity.id);
         if (this._children.size == 0) {
-            ObjectPool.getInst().recycle(this._children);
+            ObjectPool.get().recycle(this._children);
             this._children = null;
         }
     }
@@ -874,7 +874,7 @@ class Entity {
         }
         this._components.delete(component.constructor);
         if (this._components.size == 0) {
-            ObjectPool.getInst().recycle(this._components);
+            ObjectPool.get().recycle(this._components);
             this._components = null;
         }
     }
@@ -944,7 +944,7 @@ class Entity {
                 entity.dispose();
             }
             this._children.clear();
-            ObjectPool.getInst().recycle(this._children);
+            ObjectPool.get().recycle(this._children);
             this._children = null;
         }
         // 清理Component
@@ -953,12 +953,12 @@ class Entity {
                 entity.dispose();
             }
             this._components.clear();
-            ObjectPool.getInst().recycle(this._components);
+            ObjectPool.get().recycle(this._components);
             this._components = null;
         }
         // 触发Destroy事件
         if (this.destroy) {
-            EntityLifiCycleMgr.getInst().destroyComEvent(this);
+            EntityLifiCycleMgr.get().destroyComEvent(this);
         }
         this._domain = null;
         if (this._parent != null && !this._parent.isDisposed) {
@@ -971,7 +971,7 @@ class Entity {
         }
         this._parent = null;
         if (this.isFromPool) {
-            ObjectPool.getInst().recycle(this);
+            ObjectPool.get().recycle(this);
         }
         this._status = EntityStatus.NONE;
     }
@@ -1033,7 +1033,7 @@ class RecycleObj {
      * @returns
      */
     static create(values) {
-        const event = ObjectPool.getInst().fetch(this);
+        const event = ObjectPool.get().fetch(this);
         if (values) {
             Object.assign(event, values);
         }
@@ -1046,7 +1046,7 @@ class RecycleObj {
      */
     dispose() {
         if (this._isRecycle) {
-            ObjectPool.getInst().recycle(this);
+            ObjectPool.get().recycle(this);
         }
     }
 }
@@ -1099,6 +1099,16 @@ class BeforeProgramStart extends AEvent {
  * NOTE: scene is null
  */
 class AfterProgramStart extends AEvent {
+}
+/**
+ * 创建ClientScene后
+ */
+class AfterCreateClientScene extends AEvent {
+}
+/**
+ * 创建CurrentScene后
+ */
+class AfterCreateCurrentScene extends AEvent {
 }
 
 class DecoratorCollector {
@@ -1386,7 +1396,7 @@ class Root extends Singleton {
             id: 0n,
             sceneType: SceneType.PROCESS,
             name: "Process",
-            instanceId: IdGenerator.getInst().generateInstanceId(),
+            instanceId: IdGenerator.get().generateInstanceId(),
         });
         this._scene = scene;
     }
@@ -1394,13 +1404,13 @@ class Root extends Singleton {
 
 class TimeHelper {
     static clientNow() {
-        return TimeInfo.getInst().clientNow();
+        return TimeInfo.get().clientNow();
     }
     static clientNowSeconds() {
         return Math.floor(TimeHelper.clientNow() / 1000);
     }
     static serverNow() {
-        return TimeInfo.getInst().serverNow();
+        return TimeInfo.get().serverNow();
     }
 }
 TimeHelper.OneDay = 86400000;
@@ -1414,7 +1424,7 @@ var TimerType;
 })(TimerType || (TimerType = {}));
 class Timer {
     static create() {
-        const timer = ObjectPool.getInst().fetch(Timer);
+        const timer = ObjectPool.get().fetch(Timer);
         timer.reset();
         timer.id = Timer.getId();
         return timer;
@@ -1431,7 +1441,7 @@ class Timer {
     }
     dispose() {
         this.reset();
-        ObjectPool.getInst().recycle(this);
+        ObjectPool.get().recycle(this);
     }
 }
 Timer._idGenerator = 1000;
@@ -1567,7 +1577,7 @@ class CoroutineLockItem {
         this.key = key;
         this.task = Task.create();
         // 开发阶段进行检查 60s还没解锁一般都是bug了
-        if (Options.getInst().develop) {
+        if (Options.get().develop) {
             this.setTimeout(60 * 1000, 'CoroutineLock timeout');
         }
     }
@@ -1579,14 +1589,14 @@ class CoroutineLockItem {
      */
     setTimeout(timeout, info) {
         this.deleteTimeout();
-        this._timerId = TimerMgr.getInst().newOnceTimer(timeout, this.timeout.bind(this));
+        this._timerId = TimerMgr.get().newOnceTimer(timeout, this.timeout.bind(this));
         this._timeoutInfo = info;
     }
     deleteTimeout() {
         if (this._timerId == null) {
             return;
         }
-        TimerMgr.getInst().remove(this._timerId);
+        TimerMgr.get().remove(this._timerId);
         this._timerId = null;
     }
     async timeout() {
@@ -1598,7 +1608,7 @@ class CoroutineLockItem {
             return;
         }
         this.deleteTimeout();
-        CoroutineLock.getInst().runNextLock(this);
+        CoroutineLock.get().runNextLock(this);
         this.key = null;
         this.task = null;
     }
@@ -1615,7 +1625,7 @@ class CoroutineLock extends Singleton {
             lockSet = new Set;
             this._lockMap.set(newKey, lockSet);
         }
-        const lock = ObjectPool.getInst().fetch(CoroutineLockItem);
+        const lock = ObjectPool.get().fetch(CoroutineLockItem);
         lock.init(newKey);
         lockSet.add(lock);
         if (lockSet.size > 1) {
@@ -1629,11 +1639,53 @@ class CoroutineLock extends Singleton {
     runNextLock(lock) {
         const lockSet = this._lockMap.get(lock.key);
         lockSet.delete(lock);
-        ObjectPool.getInst().recycle(lock);
+        ObjectPool.get().recycle(lock);
         for (const nextLock of Array.from(lockSet.values())) {
             nextLock.task.setResult();
             break;
         }
+    }
+}
+
+/**
+ * manage client scene
+ */
+class SceneRefCom extends Entity {
+}
+
+class SceneFactory {
+    static createClientScene() {
+        const parent = Root.get().scene.getCom(SceneRefCom);
+        parent.scene?.dispose();
+        const scene = new Scene();
+        scene.init({
+            id: 1n,
+            sceneType: SceneType.CLIENT,
+            name: "Game",
+            instanceId: IdGenerator.get().generateInstanceId(),
+            parent: parent
+        });
+        scene.addCom(SceneRefCom);
+        parent.scene = scene;
+        EventSystem.get().publish(scene, AfterCreateClientScene.create());
+        return scene;
+    }
+    static createCurrentScene(id, name) {
+        const clientSceneRef = Root.get().scene.getCom(SceneRefCom);
+        const clientScene = clientSceneRef.scene;
+        const parent = clientScene.getCom(SceneRefCom);
+        parent.scene?.dispose();
+        const scene = new Scene();
+        scene.init({
+            id: id,
+            sceneType: SceneType.CURRENT,
+            name: name,
+            instanceId: IdGenerator.get().generateInstanceId(),
+            parent: parent
+        });
+        parent.scene = scene;
+        EventSystem.get().publish(scene, AfterCreateCurrentScene.create());
+        return scene;
     }
 }
 
@@ -1663,6 +1715,9 @@ class Program {
         MoyeEventCenter.inst.reloadEvent();
         MoyeEventCenter.inst.publish(new BeforeProgramStart());
         MoyeEventCenter.inst.publish(new AfterProgramStart());
+        // create client scene
+        Root.get().scene.addCom(SceneRefCom);
+        SceneFactory.createClientScene();
     }
 }
 
@@ -1924,7 +1979,7 @@ class BundleAsset {
         return handle;
     }
     async createProvider(assetInfo) {
-        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_ASSET_LOAD, assetInfo.uuid);
+        const lock = await CoroutineLock.get().wait(AssetLockType.BUNDLE_ASSET_LOAD, assetInfo.uuid);
         try {
             let provider = this._providerMap.get(assetInfo.uuid);
             if (provider) {
@@ -1979,7 +2034,7 @@ class MoyeAssets extends Singleton {
         }
     }
     static async loadBundleAsync(bundleName) {
-        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_LOAD, bundleName);
+        const lock = await CoroutineLock.get().wait(AssetLockType.BUNDLE_LOAD, bundleName);
         try {
             let bundleAsset = MoyeAssets._bundleMap.get(bundleName);
             if (bundleAsset) {
@@ -3142,4 +3197,4 @@ RoundBoxSprite = __decorate([
     menu('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
-export { AEvent, AEventHandler, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, ObjectPool, Options, Program, RecycleObj, RoundBoxSprite, Scene, SceneType, Singleton, SizeFollow, TimeInfo, TimerMgr, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, ObjectPool, Options, Program, RecycleObj, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, SizeFollow, TimeInfo, TimerMgr, error, log, safeCall, warn };

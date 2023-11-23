@@ -45,7 +45,7 @@ export class MoyeAssets extends Singleton {
     }
 
     static async loadBundleAsync(bundleName: string): Promise<BundleAsset> {
-        const lock = await CoroutineLock.getInst().wait(AssetLockType.BUNDLE_LOAD, bundleName);
+        const lock = await CoroutineLock.get().wait(AssetLockType.BUNDLE_LOAD, bundleName);
 
         try {
             let bundleAsset = MoyeAssets._bundleMap.get(bundleName);

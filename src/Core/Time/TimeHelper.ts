@@ -6,7 +6,7 @@ export class TimeHelper {
     static readonly Minute: number = 60000;
 
     static clientNow(): number {
-        return TimeInfo.getInst().clientNow();
+        return TimeInfo.get().clientNow();
     }
 
     static clientNowSeconds(): number {
@@ -14,6 +14,6 @@ export class TimeHelper {
     }
 
     static serverNow(): number {
-        return TimeInfo.getInst().serverNow();
+        return TimeInfo.get().serverNow();
     }
 }
