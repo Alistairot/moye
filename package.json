@@ -1,5 +1,5 @@
 {
-  "name": "moye",
+  "name": "moye-client",
   "version": "1.0.0",
   "description": "game framework of cocos creator & nodejs",
   "main": "dist/moye.mjs",
