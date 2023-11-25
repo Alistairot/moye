@@ -105,6 +105,28 @@ export declare abstract class Singleton {
 	protected destroy?(): void;
 	private _onPreDestroy;
 }
+/**
+ * 保存根节点
+ */
+export declare class Root extends Singleton {
+	get scene(): Scene;
+	private _scene;
+	awake(): void;
+}
+export interface IEntity {
+	instanceId: bigint;
+	isDisposed: boolean;
+	awake(): void;
+	update(): void;
+	lateUpdate(): void;
+	destroy(): void;
+}
+export declare class EntityCenter extends Singleton {
+	private _allEntities;
+	add(entity: IEntity): void;
+	remove(instanceId: bigint): void;
+	get(instanceId: bigint): IEntity;
+}
 export declare class ObjectPool extends Singleton {
 	private _pool;
 	fetch<T>(type: Type<T>): T;
@@ -284,20 +306,6 @@ export declare class Game {
 	static frameFinishUpdate(): void;
 	static dispose(): void;
 }
-export interface IEntity {
-	instanceId: bigint;
-	isDisposed: boolean;
-	awake(): void;
-	update(): void;
-	lateUpdate(): void;
-	destroy(): void;
-}
-export declare class EntityCenter extends Singleton {
-	private _allEntities;
-	add(entity: IEntity): void;
-	remove(instanceId: bigint): void;
-	get(instanceId: bigint): IEntity;
-}
 export interface IScene {
 	sceneType: string;
 }
@@ -393,8 +401,20 @@ export declare class TimeInfo extends Singleton {
 	 */
 	serverMinusClientTime: number;
 	protected awake(): void;
+	/**
+	 * Returns the number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
+	 * @returns
+	 */
 	clientNow(): number;
 	serverNow(): number;
+}
+export declare class TimeHelper {
+	static readonly oneDay: number;
+	static readonly oneHour: number;
+	static readonly oneMinute: number;
+	static clientNow(): number;
+	static clientNowSeconds(): number;
+	static serverNow(): number;
 }
 export declare class Options extends Singleton {
 	/**
@@ -501,7 +521,7 @@ export declare class TimerMgr extends Singleton {
 	 */
 	waitAsync(time: number, cancellationToken?: CancellationToken): Promise<void>;
 }
-declare class Task<T = any> extends Promise<T> {
+export declare class Task<T = any> extends Promise<T> {
 	private _resolve;
 	/**
 	 * 创建一个新的task
@@ -557,7 +577,7 @@ export interface IBundleAssetProvider {
 	releaseHandle(handle: IAssetOperationHandle): any;
 	internalLoad(): any;
 }
-declare class AssetOperationHandle {
+export declare class AssetOperationHandle {
 	provider: IBundleAssetProvider;
 	isDisposed: boolean;
 	getAsset<T extends Asset>(assetType: Type<T>): T;
@@ -612,6 +632,128 @@ export declare class MoyeAssets extends Singleton {
 	static releaseBundle(bundleAsset: BundleAsset): void;
 	static unloadUnusedAssets(): void;
 }
+export declare enum ViewLayer {
+	/**
+	 * 场景UI，如：点击建筑查看建筑信息---一般置于场景之上，界面UI之下
+	 */
+	SCENE = 1,
+	/**
+	 * 背景UI，如：主界面---一般情况下用户不能主动关闭，永远处于其它UI的最底层
+	 */
+	BACKGROUND = 2,
+	/**
+	 * 普通UI，一级、二级、三级等窗口---一般由用户点击打开的多级窗口
+	 */
+	NORMAL = 3,
+	/**
+	 * 信息UI---如：跑马灯、广播等---一般永远置于用户打开窗口顶层
+	 */
+	INFO = 4,
+	/**
+	 * 提示UI，如：错误弹窗，网络连接弹窗等
+	 */
+	TIPS = 5,
+	/**
+	 * 顶层UI，如：场景加载
+	 */
+	TOP = 6
+}
+export declare abstract class AMoyeView extends Entity {
+	viewName: string;
+	layer: ViewLayer;
+	node: Node;
+	private _viewMgr;
+	/**
+	 * on node load, this method will be called
+	 */
+	protected onLoad?(): void;
+	/**
+	 * on view visible, this method will be called
+	 */
+	protected onShow?(): void;
+	/**
+	 * on view invisible, this method will be called
+	 */
+	protected onHide?(): void;
+	/**
+	 * on node destroy, this method will be called
+	 */
+	protected destroy?(): void;
+	/**
+	 * the mothod can't get this.node, if you want get node on node load, use onLoad
+	 */
+	protected awake?(): void;
+	private _realDispose;
+	dispose(): void;
+	bringToFront(): void;
+}
+export interface IMoyeViewConfig {
+	/**
+	 * after view hide, destroy view after expire(ms),
+	 */
+	expire: number;
+	/**
+	 * on view load, this method will be called, should return a node,
+	 * @param viewName
+	 */
+	load(viewName: string): Promise<Node>;
+	/**
+	 * on view destroy, you can do some clean in this method,
+	 */
+	destroy(): void;
+	/**
+	 * before show do animation
+	 * if animation done, you should call task.setResult()
+	 * @param task
+	 */
+	doShowAnimation?(view: AMoyeView, task: Task): void;
+	/**
+	 * before hide do animation
+	 * if animation done, you should call task.setResult()
+	 * @param task
+	 */
+	doHideAnimation?(view: AMoyeView, task: Task): void;
+}
+export declare class MoyeViewMgr extends Entity {
+	static inst: MoyeViewMgr;
+	/**
+	 * all views
+	 */
+	private _views;
+	private _type2Names;
+	private _showingViews;
+	private _hideViews;
+	private _viewCfgs;
+	private _layers;
+	private _globalViewCfgType;
+	private _uiRoot;
+	private _checkTimerId;
+	private _checkInterval;
+	protected awake(): void;
+	protected destroy(): void;
+	/**
+	 * init view manager
+	 * @param uiRoot
+	 * @param globalViewCfg all field need to set
+	 * @returns
+	 */
+	init(uiRoot: Node, globalViewCfg: Type<IMoyeViewConfig>): void | this;
+	show<T extends AMoyeView>(type: Type<T>, bindEntity?: Entity): Promise<T>;
+	show(name: string, bindEntity?: Entity): Promise<AMoyeView>;
+	hide(name: string): Promise<void>;
+	/**
+	 * reload confog
+	 */
+	reload(): void;
+	private check;
+	private getLayerNode;
+	private addToCleanCom;
+	private enterViewShow;
+	private enterViewHide;
+	private enterViewDestroy;
+}
+export declare const ViewDecoratorType = "ViewDecorator";
+export declare function ViewDecorator(name: string, layer: ViewLayer, viewCfg?: Type<IMoyeViewConfig>): (target: Type<AMoyeView>) => void;
 export declare class SizeFollow extends Component {
 	get target(): UITransform;
 	set target(value: UITransform);

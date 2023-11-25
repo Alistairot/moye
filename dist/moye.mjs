@@ -1,4 +1,4 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material } from 'cc';
 import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -37,6 +37,10 @@ class TimeInfo extends Singleton {
     awake() {
         this.serverMinusClientTime = 0;
     }
+    /**
+     * Returns the number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
+     * @returns
+     */
     clientNow() {
         return Date.now();
     }
@@ -1020,6 +1024,25 @@ var SceneType;
 })(SceneType || (SceneType = {}));
 
 /**
+ * 保存根节点
+ */
+class Root extends Singleton {
+    get scene() {
+        return this._scene;
+    }
+    awake() {
+        const scene = new Scene();
+        scene.init({
+            id: 0n,
+            sceneType: SceneType.PROCESS,
+            name: "Process",
+            instanceId: IdGenerator.get().generateInstanceId(),
+        });
+        this._scene = scene;
+    }
+}
+
+/**
  * 可回收对象
  */
 class RecycleObj {
@@ -1383,25 +1406,6 @@ MoyeRuntime = __decorate$4([
     ccclass$3('MoyeRuntime')
 ], MoyeRuntime);
 
-/**
- * 保存根节点
- */
-class Root extends Singleton {
-    get scene() {
-        return this._scene;
-    }
-    awake() {
-        const scene = new Scene();
-        scene.init({
-            id: 0n,
-            sceneType: SceneType.PROCESS,
-            name: "Process",
-            instanceId: IdGenerator.get().generateInstanceId(),
-        });
-        this._scene = scene;
-    }
-}
-
 class TimeHelper {
     static clientNow() {
         return TimeInfo.get().clientNow();
@@ -1413,9 +1417,9 @@ class TimeHelper {
         return TimeInfo.get().serverNow();
     }
 }
-TimeHelper.OneDay = 86400000;
-TimeHelper.Hour = 3600000;
-TimeHelper.Minute = 60000;
+TimeHelper.oneDay = 86400000;
+TimeHelper.oneHour = 3600000;
+TimeHelper.oneMinute = 60000;
 
 var TimerType;
 (function (TimerType) {
@@ -2081,7 +2085,7 @@ class MoyeAssets extends Singleton {
         }
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
-        coreLog('卸载bundle:{0}', bundleAsset.bundleName);
+        coreLog(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
     }
     static unloadUnusedAssets() {
         for (const [name, bundleAsset] of this._bundleMap) {
@@ -2113,6 +2117,284 @@ let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandle
 AfterProgramInitHandler = __decorate$3([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
+
+const ViewDecoratorType = "ViewDecorator";
+function ViewDecorator(name, layer, viewCfg) {
+    return function (target) {
+        DecoratorCollector.inst.add(ViewDecoratorType, target, name, layer, viewCfg);
+    };
+}
+
+var ViewLayer;
+(function (ViewLayer) {
+    /**
+     * 场景UI，如：点击建筑查看建筑信息---一般置于场景之上，界面UI之下
+     */
+    ViewLayer[ViewLayer["SCENE"] = 1] = "SCENE";
+    /**
+     * 背景UI，如：主界面---一般情况下用户不能主动关闭，永远处于其它UI的最底层
+     */
+    ViewLayer[ViewLayer["BACKGROUND"] = 2] = "BACKGROUND";
+    /**
+     * 普通UI，一级、二级、三级等窗口---一般由用户点击打开的多级窗口
+     */
+    ViewLayer[ViewLayer["NORMAL"] = 3] = "NORMAL";
+    /**
+     * 信息UI---如：跑马灯、广播等---一般永远置于用户打开窗口顶层
+     */
+    ViewLayer[ViewLayer["INFO"] = 4] = "INFO";
+    /**
+     * 提示UI，如：错误弹窗，网络连接弹窗等
+     */
+    ViewLayer[ViewLayer["TIPS"] = 5] = "TIPS";
+    /**
+     * 顶层UI，如：场景加载
+     */
+    ViewLayer[ViewLayer["TOP"] = 6] = "TOP";
+})(ViewLayer || (ViewLayer = {}));
+
+class ViewCleanCom extends Entity {
+    constructor() {
+        super(...arguments);
+        this._views = new Set;
+    }
+    init(viewMgr) {
+        this._viewMgr = viewMgr;
+        return this;
+    }
+    add(viewName) {
+        this._views.add(viewName);
+    }
+    remove(viewName) {
+        this._views.delete(viewName);
+    }
+    destroy() {
+        for (const viewName of this._views) {
+            this._viewMgr.hide(viewName);
+        }
+    }
+}
+
+const MoyeViewTag = "MoyeView";
+
+const viewLoadLock = "MoyeViewLoadLock";
+class MoyeViewMgr extends Entity {
+    constructor() {
+        super(...arguments);
+        /**
+         * all views
+         */
+        this._views = new Map();
+        this._type2Names = new Map();
+        this._showingViews = new Set();
+        this._hideViews = new Set();
+        this._viewCfgs = new Map();
+        this._layers = new Map();
+        this._checkInterval = 5 * 1000;
+    }
+    awake() {
+        MoyeViewMgr.inst = this;
+    }
+    destroy() {
+        if (this._checkTimerId != null) {
+            TimerMgr.get().remove(this._checkTimerId);
+            this._checkTimerId = null;
+        }
+        MoyeViewMgr.inst = null;
+    }
+    /**
+     * init view manager
+     * @param uiRoot
+     * @param globalViewCfg all field need to set
+     * @returns
+     */
+    init(uiRoot, globalViewCfg) {
+        if (this._uiRoot != null) {
+            return coreError(MoyeViewTag, 'MoyeViewMgr is already inited');
+        }
+        this._uiRoot = uiRoot;
+        this._globalViewCfgType = globalViewCfg;
+        this.reload();
+        this._checkTimerId = TimerMgr.get().newRepeatedTimer(this._checkInterval, this.check.bind(this));
+        return this;
+    }
+    async show(nameOrType, bindEntity) {
+        let name;
+        if (typeof nameOrType == 'string') {
+            name = nameOrType;
+        }
+        else {
+            name = this._type2Names.get(nameOrType);
+        }
+        if (JsHelper.isNullOrEmpty(name)) {
+            coreError(MoyeViewTag, 'MoyeView name is null or empty, name={0}', name);
+            return;
+        }
+        const lock = await CoroutineLock.get().wait(viewLoadLock, name);
+        try {
+            if (this._uiRoot == null) {
+                throw new Error('MoyeViewMgr is not inited');
+            }
+            if (this._showingViews.has(name)) {
+                const view = this._views.get(name);
+                return view;
+            }
+            if (this._views.has(name)) {
+                const view = this._views.get(name);
+                await this.enterViewShow(view, bindEntity);
+                return view;
+            }
+            const viewCfg = this._viewCfgs.get(name);
+            const node = await viewCfg.load(name);
+            const layerNode = this.getLayerNode(viewCfg.layer);
+            node.parent = layerNode;
+            const view = this.addCom(viewCfg.viewType);
+            view.node = node;
+            view.layer = viewCfg.layer;
+            view.viewName = name;
+            view['onLoad']?.();
+            view['_viewMgr'] = this;
+            this._views.set(name, view);
+            await this.enterViewShow(view, bindEntity);
+            return view;
+        }
+        catch (e) {
+            coreError(MoyeViewTag, 'show view errr, {0}', e);
+        }
+        finally {
+            lock.dispose();
+        }
+    }
+    async hide(name) {
+        const lock = await CoroutineLock.get().wait(viewLoadLock, name);
+        try {
+            if (!this._showingViews.has(name)) {
+                return;
+            }
+            const view = this._views.get(name);
+            await this.enterViewHide(view);
+        }
+        catch (e) {
+            coreError(MoyeViewTag, 'hide view errr, {0}', e);
+        }
+        finally {
+            lock.dispose();
+        }
+    }
+    /**
+     * reload confog
+     */
+    reload() {
+        const list = DecoratorCollector.inst.get(ViewDecoratorType);
+        for (const args of list) {
+            const viewType = args[0];
+            const name = args[1];
+            const layer = args[2];
+            const viewCfgType = args[3];
+            if (this._viewCfgs.has(name)) {
+                continue;
+            }
+            let viewCfg;
+            if (viewCfgType != null) {
+                viewCfg = new viewCfgType();
+            }
+            else {
+                viewCfg = new this._globalViewCfgType;
+            }
+            viewCfg.layer = layer;
+            viewCfg.name = name;
+            viewCfg.viewType = viewType;
+            viewCfg.cleanEntitys = new Set();
+            this._type2Names.set(viewType, name);
+            this._viewCfgs.set(name, viewCfg);
+        }
+    }
+    check() {
+        const nowTime = TimeInfo.get().clientNow();
+        for (const name of this._hideViews) {
+            const cfg = this._viewCfgs.get(name);
+            if (nowTime >= cfg.expireTime) {
+                this.enterViewDestroy(this._views.get(name));
+            }
+        }
+    }
+    getLayerNode(layer) {
+        let layerNode = this._layers.get(layer);
+        if (layerNode == null) {
+            layerNode = new Node();
+            layerNode.name = ViewLayer[layer];
+            layerNode.parent = this._uiRoot;
+            layerNode.setSiblingIndex(layer);
+            this._layers.set(layer, layerNode);
+            const size = this._uiRoot.getComponent(UITransform).contentSize;
+            layerNode.addComponent(UITransform).setContentSize(size);
+        }
+        return layerNode;
+    }
+    addToCleanCom(entity, viewName) {
+        if (entity == null) {
+            return;
+        }
+        let cleanCom = entity.getCom(ViewCleanCom);
+        const viewCfg = this._viewCfgs.get(viewName);
+        if (cleanCom == null) {
+            cleanCom = entity.addCom(ViewCleanCom).init(this);
+        }
+        viewCfg.cleanEntitys.add(cleanCom);
+        cleanCom.add(viewName);
+    }
+    async enterViewShow(view, bindEntity) {
+        view.node.active = true;
+        view.bringToFront();
+        const cfg = this._viewCfgs.get(view.viewName);
+        if (cfg.doShowAnimation != null) {
+            const task = Task.create();
+            cfg.doShowAnimation(view, task);
+            await task;
+        }
+        this._showingViews.add(view.viewName);
+        this._hideViews.delete(view.viewName);
+        this.addToCleanCom(bindEntity, view.viewName);
+        view['onShow']?.();
+    }
+    async enterViewHide(view) {
+        const cfg = this._viewCfgs.get(view.viewName);
+        if (cfg.doHideAnimation != null) {
+            const task = Task.create();
+            cfg.doHideAnimation(view, task);
+            await task;
+        }
+        view['onHide']?.();
+        view.node.active = false;
+        this._hideViews.add(view.viewName);
+        this._showingViews.delete(view.viewName);
+        for (const cleanCom of cfg.cleanEntitys) {
+            cleanCom.remove(view.viewName);
+        }
+        cfg.cleanEntitys.clear();
+        cfg.expireTime = TimeInfo.get().clientNow() + (cfg.expire);
+    }
+    enterViewDestroy(view) {
+        view['_realDispose']();
+        view.node.destroy();
+        this._views.delete(view.viewName);
+        this._hideViews.delete(view.viewName);
+        const cfg = this._viewCfgs.get(view.viewName);
+        cfg.destroy();
+    }
+}
+
+class AMoyeView extends Entity {
+    _realDispose() {
+        super.dispose();
+    }
+    dispose() {
+        this._viewMgr.hide(this.viewName);
+    }
+    bringToFront() {
+        this.node.setSiblingIndex(-1);
+    }
+}
 
 var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -3197,4 +3479,4 @@ RoundBoxSprite = __decorate([
     menu('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
-export { AEvent, AEventHandler, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, ObjectPool, Options, Program, RecycleObj, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, SizeFollow, TimeInfo, TimerMgr, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMoyeView, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, SizeFollow, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, error, log, safeCall, warn };

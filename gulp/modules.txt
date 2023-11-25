@@ -6,6 +6,10 @@
 [export=true]
 资源管理
 
+[name=MoyeView]
+[export=true]
+a simple ui manager
+
 [name=Relation]
 [export=true]
 仿写fairygui的relation模块

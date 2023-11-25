@@ -1,0 +1,15 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "MoyeView",
+
+    "description-explain":"模块描述",
+    "description": "a simple ui manager",
+
+    "entry-explain":"入口文件",
+    "entry": "Index.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+        "Core"
+    ]
+}

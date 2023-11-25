@@ -105,7 +105,7 @@ export class MoyeAssets extends Singleton {
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
 
-        coreLog('卸载bundle:{0}', bundleAsset.bundleName);
+        coreLog(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
     }
 
     static unloadUnusedAssets() {
