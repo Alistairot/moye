@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const moyeModule = require('./moye-module');
 const gulp = require('gulp');
 const rollup = require('rollup');
@@ -17,11 +19,11 @@ gulp.task('updateExportFile', async function () {
     ]);
 
     return;
-})
+});
 
 gulp.task('buildJs', () => {
     return tsProject.src().pipe(tsProject()).pipe(gulp.dest('../build'));
-})
+});
 
 gulp.task("rollup", async function () {
     let config = {
@@ -47,12 +49,12 @@ gulp.task("rollup", async function () {
 });
 
 gulp.task("uglify", async function () {
-    let content = readFileSync('../dist/moye.mjs', 'utf8')
-    let text = content
-    let output = await minify(text, { sourceMap: false })
+    let content = readFileSync('../dist/moye.mjs', 'utf8');
+    let text = content;
+    let output = await minify(text, { sourceMap: false });
 
-    writeFileSync('../dist/moye.min.mjs', output.code, { encoding: 'utf8', flag: 'w' })
-    return
+    writeFileSync('../dist/moye.min.mjs', output.code, { encoding: 'utf8', flag: 'w' });
+    return;
 });
 
 gulp.task('buildDts', function () {
@@ -64,22 +66,22 @@ gulp.task('buildDts', function () {
                     inlineDeclareExternals: true
                 }
             }],
-            {
-                preferredConfigPath: "tsconfig.json",
-                // followSymlinks: true,
-            });
+        {
+            preferredConfigPath: "tsconfig.json",
+            // followSymlinks: true,
+        });
 
         let content = '';
 
         strs.forEach(str => {
-            content += str
-        })
+            content += str;
+        });
 
-        writeFileSync('../dist/moye.d.ts', content, { encoding: 'utf8', flag: 'w' })
+        writeFileSync('../dist/moye.d.ts', content, { encoding: 'utf8', flag: 'w' });
 
         resolve();
     });
-})
+});
 
 gulp.task('build', gulp.series(
     'updateExportFile',
@@ -87,4 +89,4 @@ gulp.task('build', gulp.series(
     'rollup',
     'uglify',
     'buildDts'
-))
+));
