@@ -11,7 +11,7 @@ this repository is Moye Client, support cocos creator version 3.8^
 
 ### install to cocos creator project
 ```bash
-npm i github:Alistairot/moye-client
+npm i moye@Alistairot/moye-client
 ```
 
 ### how to compile src?
