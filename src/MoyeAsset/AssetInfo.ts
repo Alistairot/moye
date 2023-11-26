@@ -31,11 +31,17 @@ export class AssetInfo {
     }
 
     private parseLocation<T extends Asset>(assetType: Type<T>, location: string) {
-        if (assetType.name == SpriteFrame.name) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        if (assetType == SpriteFrame) {
             if (!location.endsWith("spriteFrame")) {
                 location += '/spriteFrame';
             }
-        } else if (assetType.name == Texture2D.name) {
+
+        } 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        else if (assetType == Texture2D) {
             if (!location.endsWith("texture")) {
                 location += '/texture';
             }

@@ -60,6 +60,7 @@ export class MoyeAssets extends Singleton {
                 this._bundlePathMap.set(bundleName, bundleName);
 
                 if (NATIVE) {
+                    // check hot
                     const writePath = native.fileUtils.getWritablePath();
                     const bundlePath = `${writePath}hot/${bundleName}`;
 

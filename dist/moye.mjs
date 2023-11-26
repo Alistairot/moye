@@ -83,6 +83,13 @@ class JsHelper {
         const result = hash % mode;
         return result;
     }
+    static powBigInt(base, exp) {
+        let result = BigInt(1);
+        for (let i = 0; i < exp; i++) {
+            result *= base;
+        }
+        return result;
+    }
     /**
      * 格式化字符串
      * @param str 包含有 0 个或者多个格式符的字符串
@@ -309,9 +316,9 @@ const processBit = 14n;
  * 100w/s
  */
 const valueBit$1 = 20n;
-const powTimeBit$1 = 2n ** timeBit$1 - 1n;
-const powProcessBit = 2n ** processBit - 1n;
-const powValueBit$1 = 2n ** valueBit$1 - 1n;
+const powTimeBit$1 = JsHelper.powBigInt(2n, timeBit$1) - 1n;
+const powProcessBit = JsHelper.powBigInt(2n, processBit) - 1n;
+const powValueBit$1 = JsHelper.powBigInt(2n, valueBit$1) - 1n;
 const epoch$1 = new Date(2023, 4, 1).getTime();
 class IdStruct {
     static get inst() {
@@ -402,8 +409,8 @@ const timeBit = 32n;
  * 每秒可以产生的数量
  */
 const valueBit = 32n;
-const powTimeBit = 2n ** timeBit - 1n;
-const powValueBit = 2n ** valueBit - 1n;
+const powTimeBit = JsHelper.powBigInt(2n, timeBit) - 1n;
+const powValueBit = JsHelper.powBigInt(2n, valueBit) - 1n;
 const epoch = new Date(2023, 4, 1).getTime();
 class InstanceIdStruct {
     static get inst() {
@@ -1832,12 +1839,16 @@ class AssetInfo {
         this.uuid = `${location}.${assetType.name}`;
     }
     parseLocation(assetType, location) {
-        if (assetType.name == SpriteFrame.name) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        if (assetType == SpriteFrame) {
             if (!location.endsWith("spriteFrame")) {
                 location += '/spriteFrame';
             }
         }
-        else if (assetType.name == Texture2D.name) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-expect-error
+        else if (assetType == Texture2D) {
             if (!location.endsWith("texture")) {
                 location += '/texture';
             }
@@ -2048,6 +2059,7 @@ class MoyeAssets extends Singleton {
             if (!this._bundlePathMap.has(bundleName)) {
                 this._bundlePathMap.set(bundleName, bundleName);
                 if (NATIVE) {
+                    // check hot
                     const writePath = native.fileUtils.getWritablePath();
                     const bundlePath = `${writePath}hot/${bundleName}`;
                     if (native.fileUtils.isDirectoryExist(bundlePath)) {

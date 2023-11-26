@@ -44,6 +44,15 @@ export class JsHelper {
         return result;
     }
 
+    static powBigInt(base: bigint, exp: bigint): bigint {
+        let result = BigInt(1);
+        for (let i = 0; i < exp; i++) {
+            result *= base;
+        }
+
+        return result;
+    }
+
     /**
      * 格式化字符串
      * @param str 包含有 0 个或者多个格式符的字符串

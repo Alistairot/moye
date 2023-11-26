@@ -438,6 +438,7 @@ export declare class JsHelper {
 	static isNullOrEmpty(str: string): boolean;
 	static getStringHashCode(str: string): number;
 	static modeString(str: string, mode: number): number;
+	static powBigInt(base: bigint, exp: bigint): bigint;
 	/**
 	 * 格式化字符串
 	 * @param str 包含有 0 个或者多个格式符的字符串

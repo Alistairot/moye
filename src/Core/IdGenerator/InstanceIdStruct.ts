@@ -1,6 +1,7 @@
 import { TimeInfo } from "../Time/TimeInfo";
 import { coreError, coreWarn } from '../Logger/CoreLogHelper';
 import { IdGeneratorTag } from "./LogTag";
+import { JsHelper } from "../JavaScript/JsHelper";
 
 /**
  * 可用时间 s
@@ -12,8 +13,8 @@ const timeBit = 32n;
  */
 const valueBit = 32n;
 
-const powTimeBit = 2n ** timeBit - 1n;
-const powValueBit = 2n ** valueBit - 1n;
+const powTimeBit = JsHelper.powBigInt(2n, timeBit) - 1n;
+const powValueBit = JsHelper.powBigInt(2n, valueBit) - 1n;
 
 const epoch = new Date(2023, 4, 1).getTime();
 
