@@ -6,7 +6,7 @@ import { ViewDecoratorType } from "./ViewDecorator";
 import { ViewLayer } from "./ViewLayer";
 import { ViewCleanCom } from "./ViewCleanCom";
 import { IMoyeViewConfig } from "./IMoyeViewConfig";
-import { coreError } from "../../Core/Logger/CoreLogHelper";
+import { coreError, coreLog } from "../../Core/Logger/CoreLogHelper";
 import { MoyeViewTag } from "./LogTag";
 
 const viewLoadLock = "MoyeViewLoadLock";
@@ -79,7 +79,7 @@ export class MoyeViewMgr extends Entity {
         }
 
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-
+        coreLog(MoyeViewTag, 'show view, name={0}', name);
         try {
             if (this._uiRoot == null) {
                 throw new Error('MoyeViewMgr is not inited');
@@ -122,7 +122,7 @@ export class MoyeViewMgr extends Entity {
 
     async hide(name: string): Promise<void> {
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-
+        coreLog(MoyeViewTag, 'hide view, name={0}', name);
         try {
             if (!this._showingViews.has(name)) {
                 return;

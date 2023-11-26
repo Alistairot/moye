@@ -2231,6 +2231,7 @@ class MoyeViewMgr extends Entity {
             return;
         }
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
+        coreLog(MoyeViewTag, 'show view, name={0}', name);
         try {
             if (this._uiRoot == null) {
                 throw new Error('MoyeViewMgr is not inited');
@@ -2267,6 +2268,7 @@ class MoyeViewMgr extends Entity {
     }
     async hide(name) {
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
+        coreLog(MoyeViewTag, 'hide view, name={0}', name);
         try {
             if (!this._showingViews.has(name)) {
                 return;
