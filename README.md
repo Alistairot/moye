@@ -11,6 +11,10 @@ this repository is Moye Client, support cocos creator version 3.8^
 
 ### install to cocos creator project
 ```bash
+npm i moye@npm:moye-client
+```
+or
+```bash
 npm i moye@Alistairot/moye-client
 ```
 
