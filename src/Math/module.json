@@ -1,0 +1,14 @@
+{
+    "name-explain":"unique module name",
+    "name": "Math",
+
+    "description-explain":"description",
+    "description": "数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "name-explain":"unique module name",
+    "name": "AsyncExt",
+
+    "description-explain":"description",
+    "description": "async extension",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+        "Core"
+    ]
+}

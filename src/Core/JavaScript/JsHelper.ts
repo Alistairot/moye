@@ -69,7 +69,7 @@ export class JsHelper {
         // 开发阶段打印出错误
         if (typeof str != "string") {
             if (DEVELOP) {
-                const err = new Error('formatStr args[0] is not string');
+                const err = new Error('formatStr args err');
                 return err.name + err.stack;
             } else {
                 return `${str}`;

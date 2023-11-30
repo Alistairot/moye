@@ -1,0 +1,14 @@
+{
+    "name-explain":"unique module name",
+    "name": "YYJJoystick",
+
+    "description-explain":"description",
+    "description": "一个摇杆的控制器",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+    ]
+}

@@ -2,11 +2,19 @@
 [export=true]
 核心模块,不要剔除
 
+[name=Math]
+[export=true]
+数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型
+
 [name=MoyeAsset]
 [export=true]
 资源管理
 
-[name=MoyeView]
+[name=AsyncExt]
+[export=true]
+async extension
+
+[name=MoyeUI]
 [export=true]
 a simple ui manager
 
@@ -17,4 +25,8 @@ a simple ui manager
 [name=RoundBoxSprite]
 [export=true]
 圆角矩形
+
+[name=YYJJoystick]
+[export=true]
+一个摇杆的控制器
 
