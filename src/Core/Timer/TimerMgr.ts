@@ -27,6 +27,10 @@ export class TimerMgr extends Singleton {
         this._timerMap.set(timer.id, timer);
         this._timers.push(timer);
 
+        if(immediately){
+            callback();
+        }
+
         return timer.id;
     }
 

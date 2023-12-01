@@ -3,8 +3,16 @@ export interface ILifeCycle{
     instanceId?: bigint
     _inst: any
     awake?(): void
-    update?(): void
-    lateUpdate?(): void
+    /**
+     * 
+     * @param dt ms
+     */
+    update?(dt: number): void
+    /**
+     * 
+     * @param dt ms
+     */
+    lateUpdate?(dt: number): void
     destroy?(): void
     _onPreDestroy(): void
 }

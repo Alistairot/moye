@@ -6,6 +6,11 @@ export class TimeInfo extends Singleton {
      */
     serverMinusClientTime: number;
 
+    /**
+     * 上一帧的增量时间，以毫秒为单位
+     */
+    deltaTime: number = 0;
+
     protected awake() {
         this.serverMinusClientTime = 0;
     }
@@ -20,5 +25,9 @@ export class TimeInfo extends Singleton {
 
     serverNow(): number {
         return this.clientNow() + this.serverMinusClientTime;
+    }
+
+    protected update(dt: number): void {
+        this.deltaTime = dt;
     }
 }

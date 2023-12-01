@@ -24,8 +24,16 @@ export abstract class Singleton {
     }
 
     protected awake?(): void;
-    protected update?(): void;
-    protected lateUpdate?(): void;
+    /**
+     * 
+     * @param dt ms
+     */
+    protected update?(dt: number): void;
+    /**
+     * 
+     * @param dt ms
+     */
+    protected lateUpdate?(dt: number): void;
     protected destroy?(): void;
 
     private _onPreDestroy(): void {

@@ -24,7 +24,7 @@ export class CancellationToken {
     }
 
     remove(callback: Action) {
-        this._actions.delete(callback);
+        this._actions?.delete(callback);
     }
 
     /**

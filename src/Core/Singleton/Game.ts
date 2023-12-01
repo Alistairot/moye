@@ -59,7 +59,7 @@ export class Game {
         await task;
     }
 
-    static update(): void {
+    static update(dt: number): void {
         for (let index = 0; index < Game._updates.length; index++) {
             const update = Game._updates[index];
             const singleton = update;
@@ -68,11 +68,11 @@ export class Game {
                 continue;
             }
 
-            update.update();
+            update.update(dt);
         }
     }
 
-    static lateUpdate(): void {
+    static lateUpdate(dt: number): void {
         for (let index = 0; index < Game._lateUpdates.length; index++) {
             const lateUpdate = Game._lateUpdates[index];
             const singleton = lateUpdate;
@@ -81,7 +81,7 @@ export class Game {
                 continue;
             }
 
-            lateUpdate.lateUpdate();
+            lateUpdate.lateUpdate(dt);
         }
     }
 

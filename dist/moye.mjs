@@ -34,6 +34,13 @@ class Singleton {
 }
 
 class TimeInfo extends Singleton {
+    constructor() {
+        super(...arguments);
+        /**
+         * 上一帧的增量时间，以毫秒为单位
+         */
+        this.deltaTime = 0;
+    }
     awake() {
         this.serverMinusClientTime = 0;
     }
@@ -46,6 +53,9 @@ class TimeInfo extends Singleton {
     }
     serverNow() {
         return this.clientNow() + this.serverMinusClientTime;
+    }
+    update(dt) {
+        this.deltaTime = dt;
     }
 }
 
@@ -1299,24 +1309,24 @@ class Game {
         Game._frameFinishTaskQueue.push(task);
         await task;
     }
-    static update() {
+    static update(dt) {
         for (let index = 0; index < Game._updates.length; index++) {
             const update = Game._updates[index];
             const singleton = update;
             if (singleton.isDisposed) {
                 continue;
             }
-            update.update();
+            update.update(dt);
         }
     }
-    static lateUpdate() {
+    static lateUpdate(dt) {
         for (let index = 0; index < Game._lateUpdates.length; index++) {
             const lateUpdate = Game._lateUpdates[index];
             const singleton = lateUpdate;
             if (singleton.isDisposed) {
                 continue;
             }
-            lateUpdate.lateUpdate();
+            lateUpdate.lateUpdate(dt);
         }
     }
     static frameFinishUpdate() {
@@ -1399,10 +1409,10 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         director.addPersistRootNode(this.node);
     }
     update(dt) {
-        Game.update();
+        Game.update(dt * 1000);
     }
     lateUpdate(dt) {
-        Game.lateUpdate();
+        Game.lateUpdate(dt * 1000);
         Game.frameFinishUpdate();
     }
     onDestroy() {
@@ -1478,6 +1488,9 @@ class TimerMgr extends Singleton {
         timer.expireTime = interval + TimeHelper.clientNow();
         this._timerMap.set(timer.id, timer);
         this._timers.push(timer);
+        if (immediately) {
+            callback();
+        }
         return timer.id;
     }
     /**
@@ -1791,7 +1804,7 @@ class CancellationToken {
         this._actions.add(callback);
     }
     remove(callback) {
-        this._actions.delete(callback);
+        this._actions?.delete(callback);
     }
     /**
      * 执行取消动作

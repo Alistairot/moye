@@ -100,8 +100,16 @@ export declare abstract class Singleton {
 	get isDisposed(): boolean;
 	dispose(): void;
 	protected awake?(): void;
-	protected update?(): void;
-	protected lateUpdate?(): void;
+	/**
+	 *
+	 * @param dt ms
+	 */
+	protected update?(dt: number): void;
+	/**
+	 *
+	 * @param dt ms
+	 */
+	protected lateUpdate?(dt: number): void;
 	protected destroy?(): void;
 	private _onPreDestroy;
 }
@@ -301,8 +309,8 @@ export declare class Game {
 	private static _frameFinishTaskQueue;
 	static addSingleton<T extends Singleton>(singletonType: new () => T, isNotify?: boolean): T;
 	static waitFrameFinish(): Promise<void>;
-	static update(): void;
-	static lateUpdate(): void;
+	static update(dt: number): void;
+	static lateUpdate(dt: number): void;
 	static frameFinishUpdate(): void;
 	static dispose(): void;
 }
@@ -400,6 +408,10 @@ export declare class TimeInfo extends Singleton {
 	 * server time - client time
 	 */
 	serverMinusClientTime: number;
+	/**
+	 * 上一帧的增量时间，以毫秒为单位
+	 */
+	deltaTime: number;
 	protected awake(): void;
 	/**
 	 * Returns the number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC).
@@ -407,6 +419,7 @@ export declare class TimeInfo extends Singleton {
 	 */
 	clientNow(): number;
 	serverNow(): number;
+	protected update(dt: number): void;
 }
 export declare class TimeHelper {
 	static readonly oneDay: number;
