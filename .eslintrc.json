@@ -18,29 +18,47 @@
     ],
     "rules": {
         "semi": "warn",
-        "indent":"warn",
+        "indent": "warn",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-explicit-any": ["off"],
+        "@typescript-eslint/no-explicit-any": [
+            "off"
+        ],
         "@typescript-eslint/no-unused-vars": "off",
         "@typescript-eslint/naming-convention": [
-			"error",
-			{
-				"selector": "classProperty",
-				"modifiers": ["private"],
-				"format": ["camelCase"],
-				"leadingUnderscore": "require"
-			},
+            "error",
+            {
+                "selector": "classProperty",
+                "modifiers": [
+                    "private"
+                ],
+                "format": [
+                    "camelCase"
+                ],
+                "leadingUnderscore": "require"
+            },
             {
                 "selector": "enumMember",
                 "modifiers": [],
-                "format": ["UPPER_CASE"]
+                "format": [
+                    "UPPER_CASE"
+                ]
             },
             {
-              "selector": "interface",
-              "format": ["PascalCase"],
-              "custom": {
-                "regex": "^I[A-Z]",
-                "match": true
+                "selector": "interface",
+                "format": [
+                    "PascalCase"
+                ],
+                "custom": {
+                    "regex": "^I[A-Z]",
+                    "match": true
+                }
+            }
+        ],
+        "@typescript-eslint/ban-types": [
+            "error",
+            {
+                "types": {
+                    "Function": false
                 }
             }
         ]

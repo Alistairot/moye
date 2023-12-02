@@ -1835,6 +1835,93 @@ class CancellationToken {
     }
 }
 
+/**
+ * 在entity销毁的时候自动取消订阅
+ */
+class EventAutoReleaseCom extends Entity {
+    constructor() {
+        super(...arguments);
+        this.events = [];
+    }
+    addItem(item) {
+        this.events.push(item);
+    }
+    destroy() {
+        const eventMap = this.eventCom['eventMap'];
+        for (const item of this.events) {
+            const eventSet = eventMap.get(item.eventCode);
+            eventSet.delete(item);
+            item.entity = null;
+            item.handler = null;
+            item.eventCode = null;
+            item.dispose();
+        }
+        this.events = null;
+        this.eventCom = null;
+    }
+}
+
+class EventItem extends RecycleObj {
+}
+
+/**
+ * 事件组件 可以发送事件给监听的对象
+ * 不允许取消订阅
+ */
+class EventCom extends Entity {
+    constructor() {
+        super(...arguments);
+        this._eventMap = new Map;
+    }
+    destroy() {
+        const eventMap = this._eventMap;
+        for (const eventSet of eventMap.values()) {
+            for (const item of eventSet) {
+                item.entity = null;
+                item.handler = null;
+                item.eventCode = null;
+                item.dispose();
+            }
+            eventSet.clear();
+        }
+        eventMap.clear();
+    }
+    /**
+     * evtCom.subscribe(123, this.onEvent, this)
+     * handler不需要绑定entity 也就是不需要bind
+     * @param eventType
+     * @param handler
+     * @param entity
+     */
+    subscribe(eventCode, handler, entity) {
+        const item = EventItem.create({
+            entity: entity,
+            handler: handler,
+            eventCode: eventCode
+        });
+        let eventSet = this._eventMap.get(eventCode);
+        if (!eventSet) {
+            eventSet = new Set();
+            this._eventMap.set(eventCode, eventSet);
+        }
+        eventSet.add(item);
+        let autoReleaseCom = entity.getCom(EventAutoReleaseCom);
+        if (!autoReleaseCom) {
+            autoReleaseCom = entity.addCom(EventAutoReleaseCom);
+            autoReleaseCom.eventCom = this;
+        }
+        autoReleaseCom.addItem(item);
+    }
+    publish(eventCode, ...args) {
+        const eventSet = this._eventMap.get(eventCode);
+        if (eventSet) {
+            for (const item of eventSet) {
+                item.handler.apply(item.entity, args);
+            }
+        }
+    }
+}
+
 /*
  Copyright (c) 2020-2023 Xiamen Yaji Software Co., Ltd.
 
@@ -12865,4 +12952,4 @@ YYJJoystickPlayer = __decorate([
     menu('moye/YYJJoystickPlayer')
 ], YYJJoystickPlayer);
 
-export { AEvent, AEventHandler, AMoyeView, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, DirectionType, EPSILON, Entity, EntityCenter, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JoystickType, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, SET_JOYSTICK_TYPE, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, YYJJoystick, YYJJoystickCom, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, instance, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };
+export { AEvent, AEventHandler, AMoyeView, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, DirectionType, EPSILON, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JoystickType, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, SET_JOYSTICK_TYPE, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, YYJJoystick, YYJJoystickCom, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, instance, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };

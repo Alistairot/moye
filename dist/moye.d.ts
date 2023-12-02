@@ -585,6 +585,23 @@ export declare class SceneFactory {
 export declare class SceneRefCom extends Entity {
 	scene: Scene;
 }
+/**
+ * 事件组件 可以发送事件给监听的对象
+ * 不允许取消订阅
+ */
+export declare class EventCom extends Entity {
+	private _eventMap;
+	protected destroy(): void;
+	/**
+	 * evtCom.subscribe(123, this.onEvent, this)
+	 * handler不需要绑定entity 也就是不需要bind
+	 * @param eventType
+	 * @param handler
+	 * @param entity
+	 */
+	subscribe(eventCode: number, handler: Function, entity: Entity): void;
+	publish(eventCode: number, ...args: any[]): void;
+}
 export interface IColorLike {
 	r: number;
 	g: number;

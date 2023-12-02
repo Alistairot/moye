@@ -2,6 +2,10 @@
 [export=true]
 核心模块,不要剔除
 
+[name=EventCom]
+[export=true]
+dynamic event component
+
 [name=Math]
 [export=true]
 数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型
