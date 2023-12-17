@@ -8,4 +8,4 @@
  [nodejs server](https://github.com/Alistairot/moye-server)
  
 ## example
- [simple example](https://github.com/Alistairot/moye-example)
+ [moye example](https://github.com/Alistairot/moye-example)
