@@ -21,6 +21,7 @@ export declare class Scene extends Entity {
 	set domain(value: Entity);
 	get domain(): Entity;
 	set parent(value: Entity);
+	get parent(): Entity;
 	init(args: ISceneInitArgs): void;
 }
 export declare abstract class Entity {
@@ -584,6 +585,10 @@ export declare class SceneFactory {
  */
 export declare class SceneRefCom extends Entity {
 	scene: Scene;
+}
+export interface Entity {
+	currentScene(): Scene;
+	clientScene(): Scene;
 }
 /**
  * 事件组件 可以发送事件给监听的对象

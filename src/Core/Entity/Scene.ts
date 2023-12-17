@@ -31,6 +31,10 @@ export class Scene extends Entity {
         this._parent.children.set(this.id, this);
     }
 
+    get parent() {
+        return this._parent;
+    }
+
     init(args: ISceneInitArgs) {
         this.id = args.id;
         this.instanceId = args.instanceId;

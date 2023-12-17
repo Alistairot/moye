@@ -1018,6 +1018,9 @@ class Scene extends Entity {
         this._parent = value;
         this._parent.children.set(this.id, this);
     }
+    get parent() {
+        return this._parent;
+    }
     init(args) {
         this.id = args.id;
         this.instanceId = args.instanceId;
@@ -1766,7 +1769,7 @@ class AEventHandler {
             await this.run(scene, a);
         }
         catch (e) {
-            coreError(EventHandlerTag, e);
+            coreError(EventHandlerTag, 'error:{0}', e);
         }
     }
     handle(scene, a) {
@@ -1778,7 +1781,7 @@ class AEventHandler {
             }
         }
         catch (e) {
-            coreError(EventHandlerTag, e);
+            coreError(EventHandlerTag, 'error:{0}', e);
         }
     }
 }
@@ -1834,6 +1837,27 @@ class CancellationToken {
         }
     }
 }
+
+Entity.prototype.clientScene = function () {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const domainScene = self.domainScene();
+    if (domainScene.sceneType == SceneType.CLIENT) {
+        return domainScene;
+    }
+    else if (domainScene.sceneType == SceneType.CURRENT) {
+        return domainScene.parent.parent;
+    }
+    else if (domainScene.sceneType == SceneType.PROCESS) {
+        return domainScene.getCom(SceneRefCom).scene;
+    }
+};
+Entity.prototype.currentScene = function () {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const clientScene = self.clientScene();
+    return clientScene.getCom(SceneRefCom).scene;
+};
 
 /**
  * 在entity销毁的时候自动取消订阅

@@ -1,5 +1,6 @@
 // 自动生成 请勿在此处添加代码
 export * from './Core/Core';
+export * from './EntityExt/Index';
 export * from './EventCom/Index';
 export * from './Math/Index';
 export * from './MoyeAsset/Index';

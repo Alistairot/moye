@@ -1,0 +1,15 @@
+{
+    "name-explain":"unique module name",
+    "name": "EntityExt",
+
+    "description-explain":"description",
+    "description": "quick get current scene and client scene",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+        "Core"
+    ]
+}

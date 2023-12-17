@@ -2,6 +2,10 @@
 [export=true]
 核心模块,不要剔除
 
+[name=EntityExt]
+[export=true]
+quick get current scene and client scene
+
 [name=EventCom]
 [export=true]
 dynamic event component
