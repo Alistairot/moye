@@ -4555,15 +4555,7 @@ export declare class RoundBoxSprite extends UIRenderer {
 	private _updateUVs;
 	private _applySpriteFrame;
 }
-/**
- * 全局事件监听实例
- */
-export declare const instance: import("cc").__private._cocos_core_event_event_target__Empty & import("cc").__private._cocos_core_event_eventify__IEventified;
-export declare const SET_JOYSTICK_TYPE = "SET_JOYSTICK_TYPE";
-/**
- * 方向类型
- */
-export declare enum DirectionType {
+declare enum DirectionType {
 	FOUR = 0,
 	EIGHT = 1,
 	ALL = 2
@@ -4576,10 +4568,7 @@ export declare enum SpeedType {
 	NORMAL = 1,
 	FAST = 2
 }
-/**
- * 摇杆类型
- */
-export declare enum JoystickType {
+declare enum JoystickType {
 	FIXED = 0,
 	FOLLOW = 1
 }
@@ -4686,6 +4675,20 @@ export declare class YYJJoystickCom extends Entity {
 	 */
 	move(): void;
 	update(): void;
+}
+export declare class YYJJoystickSpeedChangeEvent extends AEvent {
+	speedType: SpeedType;
+}
+export declare class YYJJoystickMoveEvent extends AEvent {
+	dir: Vec3;
+}
+export declare class YYJJoystickListener extends Entity {
+	private _speedType;
+	protected awake(): void;
+	protected destroy(): void;
+	onTouchStart(): void;
+	onTouchMove(event: EventTouch, data: JoystickDataType): void;
+	onTouchEnd(event: EventTouch, data: JoystickDataType): void;
 }
 
 export {};

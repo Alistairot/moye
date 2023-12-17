@@ -12976,4 +12976,41 @@ YYJJoystickPlayer = __decorate([
     menu('moye/YYJJoystickPlayer')
 ], YYJJoystickPlayer);
 
-export { AEvent, AEventHandler, AMoyeView, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, DirectionType, EPSILON, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JoystickType, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, SET_JOYSTICK_TYPE, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, YYJJoystick, YYJJoystickCom, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, instance, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };
+class YYJJoystickSpeedChangeEvent extends AEvent {
+}
+class YYJJoystickMoveEvent extends AEvent {
+}
+class YYJJoystickListener extends Entity {
+    constructor() {
+        super(...arguments);
+        this._speedType = SpeedType.STOP;
+    }
+    awake() {
+        instance.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        instance.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        instance.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+    }
+    destroy() {
+        instance.off(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        instance.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        instance.off(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+    }
+    onTouchStart() { }
+    onTouchMove(event, data) {
+        const oldSpeedType = this._speedType;
+        this._speedType = data.speedType;
+        if (oldSpeedType !== this._speedType) {
+            EventSystem.get().publish(this.domainScene(), YYJJoystickSpeedChangeEvent.create({
+                speedType: this._speedType
+            }));
+        }
+        EventSystem.get().publish(this.domainScene(), YYJJoystickMoveEvent.create({
+            dir: data.moveVec
+        }));
+    }
+    onTouchEnd(event, data) {
+        this.onTouchMove(event, data);
+    }
+}
+
+export { AEvent, AEventHandler, AMoyeView, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, EPSILON, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };
