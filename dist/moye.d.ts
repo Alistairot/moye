@@ -604,8 +604,8 @@ export declare class EventCom extends Entity {
 	 * @param handler
 	 * @param entity
 	 */
-	subscribe(eventCode: number, handler: Function, entity: Entity): void;
-	publish(eventCode: number, ...args: any[]): void;
+	subscribe(eventType: string, handler: Function, entity: Entity): void;
+	publish(eventType: string, ...args: any[]): void;
 }
 export interface IColorLike {
 	r: number;
@@ -4297,6 +4297,49 @@ export declare class MoyeAssets extends Singleton {
 	static loadBundleAsync(bundleName: string): Promise<BundleAsset>;
 	static releaseBundle(bundleAsset: BundleAsset): void;
 	static unloadUnusedAssets(): void;
+}
+export declare enum WaitError {
+	SUCCESS = 0,
+	DESTROY = 1,
+	CANCEL = 2,
+	TIMEOUT = 3
+}
+export declare class AWait extends RecycleObj {
+	error: WaitError;
+}
+export declare class ObjectWait extends Entity {
+	private _tasks;
+	protected destroy(): void;
+	/**
+	 * 一直等待 知道notify了 永不超时
+	 * @param type
+	 * @param cancellationToken
+	 * @returns
+	 */
+	wait<T extends AWait>(type: Type<T>, cancellationToken?: CancellationToken): Promise<T>;
+	/**
+	 * 等待且有超时限制 超时将会取消等待
+	 * @param type
+	 * @param timeout ms
+	 * @param cancellationToken
+	 * @returns
+	 */
+	waitWithTimeout<T extends AWait>(type: Type<T>, timeout: number, cancellationToken?: CancellationToken): Promise<T>;
+	/**
+	 * 取消上一个等待
+	 * @param type
+	 */
+	private cancelLastWait;
+	/**
+	 * 超时取消等待
+	 * @param type
+	 * @param time
+	 * @param cancellationToken
+	 * @returns
+	 */
+	private timeoutRun;
+	private createWaitInstance;
+	notify<T extends AWait>(obj: T): void;
 }
 /**
  * button async listener

@@ -7,7 +7,7 @@ import { EventItem } from "./EventItem";
  * 不允许取消订阅
  */
 export class EventCom extends Entity {
-    private _eventMap: Map<number, Set<EventItem>> = new Map;
+    private _eventMap: Map<string, Set<EventItem>> = new Map;
     protected destroy(): void {
         const eventMap = this._eventMap;
 
@@ -15,7 +15,7 @@ export class EventCom extends Entity {
             for (const item of eventSet) {
                 item.entity = null;
                 item.handler = null;
-                item.eventCode = null;
+                item.eventType = null;
                 item.dispose();
             }
 
@@ -31,18 +31,18 @@ export class EventCom extends Entity {
      * @param handler 
      * @param entity 
      */
-    subscribe(eventCode: number, handler: Function, entity: Entity) {
+    subscribe(eventType: string, handler: Function, entity: Entity) {
         const item = EventItem.create({
             entity: entity,
             handler: handler,
-            eventCode: eventCode
+            eventType: eventType
         });
 
-        let eventSet = this._eventMap.get(eventCode);
+        let eventSet = this._eventMap.get(eventType);
 
         if (!eventSet) {
             eventSet = new Set();
-            this._eventMap.set(eventCode, eventSet);
+            this._eventMap.set(eventType, eventSet);
         }
 
         eventSet.add(item);
@@ -57,8 +57,8 @@ export class EventCom extends Entity {
         autoReleaseCom.addItem(item);
     }
 
-    publish(eventCode: number, ...args: any[]) {
-        const eventSet = this._eventMap.get(eventCode);
+    publish(eventType: string, ...args: any[]) {
+        const eventSet = this._eventMap.get(eventType);
 
         if (eventSet) {
             for (const item of eventSet) {

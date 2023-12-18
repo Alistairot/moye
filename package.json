@@ -1,6 +1,6 @@
 {
   "name": "moye-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "game framework of cocos creator & nodejs",
   "main": "dist/moye.mjs",
   "types": "dist/moye.d.ts",

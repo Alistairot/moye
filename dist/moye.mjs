@@ -1873,11 +1873,11 @@ class EventAutoReleaseCom extends Entity {
     destroy() {
         const eventMap = this.eventCom['eventMap'];
         for (const item of this.events) {
-            const eventSet = eventMap.get(item.eventCode);
+            const eventSet = eventMap.get(item.eventType);
             eventSet.delete(item);
             item.entity = null;
             item.handler = null;
-            item.eventCode = null;
+            item.eventType = null;
             item.dispose();
         }
         this.events = null;
@@ -1903,7 +1903,7 @@ class EventCom extends Entity {
             for (const item of eventSet) {
                 item.entity = null;
                 item.handler = null;
-                item.eventCode = null;
+                item.eventType = null;
                 item.dispose();
             }
             eventSet.clear();
@@ -1917,16 +1917,16 @@ class EventCom extends Entity {
      * @param handler
      * @param entity
      */
-    subscribe(eventCode, handler, entity) {
+    subscribe(eventType, handler, entity) {
         const item = EventItem.create({
             entity: entity,
             handler: handler,
-            eventCode: eventCode
+            eventType: eventType
         });
-        let eventSet = this._eventMap.get(eventCode);
+        let eventSet = this._eventMap.get(eventType);
         if (!eventSet) {
             eventSet = new Set();
-            this._eventMap.set(eventCode, eventSet);
+            this._eventMap.set(eventType, eventSet);
         }
         eventSet.add(item);
         let autoReleaseCom = entity.getCom(EventAutoReleaseCom);
@@ -1936,8 +1936,8 @@ class EventCom extends Entity {
         }
         autoReleaseCom.addItem(item);
     }
-    publish(eventCode, ...args) {
-        const eventSet = this._eventMap.get(eventCode);
+    publish(eventType, ...args) {
+        const eventSet = this._eventMap.get(eventType);
         if (eventSet) {
             for (const item of eventSet) {
                 item.handler.apply(item.entity, args);
@@ -11112,6 +11112,137 @@ AfterProgramInitHandler = __decorate$5([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
 
+var WaitError;
+(function (WaitError) {
+    WaitError[WaitError["SUCCESS"] = 0] = "SUCCESS";
+    WaitError[WaitError["DESTROY"] = 1] = "DESTROY";
+    WaitError[WaitError["CANCEL"] = 2] = "CANCEL";
+    WaitError[WaitError["TIMEOUT"] = 3] = "TIMEOUT";
+})(WaitError || (WaitError = {}));
+
+class AWait extends RecycleObj {
+    constructor() {
+        super(...arguments);
+        this.error = WaitError.SUCCESS;
+    }
+}
+
+class ObjectWait extends Entity {
+    constructor() {
+        super(...arguments);
+        this._tasks = new Map;
+    }
+    destroy() {
+        for (const [type, task] of this._tasks) {
+            const obj = this.createWaitInstance(type, WaitError.DESTROY);
+            this.notify(obj);
+        }
+    }
+    /**
+     * 一直等待 知道notify了 永不超时
+     * @param type
+     * @param cancellationToken
+     * @returns
+     */
+    async wait(type, cancellationToken) {
+        this.cancelLastWait(type);
+        const tcs = Task.create(type);
+        this._tasks.set(type, tcs);
+        let cancelAction;
+        let ret;
+        if (cancellationToken) {
+            cancelAction = () => {
+                const obj = this.createWaitInstance(type, WaitError.CANCEL);
+                this.notify(obj);
+            };
+            cancellationToken.add(cancelAction);
+        }
+        try {
+            ret = await tcs;
+        }
+        finally {
+            cancellationToken?.remove(cancelAction);
+            cancelAction = null;
+        }
+        return ret;
+    }
+    /**
+     * 等待且有超时限制 超时将会取消等待
+     * @param type
+     * @param timeout ms
+     * @param cancellationToken
+     * @returns
+     */
+    async waitWithTimeout(type, timeout, cancellationToken) {
+        this.cancelLastWait(type);
+        const tcs = Task.create(type);
+        this._tasks.set(type, tcs);
+        this.timeoutRun(type, timeout, cancellationToken);
+        let cancelAction;
+        let ret;
+        if (cancellationToken) {
+            cancelAction = () => {
+                const obj = this.createWaitInstance(type, WaitError.CANCEL);
+                this.notify(obj);
+            };
+            cancellationToken.add(cancelAction);
+        }
+        try {
+            ret = await tcs;
+        }
+        finally {
+            cancellationToken?.remove(cancelAction);
+            cancelAction = null;
+        }
+        return ret;
+    }
+    /**
+     * 取消上一个等待
+     * @param type
+     */
+    cancelLastWait(type) {
+        if (!this._tasks.has(type)) {
+            return;
+        }
+        coreWarn('上一个wait已经取消, {0}', type.name);
+        const obj = this.createWaitInstance(type, WaitError.CANCEL);
+        this.notify(obj);
+    }
+    /**
+     * 超时取消等待
+     * @param type
+     * @param time
+     * @param cancellationToken
+     * @returns
+     */
+    async timeoutRun(type, time, cancellationToken) {
+        await TimerMgr.get().waitAsync(time, cancellationToken);
+        if (cancellationToken?.isCancel()) {
+            return;
+        }
+        // 已经执行完毕 不需要执行超时的逻辑
+        if (!this._tasks.has(type)) {
+            return;
+        }
+        const obj = this.createWaitInstance(type, WaitError.TIMEOUT);
+        this.notify(obj);
+    }
+    createWaitInstance(type, error) {
+        const obj = type.create();
+        obj.error = error;
+        return obj;
+    }
+    notify(obj) {
+        const tcs = this._tasks.get(obj.constructor);
+        if (!tcs) {
+            return;
+        }
+        this._tasks.delete(obj.constructor);
+        tcs.setResult(obj);
+        obj.dispose();
+    }
+}
+
 /**
  * button async listener
  * wait for the callback to complete
@@ -13013,4 +13144,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMoyeView, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, EPSILON, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };
+export { AEvent, AEventHandler, AMoyeView, AWait, AffineTransform, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, Color, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, EPSILON, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, HALF_PI, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, Mat3, Mat4, MoyeAssets, MoyeViewMgr, ObjectPool, ObjectWait, Options, Program, Quat, Rect, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Singleton, Size, SizeFollow, SpeedType, TWO_PI, Task, TimeHelper, TimeInfo, TimerMgr, Vec2, Vec3, Vec4, ViewDecorator, ViewDecoratorType, ViewLayer, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, absMax, absMaxComponent, approx, bits, clamp, clamp01, color, enumerableProps, equals, error, floatToHalf, halfToFloat, inverseLerp, lerp, log, mat4, nextPow2, pingPong, preTransforms, pseudoRandom, pseudoRandomRange, pseudoRandomRangeInt, quat, random, randomRange, randomRangeInt, rect, repeat, safeCall, setRandGenerator, size, toDegree, toRadian, v2, v3, v4, warn };

@@ -18,6 +18,10 @@ dynamic event component
 [export=true]
 资源管理
 
+[name=ObjectWait]
+[export=true]
+wait something to be done
+
 [name=AsyncExt]
 [export=true]
 async extension

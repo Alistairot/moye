@@ -17,12 +17,12 @@ export class EventAutoReleaseCom extends Entity {
         const eventMap = this.eventCom['eventMap'];
 
         for (const item of this.events) {
-            const eventSet = eventMap.get(item.eventCode);
+            const eventSet = eventMap.get(item.eventType);
 
             eventSet.delete(item);
             item.entity = null;
             item.handler = null;
-            item.eventCode = null;
+            item.eventType = null;
             item.dispose();
         }
 
