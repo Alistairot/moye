@@ -11,7 +11,7 @@ quick get current scene and client scene
 dynamic event component
 
 [name=Math]
-[export=true]
+[export=false]
 数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型
 
 [name=MoyeAsset]

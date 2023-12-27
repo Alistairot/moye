@@ -2,7 +2,6 @@
 export * from './Core/Core';
 export * from './EntityExt/Index';
 export * from './EventCom/Index';
-export * from './Math/Index';
 export * from './MoyeAsset/Index';
 export * from './ObjectWait/Index';
 export * from './UI/AsyncExt/Index';
