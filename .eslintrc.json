@@ -36,13 +36,13 @@
                 ],
                 "leadingUnderscore": "require"
             },
-            {
-                "selector": "enumMember",
-                "modifiers": [],
-                "format": [
-                    "UPPER_CASE"
-                ]
-            },
+            // {
+            //     "selector": "enumMember",
+            //     "modifiers": [],
+            //     "format": [
+            //         "UPPER_CASE"
+            //     ]
+            // },
             {
                 "selector": "interface",
                 "format": [

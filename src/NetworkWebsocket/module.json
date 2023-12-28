@@ -1,0 +1,16 @@
+{
+    "name-explain":"unique module name",
+    "name": "NetworkWebsocket",
+
+    "description-explain":"description",
+    "description": "NetworkWebsocket module",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+        "Core",
+        "Network"
+    ]
+}

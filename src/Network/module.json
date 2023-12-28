@@ -1,0 +1,15 @@
+{
+    "name-explain":"unique module name",
+    "name": "Network",
+
+    "description-explain":"description",
+    "description": "network module",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+        "Core"
+    ]
+}

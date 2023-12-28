@@ -252,7 +252,7 @@ export abstract class Entity {
             throw new Error(`entity already has component: ${type.name}`);
         }
 
-        const com = this.create(type, isFromPool);
+        const com = this.createInst(type, isFromPool);
         com.id = this.id;
         com.componentParent = this;
 
@@ -275,7 +275,7 @@ export abstract class Entity {
     }
 
     addChildWithId<T extends Entity>(type: Type<T>, id: bigint, isFromPool: boolean = false): T {
-        const entity = this.create(type, isFromPool);
+        const entity = this.createInst(type, isFromPool);
         entity.id = id;
         entity.parent = this;
 
@@ -292,7 +292,7 @@ export abstract class Entity {
     }
 
     private addChildByType<T extends Entity>(type: Type<T>, isFromPool: boolean = false): T {
-        const entity = this.create(type, isFromPool);
+        const entity = this.createInst(type, isFromPool);
         entity.id = IdGenerator.get().generateId();
         entity.parent = this;
 
@@ -303,7 +303,7 @@ export abstract class Entity {
         return entity as T;
     }
 
-    private create(type: Type, isFromPool: boolean): Entity {
+    private createInst(type: Type, isFromPool: boolean): Entity {
         let inst: Entity;
 
         if (isFromPool) {

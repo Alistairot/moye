@@ -67,7 +67,7 @@ export declare abstract class Entity {
 	addChildWithId<T extends Entity>(type: Type<T>, id: bigint, isFromPool?: boolean): T;
 	private addChildByEntity;
 	private addChildByType;
-	private create;
+	private createInst;
 	private removeFromChildren;
 	private removeFromComponents;
 	private addToComponents;
@@ -607,6 +607,93 @@ export declare class EventCom extends Entity {
 	subscribe(eventType: string, handler: Function, entity: Entity): void;
 	publish(eventType: string, ...args: any[]): void;
 }
+declare class IPEndPoint {
+	host: string;
+	port: number;
+	constructor(host: string, port?: number);
+	toString(): string;
+}
+declare enum ServiceType {
+	Outer = 0,
+	Inner = 1
+}
+export type AServiceDataType = Uint8Array | string;
+declare abstract class AService {
+	serviceType: ServiceType;
+	id: number;
+	abstract send(channelId: bigint, data: AServiceDataType): void;
+	abstract create(id: bigint, address: IPEndPoint): void;
+	abstract remove(id: bigint, error: number): void;
+	abstract dispose(): void;
+}
+export declare class AMessage<T = any> {
+	constructor(args?: Partial<T>);
+}
+declare class RpcResponse extends AMessage<RpcResponse> {
+	rpcId: number;
+	error: number;
+	data: Uint8Array;
+}
+/**
+ * session的id跟channel的id是一样的
+ */
+export declare class Session extends Entity {
+	private static _rpcId;
+	serviceId: number;
+	requestCallbacks: Map<number, Task>;
+	lastRecvTime: number;
+	lastSendTime: number;
+	error: number;
+	remoteAddress: IPEndPoint;
+	init(serviceId: number): void;
+	onResponse(response: RpcResponse): void;
+	send(msg: AMessage): void;
+	call(msg: AMessage): Promise<AMessage>;
+	protected destroy(): void;
+}
+export declare class MoyeMsgType {
+	static Message: string;
+	static Request: string;
+	static Response: string;
+	static ActorMessage: string;
+	static ActorRequest: string;
+	static ActorResponse: string;
+	static ActorLocationMessage: string;
+	static ActorLocationRequest: string;
+	static ActorLocationResponse: string;
+}
+export declare const MsgDecoratorType = "MsgDecorator";
+/**
+ * 装饰消息
+ * @param opcode
+ * @param messageType
+ * @returns
+ */
+export declare function MsgDecorator(opcode: number, messageType: string): (target: Function) => void;
+export declare const MsgResponseDecoratorType = "MsgResponseDecorator";
+/**
+ * 装饰消息
+ * @param opcode
+ * @param messageType
+ * @returns
+ */
+export declare function MsgResponseDecorator(responseType: Type<AMessage<any>>): (target: Function) => void;
+export declare class MsgMgr extends Singleton {
+	private _requestResponse;
+	private _messageTypeMap;
+	private _typeToMessageTypeMap;
+	opcodeToTypeMap: Map<number, Type>;
+	protected awake(): void;
+}
+/**
+ * 消息序列化
+ */
+export declare class MsgSerializeMgr extends Singleton {
+	private _encoder;
+	awake(): void;
+	serialize(obj: AMessage<any>): Uint8Array;
+	deserialize(bytes: Uint8Array): any;
+}
 export interface IAssetOperationHandle {
 }
 export interface IBundleAssetProvider {
@@ -668,6 +755,98 @@ export declare class MoyeAssets extends Singleton {
 	static loadBundleAsync(bundleName: string): Promise<BundleAsset>;
 	static releaseBundle(bundleAsset: BundleAsset): void;
 	static unloadUnusedAssets(): void;
+}
+export type AcceptCallback = (channelId: bigint, ipEndPoint: IPEndPoint) => void;
+export type ReadCallback = (channelId: bigint, data: AServiceDataType) => void;
+export type ErrorCallback = (channelId: bigint, error: number) => void;
+export declare class NetServices extends Singleton {
+	private _acceptIdGenerator;
+	private _services;
+	private _serviceIdGenerator;
+	private _acceptCallback;
+	private _readCallback;
+	private _errorCallback;
+	sendMessage(serviceId: number, channelId: bigint, message: AServiceDataType): void;
+	addService(aService: AService): number;
+	removeService(serviceId: number): void;
+	createChannel(serviceId: number, channelId: bigint, address: IPEndPoint): void;
+	removeChannel(serviceId: number, channelId: bigint, error: number): void;
+	registerAcceptCallback(serviceId: number, action: AcceptCallback): void;
+	registerReadCallback(serviceId: number, action: ReadCallback): void;
+	/**
+	 * 一个serviceId只能注册一个
+	 * @param serviceId
+	 * @param action
+	 */
+	registerErrorCallback(serviceId: number, action: ErrorCallback): void;
+	onAccept(serviceId: number, channelId: bigint, ipEndPoint: IPEndPoint): void;
+	onRead(serviceId: number, channelId: bigint, message: AServiceDataType): void;
+	onError(serviceId: number, channelId: bigint, error: number): void;
+	get(id: number): AService;
+	createAcceptChannelId(): number;
+	private add;
+	private remove;
+}
+export declare class NetworkErrorCode {
+	static ERR_SendMessageNotFoundChannel: number;
+	static ERR_ChannelReadError: number;
+	static ERR_WebSocketError: number;
+}
+export declare class WService extends AService {
+	private readonly _idChannels;
+	initSender(serviceType: ServiceType): void;
+	send(channelId: bigint, data: AServiceDataType): void;
+	create(id: bigint, address: IPEndPoint): void;
+	remove(id: bigint, error: number): void;
+	dispose(): void;
+	private innerCreate;
+	/**
+	 * channel 被动关闭 调用这个
+	 * @param channel
+	 * @param code
+	 */
+	channelClose(channel: WChannel, code: number): void;
+}
+declare abstract class AChannel {
+	id: bigint;
+	error: number;
+	/**
+	 * 通过socket初始化的是客户端地址
+	 * 通过地址初始化的是服务器地址
+	 */
+	remoteAddress: IPEndPoint;
+	get isDisposed(): boolean;
+	abstract dispose(): void;
+}
+export declare class WChannel extends AChannel {
+	wSocket: WebSocket;
+	private _service;
+	private _isConnected;
+	private _msgQueue;
+	/**
+	 * 通过地址建立连接
+	 * 也就是客户端
+	 * @param address
+	 * @param id
+	 * @param service
+	 */
+	initByAddress(address: IPEndPoint, id: bigint, service: WService): void;
+	private onConnectComplete;
+	onMessage(data: AServiceDataType): void;
+	dispose(): void;
+	private onWsSocketError;
+	/**
+	 * socket被动关闭
+	 * @param code
+	 */
+	onSocketClose(code: number): void;
+	/**
+	 * 这里的只能是主动关闭
+	 */
+	closeSocket(code: number): void;
+	private onError;
+	private innerSend;
+	send(data: AServiceDataType): void;
 }
 export declare enum WaitError {
 	SUCCESS = 0,

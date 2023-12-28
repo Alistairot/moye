@@ -1,0 +1,17 @@
+{
+    "name-explain":"unique module name",
+    "name": "Message",
+
+    "description-explain":"description",
+    "description": "message module",
+
+    "entry-explain":"entry file",
+    "entry": "Index.ts",
+
+    "deps-explain":"dependent modules",
+    "deps": [
+        "Core",
+        "Network",
+        "NetworkWebsocket"
+    ]
+}

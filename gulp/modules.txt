@@ -14,9 +14,21 @@ dynamic event component
 [export=false]
 数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型
 
+[name=Message]
+[export=true]
+message module
+
 [name=MoyeAsset]
 [export=true]
 资源管理
+
+[name=Network]
+[export=true]
+network module
+
+[name=NetworkWebsocket]
+[export=true]
+NetworkWebsocket module
 
 [name=ObjectWait]
 [export=true]
