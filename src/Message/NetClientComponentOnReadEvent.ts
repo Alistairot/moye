@@ -6,7 +6,13 @@ import { NetClientComponentOnRead } from "./NetClientComponentOnRead";
 export class NetClientComponentOnReadEvent extends AEventHandler<NetClientComponentOnRead>{
     protected run(scene: Scene, args: NetClientComponentOnRead) {
         const session = args.session;
-        const message = args.data;
+        const data = args.data;
 
+        // 屏蔽非Uint8Array类型的数据
+        if(!(data instanceof Uint8Array)){
+            return;
+        }
+
+        
     }
 }
