@@ -3,12 +3,10 @@ import { IPEndPoint } from "../Network/IPEndPoint";
 import { NetServices } from "../Network/NetServices";
 import { TimeHelper } from "../Core/Time/TimeHelper";
 import { Entity, Task } from "../Core/Core";
-import { RpcRequest, RpcResponse } from "./Proto/Message";
-import { AMessage } from "./AMessage";
 import { MessageTag } from "./MessageTag";
 import { MsgSerializeMgr } from "./MsgSerializeMgr";
 import { MessageErrorCode } from "./MessageErrorCode";
-
+import { IRpcResponse, IRpcResquest, RpcResponse } from "./IRpcMessage";
 
 /**
  * session的id跟channel的id是一样的
@@ -30,7 +28,7 @@ export class Session extends Entity {
         this.lastSendTime = timeNow;
     }
 
-    onResponse(response: RpcResponse) {
+    onResponse(response: IRpcResponse) {
         const task = this.requestCallbacks.get(response.rpcId);
 
         if (!task) {
@@ -42,7 +40,7 @@ export class Session extends Entity {
         task.setResult(response);
     }
 
-    send(msg: AMessage) {
+    send(msg: object) {
         if (this.isDisposed) {
             coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
             return;
@@ -58,14 +56,12 @@ export class Session extends Entity {
         }
     }
 
-    async call(msg: AMessage): Promise<AMessage> {
+    async call(req: IRpcResquest): Promise<IRpcResponse> {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
+            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
             const response = new RpcResponse({ error: MessageErrorCode.ERR_SessionDisposed });
             return response;
         }
-
-        const req = new RpcRequest();
 
         const rpcId = ++Session._rpcId;
         const task = Task.create();
@@ -74,15 +70,8 @@ export class Session extends Entity {
 
         req.rpcId = rpcId;
 
-        try {
-            const data = MsgSerializeMgr.get().serialize(msg);
-            req.data = data;
-        } catch (error) {
-            coreError(MessageTag, 'session call error={0}', error.stack);
-        }
-
         this.send(req);
-
+        
         const result = await task;
 
         return result;

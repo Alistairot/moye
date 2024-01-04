@@ -4,7 +4,7 @@ import './NetClientComponentOnReadEvent';
 
 export * from './MoyeMsgType';
 export * from './MsgDecorator';
-export * from './AMessage';
+export * from './IRpcMessage';
 export * from './MsgResponseDecorator';
 export * from './MsgMgr';
 export * from './MsgSerializeMgr';

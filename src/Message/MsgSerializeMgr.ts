@@ -1,44 +1,37 @@
 import { Singleton } from "../Core/Core";
-import { Encoder, addExtension, decode, encode, isNativeAccelerationEnabled } from 'cbor-x';
-import { MsgMgr } from "./MsgMgr";
-import { AMessage } from "./AMessage";
+
+export interface ISerialize {
+    encode(obj: object): Uint8Array | string;
+    decode(bytes: Uint8Array | string): object;
+}
 
 /**
  * 消息序列化
  */
 export class MsgSerializeMgr extends Singleton {
-    private _encoder: Encoder;
+    private _serialize: ISerialize;
 
-    awake(): void {
-        const opcodeTypeMap = MsgMgr.get().opcodeToTypeMap;
-        const startTag = 41000;
+    register(serialize: ISerialize) {
+        this._serialize = serialize;
+    }
 
-        for (const [opcode, type] of opcodeTypeMap) {
-            addExtension({
-                Class: type,
-                tag: startTag + opcode,
-                encode(instance: any, encode) {
-                    return encode(Object.assign({}, instance));
-                },
-                decode(data: any) {
-                    Object.setPrototypeOf(data, type.prototype);
-                    return data;
-                }
-            });
+    serialize(obj: object): Uint8Array | string {
+        if (this._serialize) {
+            return this._serialize.encode(obj);
         }
 
-        this._encoder = new Encoder({ structuredClone: true });
+        return JSON.stringify(obj);
     }
 
-    serialize(obj: AMessage<any>): Uint8Array {
-        const serialized = this._encoder.encode(obj);
-        const bytes = new Uint8Array(serialized);
+    deserialize(bytes: Uint8Array | string): any {
+        if (this._serialize) {
+            return this._serialize.decode(bytes);
+        }
+
+        if(typeof bytes == 'string'){
+            return JSON.parse(bytes);
+        }
 
         return bytes;
-    }
-
-    deserialize(bytes: Uint8Array): any {
-        const obj = this._encoder.decode(bytes);
-        return obj;
     }
 }

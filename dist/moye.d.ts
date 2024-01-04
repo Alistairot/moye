@@ -626,13 +626,17 @@ declare abstract class AService {
 	abstract remove(id: bigint, error: number): void;
 	abstract dispose(): void;
 }
-export declare class AMessage<T = any> {
-	constructor(args?: Partial<T>);
+export interface IRpcResquest {
+	rpcId: number;
 }
-declare class RpcResponse extends AMessage<RpcResponse> {
+export interface IRpcResponse {
 	rpcId: number;
 	error: number;
-	data: Uint8Array;
+}
+export declare class RpcResponse implements IRpcResponse {
+	rpcId: number;
+	error: number;
+	constructor(values: Partial<RpcResponse>);
 }
 /**
  * session的id跟channel的id是一样的
@@ -646,9 +650,9 @@ export declare class Session extends Entity {
 	error: number;
 	remoteAddress: IPEndPoint;
 	init(serviceId: number): void;
-	onResponse(response: RpcResponse): void;
-	send(msg: AMessage): void;
-	call(msg: AMessage): Promise<AMessage>;
+	onResponse(response: IRpcResponse): void;
+	send(msg: object): void;
+	call(req: IRpcResquest): Promise<IRpcResponse>;
 	protected destroy(): void;
 }
 export declare class MoyeMsgType {
@@ -677,7 +681,7 @@ export declare const MsgResponseDecoratorType = "MsgResponseDecorator";
  * @param messageType
  * @returns
  */
-export declare function MsgResponseDecorator(responseType: Type<AMessage<any>>): (target: Function) => void;
+export declare function MsgResponseDecorator(responseType: Type<any>): (target: Function) => void;
 export declare class MsgMgr extends Singleton {
 	private _requestResponse;
 	private _messageTypeMap;
@@ -685,14 +689,18 @@ export declare class MsgMgr extends Singleton {
 	opcodeToTypeMap: Map<number, Type>;
 	protected awake(): void;
 }
+export interface ISerialize {
+	encode(obj: object): Uint8Array | string;
+	decode(bytes: Uint8Array | string): object;
+}
 /**
  * 消息序列化
  */
 export declare class MsgSerializeMgr extends Singleton {
-	private _encoder;
-	awake(): void;
-	serialize(obj: AMessage<any>): Uint8Array;
-	deserialize(bytes: Uint8Array): any;
+	private _serialize;
+	register(serialize: ISerialize): void;
+	serialize(obj: object): Uint8Array | string;
+	deserialize(bytes: Uint8Array | string): any;
 }
 export interface IAssetOperationHandle {
 }

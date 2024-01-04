@@ -1,6 +1,5 @@
 import { Type } from "../Core/Core";
 import { DecoratorCollector } from "../Core/Decorator/DecoratorCollector";
-import { AMessage } from "./AMessage";
 
 export const MsgResponseDecoratorType = 'MsgResponseDecorator';
 /**
@@ -9,7 +8,7 @@ export const MsgResponseDecoratorType = 'MsgResponseDecorator';
  * @param messageType 
  * @returns 
  */
-export function MsgResponseDecorator(responseType: Type<AMessage<any>>) {
+export function MsgResponseDecorator(responseType: Type<any>) {
     return function (target: Function) {
         DecoratorCollector.inst.add(MsgResponseDecoratorType, target, responseType);
     };

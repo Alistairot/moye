@@ -1,5 +1,4 @@
 import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, EventTarget, Vec2, UIOpacity, Input, misc, CCBoolean, RigidBody2D } from 'cc';
-import { addExtension, Encoder } from 'cbor-x';
 import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -1398,7 +1397,7 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1420,7 +1419,7 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$b([
+MoyeRuntime = __decorate$a([
     ccclass$5('MoyeRuntime')
 ], MoyeRuntime);
 
@@ -2005,36 +2004,27 @@ class MsgMgr extends Singleton {
  * 消息序列化
  */
 class MsgSerializeMgr extends Singleton {
-    awake() {
-        const opcodeTypeMap = MsgMgr.get().opcodeToTypeMap;
-        const startTag = 41000;
-        for (const [opcode, type] of opcodeTypeMap) {
-            addExtension({
-                Class: type,
-                tag: startTag + opcode,
-                encode(instance, encode) {
-                    return encode(Object.assign({}, instance));
-                },
-                decode(data) {
-                    Object.setPrototypeOf(data, type.prototype);
-                    return data;
-                }
-            });
-        }
-        this._encoder = new Encoder({ structuredClone: true });
+    register(serialize) {
+        this._serialize = serialize;
     }
     serialize(obj) {
-        const serialized = this._encoder.encode(obj);
-        const bytes = new Uint8Array(serialized);
-        return bytes;
+        if (this._serialize) {
+            return this._serialize.encode(obj);
+        }
+        return JSON.stringify(obj);
     }
     deserialize(bytes) {
-        const obj = this._encoder.decode(bytes);
-        return obj;
+        if (this._serialize) {
+            return this._serialize.decode(bytes);
+        }
+        if (typeof bytes == 'string') {
+            return JSON.parse(bytes);
+        }
+        return bytes;
     }
 }
 
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2050,11 +2040,11 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$a([
+AfterSingletonAddHandler = __decorate$9([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2065,14 +2055,14 @@ let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHa
         Game.addSingleton(MsgMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$9([
+BeforeProgramStartHandler = __decorate$8([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2081,10 +2071,14 @@ var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, 
 let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends AEventHandler {
     run(scene, args) {
         args.session;
-        args.data;
+        const data = args.data;
+        // 屏蔽非Uint8Array类型的数据
+        if (!(data instanceof Uint8Array)) {
+            return;
+        }
     }
 };
-NetClientComponentOnReadEvent = __decorate$8([
+NetClientComponentOnReadEvent = __decorate$7([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
 
@@ -2100,17 +2094,11 @@ MoyeMsgType.ActorLocationMessage = 'ActorLocationMessage';
 MoyeMsgType.ActorLocationRequest = 'ActorLocationRequest';
 MoyeMsgType.ActorLocationResponse = 'ActorLocationResponse';
 
-class AMessage {
-    constructor(args) {
-        Object.assign(this, args);
+class RpcResponse {
+    constructor(values) {
+        Object.assign(this, values);
     }
 }
-// export class AResponse<T> extends AMessage<T> {
-//     /**
-//      * 错误码 0表示成功
-//      */
-//     error: number;
-// }
 
 const NetworkTag = 'Network';
 
@@ -2207,27 +2195,6 @@ class NetServices extends Singleton {
     }
 }
 
-var MessageOpcode;
-(function (MessageOpcode) {
-    MessageOpcode[MessageOpcode["RpcRequest"] = 1] = "RpcRequest";
-    MessageOpcode[MessageOpcode["RpcResponse"] = 2] = "RpcResponse";
-})(MessageOpcode || (MessageOpcode = {}));
-
-var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-class RpcResponse extends AMessage {
-}
-let RpcRequest = class RpcRequest extends AMessage {
-};
-RpcRequest = __decorate$7([
-    MsgResponseDecorator(RpcResponse),
-    MsgDecorator(MessageOpcode.RpcRequest, MoyeMsgType.Request)
-], RpcRequest);
-
 const MessageTag = 'Message';
 
 class NetworkErrorCode {
@@ -2277,24 +2244,16 @@ class Session extends Entity {
             coreError(MessageTag, 'session send error={0}', error.stack);
         }
     }
-    async call(msg) {
+    async call(req) {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
+            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
             const response = new RpcResponse({ error: MessageErrorCode.ERR_SessionDisposed });
             return response;
         }
-        const req = new RpcRequest();
         const rpcId = ++Session._rpcId;
         const task = Task.create();
         this.requestCallbacks.set(rpcId, task);
         req.rpcId = rpcId;
-        try {
-            const data = MsgSerializeMgr.get().serialize(msg);
-            req.data = data;
-        }
-        catch (error) {
-            coreError(MessageTag, 'session call error={0}', error.stack);
-        }
         this.send(req);
         const result = await task;
         return result;
@@ -4833,4 +4792,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMessage, AMoyeView, AWait, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, MoyeMsgType, MoyeViewMgr, MsgDecorator, MsgDecoratorType, MsgMgr, MsgResponseDecorator, MsgResponseDecoratorType, MsgSerializeMgr, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMoyeView, AWait, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, MoyeMsgType, MoyeViewMgr, MsgDecorator, MsgDecoratorType, MsgMgr, MsgResponseDecorator, MsgResponseDecoratorType, MsgSerializeMgr, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, RpcResponse, Scene, SceneFactory, SceneRefCom, SceneType, Session, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
