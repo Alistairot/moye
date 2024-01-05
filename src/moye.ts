@@ -2,6 +2,7 @@
 export * from './Core/Core';
 export * from './EntityExt/Index';
 export * from './EventCom/Index';
+export * from './Login/Index';
 export * from './Message/Index';
 export * from './MoyeAsset/Index';
 export * from './Network/Index';

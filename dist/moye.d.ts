@@ -607,7 +607,34 @@ export declare class EventCom extends Entity {
 	subscribe(eventType: string, handler: Function, entity: Entity): void;
 	publish(eventType: string, ...args: any[]): void;
 }
-declare class IPEndPoint {
+export interface ILoginExecutor {
+	/**
+	 * 登录
+	 * 返回错误码
+	 */
+	login(clientScene: Scene, args: any): Promise<number>;
+}
+export declare class LoginCom extends Entity {
+	private _loginExecutor;
+	private _loginArgs;
+	/**
+	 * 是否登录了gate
+	 */
+	private _isLogin;
+	/**
+	 * 是否正在重连
+	 */
+	private _isReconnecting;
+	/**
+	 * 重新登录最大尝试次数
+	 */
+	private _reLoginTryMaxCount;
+	registerExecutor(loginExecutor: ILoginExecutor): void;
+	login(args: any): Promise<number>;
+}
+export declare class AfterAddLoginCom extends AEvent {
+}
+export declare class IPEndPoint {
 	host: string;
 	port: number;
 	constructor(host: string, port?: number);
@@ -633,11 +660,6 @@ export interface IRpcResponse {
 	rpcId: number;
 	error: number;
 }
-export declare class RpcResponse implements IRpcResponse {
-	rpcId: number;
-	error: number;
-	constructor(values: Partial<RpcResponse>);
-}
 /**
  * session的id跟channel的id是一样的
  */
@@ -655,52 +677,73 @@ export declare class Session extends Entity {
 	call(req: IRpcResquest): Promise<IRpcResponse>;
 	protected destroy(): void;
 }
-export declare class MoyeMsgType {
-	static Message: string;
-	static Request: string;
-	static Response: string;
-	static ActorMessage: string;
-	static ActorRequest: string;
-	static ActorResponse: string;
-	static ActorLocationMessage: string;
-	static ActorLocationRequest: string;
-	static ActorLocationResponse: string;
+export declare const MsgHandlerDecoratorType = "MsgHandlerDecorator";
+/**
+ * 消息处理器
+ * @param opcode
+ * @param messageType
+ * @returns
+ */
+export declare function MsgHandlerDecorator(messageType: Type): (target: Function) => void;
+/**
+ * 消息处理器基类
+ */
+export declare abstract class AMHandler<A> {
+	/**
+	 * 请不要用异步 因为异步的话可能没办法保证消息的顺序
+	 * @param session
+	 * @param message
+	 */
+	protected abstract run(session: Session, message: A): void;
+	handle(session: Session, msg: A): void;
 }
-export declare const MsgDecoratorType = "MsgDecorator";
-/**
- * 装饰消息
- * @param opcode
- * @param messageType
- * @returns
- */
-export declare function MsgDecorator(opcode: number, messageType: string): (target: Function) => void;
-export declare const MsgResponseDecoratorType = "MsgResponseDecorator";
-/**
- * 装饰消息
- * @param opcode
- * @param messageType
- * @returns
- */
-export declare function MsgResponseDecorator(responseType: Type<any>): (target: Function) => void;
 export declare class MsgMgr extends Singleton {
-	private _requestResponse;
-	private _messageTypeMap;
-	private _typeToMessageTypeMap;
-	opcodeToTypeMap: Map<number, Type>;
+	private _responseTypeMap;
+	private _typeOpcodeMap;
+	private _opcodeTypeMap;
 	protected awake(): void;
+	register(type: Type, opcode: number, isResponse?: boolean): void;
+	isResponse(opcode: number): boolean;
+	getOpcode(type: Type): number;
+	getType(opcode: number): Type;
 }
-export interface ISerialize {
-	encode(obj: object): Uint8Array | string;
-	decode(bytes: Uint8Array | string): object;
+export interface IMsgSerializeExecutor {
+	encode(opcode: number, obj: object): AServiceDataType;
+	decode(bytes: AServiceDataType): [
+		number,
+		object
+	];
 }
 /**
  * 消息序列化
  */
 export declare class MsgSerializeMgr extends Singleton {
 	private _serialize;
-	register(serialize: ISerialize): void;
-	serialize(obj: object): Uint8Array | string;
-	deserialize(bytes: Uint8Array | string): any;
+	register(serialize: IMsgSerializeExecutor): void;
+	serialize(opcode: number, obj: object): AServiceDataType;
+	deserialize(bytes: AServiceDataType): [
+		number,
+		object
+	];
+}
+/**
+ * 保存客户端的session
+ */
+export declare class SessionCom extends Entity {
+	session: Session;
+	protected destroy(): void;
+}
+/**
+ * 用于处理网络消息的组件
+ * 这个组件只接受二进制数据
+ */
+export declare class NetCom extends Entity {
+	serviceId: number;
+	protected awake(): void;
+	protected destroy(): void;
+	private onRead;
+	private onError;
+	create(address: IPEndPoint): Session;
 }
 export interface IAssetOperationHandle {
 }

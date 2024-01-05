@@ -1397,7 +1397,7 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1419,7 +1419,7 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$a([
+MoyeRuntime = __decorate$c([
     ccclass$5('MoyeRuntime')
 ], MoyeRuntime);
 
@@ -1943,60 +1943,102 @@ class EventCom extends Entity {
     }
 }
 
-const MsgDecoratorType = 'MsgDecorator';
-/**
- * 装饰消息
- * @param opcode
- * @param messageType
- * @returns
- */
-function MsgDecorator(opcode, messageType) {
-    return function (target) {
-        DecoratorCollector.inst.add(MsgDecoratorType, target, messageType, opcode);
-    };
+class LoginCom extends Entity {
+    constructor() {
+        super(...arguments);
+        /**
+         * 是否登录了gate
+         */
+        this._isLogin = false;
+        /**
+         * 是否正在重连
+         */
+        this._isReconnecting = false;
+        /**
+         * 重新登录最大尝试次数
+         */
+        this._reLoginTryMaxCount = 3;
+    }
+    registerExecutor(loginExecutor) {
+        this._loginExecutor = loginExecutor;
+    }
+    async login(args) {
+        const err = await this._loginExecutor.login(this.domainScene(), args);
+        if (err == 0) {
+            this._isLogin = true;
+            this._loginArgs = args;
+        }
+        return err;
+    }
 }
 
-const MsgResponseDecoratorType = 'MsgResponseDecorator';
-/**
- * 装饰消息
- * @param opcode
- * @param messageType
- * @returns
- */
-function MsgResponseDecorator(responseType) {
-    return function (target) {
-        DecoratorCollector.inst.add(MsgResponseDecoratorType, target, responseType);
-    };
+class AfterAddLoginCom extends AEvent {
 }
 
+var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let AfterCreateClientSceneHandler$1 = class AfterCreateClientSceneHandler extends AEventHandler {
+    run(scene, args) {
+        scene.addCom(LoginCom);
+        EventSystem.get().publish(scene, new AfterAddLoginCom());
+    }
+};
+AfterCreateClientSceneHandler$1 = __decorate$b([
+    EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
+], AfterCreateClientSceneHandler$1);
+
+// import { MsgResponseDecoratorType } from "./MsgResponseDecorator";
 class MsgMgr extends Singleton {
     constructor() {
         super(...arguments);
-        this._requestResponse = new Map();
-        this._messageTypeMap = new Map;
-        this._typeToMessageTypeMap = new Map;
-        this.opcodeToTypeMap = new Map;
+        // private _requestResponse: Map<Type, Type> = new Map();
+        // private _messageTypeMap: Map<number, string> = new Map;
+        // private _typeToMessageTypeMap: Map<Type, string> = new Map;
+        this._responseTypeMap = new Set;
+        // opcodeToTypeMap: Map<number, Type> = new Map;
+        this._typeOpcodeMap = new Map;
+        this._opcodeTypeMap = new Map;
     }
     awake() {
-        const list1 = DecoratorCollector.inst.get(MsgResponseDecoratorType);
-        for (const args of list1) {
-            const request = args[0];
-            const response = args[1];
-            this._requestResponse.set(request, response);
+        // const list1 = DecoratorCollector.inst.get(MsgResponseDecoratorType);
+        // for (const args of list1) {
+        //     const request = args[0];
+        //     const response = args[1];
+        //     this._requestResponse.set(request, response);
+        // }
+        // const list2 = DecoratorCollector.inst.get(MsgDecoratorType);
+        // for (const args of list2) {
+        //     const type: Type = args[0];
+        //     const msgType: string = args[1];
+        //     const opcode: number = args[2];
+        //     const response = this._requestResponse.get(type);
+        //     if(response){
+        //         this.opcodeToTypeMap.set(opcode + 1, response);
+        //     }
+        //     this._messageTypeMap.set(opcode, msgType);
+        //     this._typeToMessageTypeMap.set(type, msgType);
+        //     this.opcodeToTypeMap.set(opcode, type);
+        // }
+    }
+    register(type, opcode, isResponse = false) {
+        this._typeOpcodeMap.set(type, opcode);
+        this._opcodeTypeMap.set(opcode, type);
+        if (isResponse) {
+            this._responseTypeMap.add(opcode);
         }
-        const list2 = DecoratorCollector.inst.get(MsgDecoratorType);
-        for (const args of list2) {
-            const type = args[0];
-            const msgType = args[1];
-            const opcode = args[2];
-            const response = this._requestResponse.get(type);
-            if (response) {
-                this.opcodeToTypeMap.set(opcode + 1, response);
-            }
-            this._messageTypeMap.set(opcode, msgType);
-            this._typeToMessageTypeMap.set(type, msgType);
-            this.opcodeToTypeMap.set(opcode, type);
-        }
+    }
+    isResponse(opcode) {
+        return this._responseTypeMap.has(opcode);
+    }
+    getOpcode(type) {
+        return this._typeOpcodeMap.get(type);
+    }
+    getType(opcode) {
+        return this._opcodeTypeMap.get(opcode);
     }
 }
 
@@ -2007,24 +2049,15 @@ class MsgSerializeMgr extends Singleton {
     register(serialize) {
         this._serialize = serialize;
     }
-    serialize(obj) {
-        if (this._serialize) {
-            return this._serialize.encode(obj);
-        }
-        return JSON.stringify(obj);
+    serialize(opcode, obj) {
+        return this._serialize.encode(opcode, obj);
     }
     deserialize(bytes) {
-        if (this._serialize) {
-            return this._serialize.decode(bytes);
-        }
-        if (typeof bytes == 'string') {
-            return JSON.parse(bytes);
-        }
-        return bytes;
+        return this._serialize.decode(bytes);
     }
 }
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2040,11 +2073,60 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$9([
+AfterSingletonAddHandler = __decorate$a([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+const MsgHandlerDecoratorType = 'MsgHandlerDecorator';
+/**
+ * 消息处理器
+ * @param opcode
+ * @param messageType
+ * @returns
+ */
+function MsgHandlerDecorator(messageType) {
+    return function (target) {
+        DecoratorCollector.inst.add(MsgHandlerDecoratorType, target, messageType);
+    };
+}
+
+/**
+ * 消息分发
+ */
+class MessageDispatcherMgr extends Singleton {
+    constructor() {
+        super(...arguments);
+        this._handlers = new Map;
+    }
+    awake() {
+        const list = DecoratorCollector.inst.get(MsgHandlerDecoratorType);
+        for (const args of list) {
+            const msgHandlerType = args[0];
+            const msgType = args[1];
+            const handler = new msgHandlerType();
+            if (!this._handlers.has(msgType)) {
+                this._handlers.set(msgType, []);
+            }
+            this._handlers.get(msgType).push(handler);
+        }
+    }
+    destroy() {
+        this._handlers.clear();
+    }
+    handle(session, msg) {
+        const type = msg.constructor;
+        const actions = this._handlers.get(type);
+        if (!actions) {
+            console.error(`[MessageDispatcherMgr] msg not found handler`, msg);
+            return;
+        }
+        for (const handler of actions) {
+            handler.handle(session, msg);
+        }
+    }
+}
+
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2053,16 +2135,17 @@ var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, 
 let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHandler {
     run(scene, args) {
         Game.addSingleton(MsgMgr);
+        Game.addSingleton(MessageDispatcherMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$8([
+BeforeProgramStartHandler = __decorate$9([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2078,27 +2161,9 @@ let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends 
         }
     }
 };
-NetClientComponentOnReadEvent = __decorate$7([
+NetClientComponentOnReadEvent = __decorate$8([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
-
-class MoyeMsgType {
-}
-MoyeMsgType.Message = 'Message';
-MoyeMsgType.Request = 'Request';
-MoyeMsgType.Response = 'Response';
-MoyeMsgType.ActorMessage = 'ActorMessage';
-MoyeMsgType.ActorRequest = 'ActorRequest';
-MoyeMsgType.ActorResponse = 'ActorResponse';
-MoyeMsgType.ActorLocationMessage = 'ActorLocationMessage';
-MoyeMsgType.ActorLocationRequest = 'ActorLocationRequest';
-MoyeMsgType.ActorLocationResponse = 'ActorLocationResponse';
-
-class RpcResponse {
-    constructor(values) {
-        Object.assign(this, values);
-    }
-}
 
 const NetworkTag = 'Network';
 
@@ -2195,7 +2260,20 @@ class NetServices extends Singleton {
     }
 }
 
-const MessageTag = 'Message';
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHandler {
+    run(scene, args) {
+        Game.addSingleton(NetServices);
+    }
+};
+AfterProgramInitHandler$1 = __decorate$7([
+    EventDecorator(AfterProgramInit, SceneType.PROCESS)
+], AfterProgramInitHandler$1);
 
 class NetworkErrorCode {
 }
@@ -2203,9 +2281,206 @@ NetworkErrorCode.ERR_SendMessageNotFoundChannel = 1;
 NetworkErrorCode.ERR_ChannelReadError = 2;
 NetworkErrorCode.ERR_WebSocketError = 3;
 
+class IPEndPoint {
+    constructor(host, port = 0) {
+        if (port == 0) {
+            const strs = host.split(":");
+            this.host = strs[0];
+            this.port = parseInt(strs[1]);
+        }
+        else {
+            this.host = host;
+            this.port = port;
+        }
+    }
+    toString() {
+        return `${this.host}:${this.port}`;
+    }
+}
+
+var ServiceType;
+(function (ServiceType) {
+    ServiceType[ServiceType["Outer"] = 0] = "Outer";
+    ServiceType[ServiceType["Inner"] = 1] = "Inner";
+})(ServiceType || (ServiceType = {}));
+
+class AChannel {
+    constructor() {
+        this.id = 0n;
+    }
+    get isDisposed() {
+        return this.id == 0n;
+    }
+}
+
+const NetworkWebsocketTag = 'WService';
+
+class WChannel extends AChannel {
+    constructor() {
+        super(...arguments);
+        this._isConnected = false;
+        this._msgQueue = [];
+    }
+    /**
+     * 通过地址建立连接
+     * 也就是客户端
+     * @param address
+     * @param id
+     * @param service
+     */
+    initByAddress(address, id, service) {
+        this.wSocket = new WebSocket(`ws://${address}`);
+        this.wSocket.binaryType = "arraybuffer";
+        this.id = id;
+        this._service = service;
+        this.remoteAddress = address;
+        this.wSocket.onopen = this.onConnectComplete.bind(this);
+        this.wSocket.onclose = this.onSocketClose.bind(this);
+        this.wSocket.onerror = this.onWsSocketError.bind(this);
+        this.wSocket.onmessage = this.onMessage.bind(this);
+    }
+    onConnectComplete() {
+        this._isConnected = true;
+        for (const msg of this._msgQueue) {
+            this.innerSend(msg);
+        }
+        this._msgQueue = [];
+    }
+    onMessage(data) {
+        try {
+            const channelId = this.id;
+            NetServices.get().onRead(this._service.id, channelId, data);
+        }
+        catch (error) {
+            coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
+            // 出现任何消息解析异常都要断开Session，防止客户端伪造消息
+            this.onError(NetworkErrorCode.ERR_ChannelReadError);
+        }
+    }
+    dispose() {
+        if (this.isDisposed) {
+            return;
+        }
+        this.id = 0n;
+        this.wSocket = null;
+        this._msgQueue = null;
+        this._service = null;
+        this._isConnected = false;
+        this.remoteAddress = null;
+    }
+    onWsSocketError(e) {
+        this.onSocketClose(NetworkErrorCode.ERR_WebSocketError);
+    }
+    /**
+     * socket被动关闭
+     * @param code
+     */
+    onSocketClose(code) {
+        if (this._service) {
+            this._service.channelClose(this, code);
+        }
+    }
+    /**
+     * 这里的只能是主动关闭
+     */
+    closeSocket(code) {
+        if (code < 4000) {
+            if (this.wSocket != null) {
+                this.wSocket.close();
+            }
+        }
+        else {
+            if (this.wSocket != null) {
+                this.wSocket.close(code);
+            }
+        }
+    }
+    onError(error) {
+        this._service.remove(this.id, error);
+    }
+    innerSend(data) {
+        this.wSocket.send(data);
+    }
+    send(data) {
+        if (this.isDisposed) {
+            return;
+        }
+        if (this._isConnected) {
+            this.innerSend(data);
+        }
+        else {
+            this._msgQueue.push(data);
+        }
+    }
+}
+
+class AService {
+}
+
+class WService extends AService {
+    constructor() {
+        super(...arguments);
+        this._idChannels = new Map;
+    }
+    initSender(serviceType) {
+        this.serviceType = serviceType;
+    }
+    send(channelId, data) {
+        const channel = this._idChannels.get(channelId);
+        if (channel == null) {
+            NetServices.get().onError(this.id, channelId, NetworkErrorCode.ERR_SendMessageNotFoundChannel);
+            return;
+        }
+        channel.send(data);
+    }
+    create(id, address) {
+        if (this._idChannels.has(id)) {
+            return;
+        }
+        this.innerCreate(id, address);
+    }
+    remove(id, error) {
+        const channel = this._idChannels.get(id);
+        if (!channel) {
+            return;
+        }
+        channel.closeSocket(error);
+        this._idChannels.delete(id);
+        channel.dispose();
+    }
+    dispose() {
+    }
+    innerCreate(id, address) {
+        const channel = new WChannel();
+        channel.initByAddress(address, id, this);
+        this._idChannels.set(channel.id, channel);
+    }
+    /**
+     * channel 被动关闭 调用这个
+     * @param channel
+     * @param code
+     */
+    channelClose(channel, code) {
+        this._idChannels.delete(channel.id);
+        NetServices.get().onError(this.id, channel.id, code);
+        channel.dispose();
+    }
+}
+
+class NetComReadEvent extends AEvent {
+}
+
+const MessageTag = 'Message';
+
 class MessageErrorCode extends NetworkErrorCode {
 }
 MessageErrorCode.ERR_SessionDisposed = 101;
+
+class RpcResponse {
+    constructor(values) {
+        Object.assign(this, values);
+    }
+}
 
 /**
  * session的id跟channel的id是一样的
@@ -2236,7 +2511,8 @@ class Session extends Entity {
             return;
         }
         try {
-            const data = MsgSerializeMgr.get().serialize(msg);
+            const opcode = MsgMgr.get().getOpcode(msg.constructor);
+            const data = MsgSerializeMgr.get().serialize(opcode, msg);
             this.lastSendTime = TimeHelper.clientNow();
             NetServices.get().sendMessage(this.serviceId, this.id, data);
         }
@@ -2273,6 +2549,102 @@ class Session extends Entity {
     }
 }
 Session._rpcId = 0;
+
+/**
+ * 用于处理网络消息的组件
+ * 这个组件只接受二进制数据
+ */
+class NetCom extends Entity {
+    awake() {
+        const service = new WService();
+        service.initSender(ServiceType.Outer);
+        const netServices = NetServices.get();
+        this.serviceId = netServices.addService(service);
+        netServices.registerReadCallback(this.serviceId, this.onRead.bind(this));
+        netServices.registerErrorCallback(this.serviceId, this.onError.bind(this));
+    }
+    destroy() {
+        const netServices = NetServices.get();
+        netServices.removeService(this.serviceId);
+    }
+    onRead(channelId, data) {
+        const session = this.getChild(Session, channelId);
+        if (session == null) {
+            return;
+        }
+        {
+            // 屏蔽非Uint8Array类型的数据
+            if (!(data instanceof Uint8Array)) {
+                coreError('NetCom', '非Uint8Array类型的数据');
+                return;
+            }
+        }
+        session.lastRecvTime = TimeHelper.clientNow();
+        const event = NetComReadEvent.create({ data: data, session: session });
+        EventSystem.get().publish(this.domainScene(), event);
+    }
+    onError(channelId, error) {
+        const session = this.getChild(Session, channelId);
+        if (session == null) {
+            return;
+        }
+        session.error = error;
+        session.dispose();
+        // EventSendHelper.publish(this.domainScene(), NetErrorEvent.create({channelId: channelId, error: error}));
+    }
+    create(address) {
+        const session = this.addChild(Session);
+        session.init(this.serviceId);
+        session.remoteAddress = address;
+        NetServices.get().createChannel(this.serviceId, session.id, address);
+        return session;
+    }
+}
+
+var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let AfterCreateClientSceneHandler = class AfterCreateClientSceneHandler extends AEventHandler {
+    run(scene, args) {
+        scene.addCom(NetCom);
+    }
+};
+AfterCreateClientSceneHandler = __decorate$6([
+    EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
+], AfterCreateClientSceneHandler);
+
+/**
+ * 消息处理器基类
+ */
+class AMHandler {
+    handle(session, msg) {
+        // session可能已经断开了，所以这里需要判断
+        if (session.isDisposed) {
+            return;
+        }
+        {
+            // 开发阶段检测
+            const ret = this.run(session, msg);
+            if (ret instanceof Promise) {
+                coreWarn('AMHandler', '{0}.run 请不要使用异步, 因为异步没办法保证消息接收后的处理顺序', this.constructor.name);
+                safeCall(ret);
+            }
+        }
+    }
+}
+
+/**
+ * 保存客户端的session
+ */
+class SessionCom extends Entity {
+    destroy() {
+        this.session?.dispose();
+        this.session = null;
+    }
+}
 
 class AssetInfo {
     init(assetType, location) {
@@ -2567,21 +2939,6 @@ class MoyeAssets extends Singleton {
 MoyeAssets._bundleMap = new Map();
 MoyeAssets._bundlePathMap = new Map();
 
-var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHandler {
-    run(scene, args) {
-        Game.addSingleton(MoyeAssets);
-    }
-};
-AfterProgramInitHandler$1 = __decorate$6([
-    EventDecorator(AfterProgramInit, SceneType.NONE)
-], AfterProgramInitHandler$1);
-
 var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -2590,175 +2947,12 @@ var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, 
 };
 let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandler {
     run(scene, args) {
-        Game.addSingleton(NetServices);
+        Game.addSingleton(MoyeAssets);
     }
 };
 AfterProgramInitHandler = __decorate$5([
-    EventDecorator(AfterProgramInit, SceneType.PROCESS)
+    EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
-
-class AChannel {
-    constructor() {
-        this.id = 0n;
-    }
-    get isDisposed() {
-        return this.id == 0n;
-    }
-}
-
-const NetworkWebsocketTag = 'WService';
-
-class WChannel extends AChannel {
-    constructor() {
-        super(...arguments);
-        this._isConnected = false;
-        this._msgQueue = [];
-    }
-    /**
-     * 通过地址建立连接
-     * 也就是客户端
-     * @param address
-     * @param id
-     * @param service
-     */
-    initByAddress(address, id, service) {
-        this.wSocket = new WebSocket(`ws://${address}`);
-        this.wSocket.binaryType = "arraybuffer";
-        this.id = id;
-        this._service = service;
-        this.remoteAddress = address;
-        this.wSocket.onopen = this.onConnectComplete.bind(this);
-        this.wSocket.onclose = this.onSocketClose.bind(this);
-        this.wSocket.onerror = this.onWsSocketError.bind(this);
-        this.wSocket.onmessage = this.onMessage.bind(this);
-    }
-    onConnectComplete() {
-        this._isConnected = true;
-        for (const msg of this._msgQueue) {
-            this.innerSend(msg);
-        }
-        this._msgQueue = [];
-    }
-    onMessage(data) {
-        try {
-            const channelId = this.id;
-            NetServices.get().onRead(this._service.id, channelId, data);
-        }
-        catch (error) {
-            coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
-            // 出现任何消息解析异常都要断开Session，防止客户端伪造消息
-            this.onError(NetworkErrorCode.ERR_ChannelReadError);
-        }
-    }
-    dispose() {
-        if (this.isDisposed) {
-            return;
-        }
-        this.id = 0n;
-        this.wSocket = null;
-        this._msgQueue = null;
-        this._service = null;
-        this._isConnected = false;
-        this.remoteAddress = null;
-    }
-    onWsSocketError(e) {
-        this.onSocketClose(NetworkErrorCode.ERR_WebSocketError);
-    }
-    /**
-     * socket被动关闭
-     * @param code
-     */
-    onSocketClose(code) {
-        if (this._service) {
-            this._service.channelClose(this, code);
-        }
-    }
-    /**
-     * 这里的只能是主动关闭
-     */
-    closeSocket(code) {
-        if (code < 4000) {
-            if (this.wSocket != null) {
-                this.wSocket.close();
-            }
-        }
-        else {
-            if (this.wSocket != null) {
-                this.wSocket.close(code);
-            }
-        }
-    }
-    onError(error) {
-        this._service.remove(this.id, error);
-    }
-    innerSend(data) {
-        this.wSocket.send(data);
-    }
-    send(data) {
-        if (this.isDisposed) {
-            return;
-        }
-        if (this._isConnected) {
-            this.innerSend(data);
-        }
-        else {
-            this._msgQueue.push(data);
-        }
-    }
-}
-
-class AService {
-}
-
-class WService extends AService {
-    constructor() {
-        super(...arguments);
-        this._idChannels = new Map;
-    }
-    initSender(serviceType) {
-        this.serviceType = serviceType;
-    }
-    send(channelId, data) {
-        const channel = this._idChannels.get(channelId);
-        if (channel == null) {
-            NetServices.get().onError(this.id, channelId, NetworkErrorCode.ERR_SendMessageNotFoundChannel);
-            return;
-        }
-        channel.send(data);
-    }
-    create(id, address) {
-        if (this._idChannels.has(id)) {
-            return;
-        }
-        this.innerCreate(id, address);
-    }
-    remove(id, error) {
-        const channel = this._idChannels.get(id);
-        if (!channel) {
-            return;
-        }
-        channel.closeSocket(error);
-        this._idChannels.delete(id);
-        channel.dispose();
-    }
-    dispose() {
-    }
-    innerCreate(id, address) {
-        const channel = new WChannel();
-        channel.initByAddress(address, id, this);
-        this._idChannels.set(channel.id, channel);
-    }
-    /**
-     * channel 被动关闭 调用这个
-     * @param channel
-     * @param code
-     */
-    channelClose(channel, code) {
-        this._idChannels.delete(channel.id);
-        NetServices.get().onError(this.id, channel.id, code);
-        channel.dispose();
-    }
-}
 
 var WaitError;
 (function (WaitError) {
@@ -4792,4 +4986,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMoyeView, AWait, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, MoyeAssets, MoyeMsgType, MoyeViewMgr, MsgDecorator, MsgDecoratorType, MsgMgr, MsgResponseDecorator, MsgResponseDecoratorType, MsgSerializeMgr, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, RpcResponse, Scene, SceneFactory, SceneRefCom, SceneType, Session, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, NetCom, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };

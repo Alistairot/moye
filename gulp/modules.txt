@@ -10,6 +10,10 @@ quick get current scene and client scene
 [export=true]
 dynamic event component
 
+[name=Login]
+[export=true]
+Login module
+
 [name=Math]
 [export=false]
 数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型

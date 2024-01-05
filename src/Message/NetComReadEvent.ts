@@ -3,7 +3,7 @@ import { AServiceDataType } from "../Network/AService";
 import { Session } from "./Session";
 
 
-export class NetClientComponentOnRead extends AEvent {
+export class NetComReadEvent extends AEvent {
     session: Session;
     data: AServiceDataType;
 }

@@ -2,11 +2,12 @@ import { coreError, coreLog, coreWarn } from "../Core/Logger/CoreLogHelper";
 import { IPEndPoint } from "../Network/IPEndPoint";
 import { NetServices } from "../Network/NetServices";
 import { TimeHelper } from "../Core/Time/TimeHelper";
-import { Entity, Task } from "../Core/Core";
+import { Entity, Task, Type } from "../Core/Core";
 import { MessageTag } from "./MessageTag";
 import { MsgSerializeMgr } from "./MsgSerializeMgr";
 import { MessageErrorCode } from "./MessageErrorCode";
 import { IRpcResponse, IRpcResquest, RpcResponse } from "./IRpcMessage";
+import { MsgMgr } from "./MsgMgr";
 
 /**
  * session的id跟channel的id是一样的
@@ -47,7 +48,8 @@ export class Session extends Entity {
         }
 
         try {
-            const data = MsgSerializeMgr.get().serialize(msg);
+            const opcode = MsgMgr.get().getOpcode(msg.constructor as Type);
+            const data = MsgSerializeMgr.get().serialize(opcode, msg);
 
             this.lastSendTime = TimeHelper.clientNow();
             NetServices.get().sendMessage(this.serviceId, this.id, data);
@@ -71,7 +73,7 @@ export class Session extends Entity {
         req.rpcId = rpcId;
 
         this.send(req);
-        
+
         const result = await task;
 
         return result;
@@ -84,7 +86,7 @@ export class Session extends Entity {
 
         NetServices.get().removeChannel(this.serviceId, this.id, this.error);
 
-        if(this.requestCallbacks.size > 0) {
+        if (this.requestCallbacks.size > 0) {
             const response = new RpcResponse({ error: MessageErrorCode.ERR_SessionDisposed });
 
             for (const [_, responseCallback] of this.requestCallbacks) {
