@@ -15,7 +15,7 @@ export abstract class AEventHandler<A>{
             await this.run(scene as T, a);
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e);
+            coreError(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
 
@@ -29,7 +29,7 @@ export abstract class AEventHandler<A>{
             }
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e);
+            coreError(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
 }

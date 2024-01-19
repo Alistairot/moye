@@ -644,7 +644,7 @@ declare enum ServiceType {
 	Outer = 0,
 	Inner = 1
 }
-export type AServiceDataType = Uint8Array | string;
+export type AServiceDataType = Uint8Array | string | ArrayBuffer;
 declare abstract class AService {
 	serviceType: ServiceType;
 	id: number;
@@ -883,7 +883,7 @@ export declare class WChannel extends AChannel {
 	 */
 	initByAddress(address: IPEndPoint, id: bigint, service: WService): void;
 	private onConnectComplete;
-	onMessage(data: AServiceDataType): void;
+	onMessage(evt: MessageEvent): void;
 	dispose(): void;
 	private onWsSocketError;
 	/**
@@ -1062,6 +1062,8 @@ export declare class MoyeViewMgr extends Entity {
 	show<T extends AMoyeView>(type: Type<T>, bindEntity?: Entity): Promise<T>;
 	show(name: string, bindEntity?: Entity): Promise<AMoyeView>;
 	hide(name: string): Promise<void>;
+	getView<T extends AMoyeView>(type: Type<T>): T;
+	getView(name: string): AMoyeView;
 	/**
 	 * reload confog
 	 */

@@ -44,11 +44,11 @@ export class WChannel extends AChannel {
         this._msgQueue = [];
     }
 
-    onMessage(data: AServiceDataType) {
+    onMessage(evt: MessageEvent) {
         try {
             const channelId = this.id;
 
-            NetServices.get().onRead(this._service.id, channelId, data);
+            NetServices.get().onRead(this._service.id, channelId, evt.data);
         } catch (error) {
             coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
             // 出现任何消息解析异常都要断开Session，防止客户端伪造消息

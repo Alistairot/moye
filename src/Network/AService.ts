@@ -1,7 +1,7 @@
 import { IPEndPoint } from "./IPEndPoint";
 import { ServiceType } from "./ServiceType";
 
-export type AServiceDataType = Uint8Array | string;
+export type AServiceDataType = Uint8Array | string | ArrayBuffer;
 
 export abstract class AService {
     serviceType: ServiceType;

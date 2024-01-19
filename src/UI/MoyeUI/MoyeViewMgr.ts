@@ -114,7 +114,7 @@ export class MoyeViewMgr extends Entity {
 
             return view;
         } catch (e) {
-            coreError(MoyeViewTag, 'show view errr, {0}', e);
+            coreError(MoyeViewTag, 'show view errr, {0}', e.stack);
         } finally {
             lock.dispose();
         }
@@ -132,9 +132,26 @@ export class MoyeViewMgr extends Entity {
 
             await this.enterViewHide(view);
         } catch (e) {
-            coreError(MoyeViewTag, 'hide view errr, {0}', e);
+            coreError(MoyeViewTag, 'hide view errr, {0}', e.stack);
         } finally {
             lock.dispose();
+        }
+    }
+
+    getView<T extends AMoyeView>(type: Type<T>): T;
+    getView(name: string): AMoyeView;
+    getView<T extends AMoyeView>(nameOrType: string | Type<T>,): AMoyeView {
+        let name: string;
+
+        if (typeof nameOrType == 'string') {
+            name = nameOrType;
+        } else {
+            name = this._type2Names.get(nameOrType);
+        }
+
+        if (this._showingViews.has(name)) {
+            const view = this._views.get(name);
+            return view;
         }
     }
 

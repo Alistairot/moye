@@ -1397,7 +1397,7 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1419,7 +1419,7 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$c([
+MoyeRuntime = __decorate$d([
     ccclass$5('MoyeRuntime')
 ], MoyeRuntime);
 
@@ -1766,7 +1766,7 @@ class AEventHandler {
             await this.run(scene, a);
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e);
+            coreError(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
     handle(scene, a) {
@@ -1778,7 +1778,7 @@ class AEventHandler {
             }
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e);
+            coreError(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
 }
@@ -1975,7 +1975,7 @@ class LoginCom extends Entity {
 class AfterAddLoginCom extends AEvent {
 }
 
-var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1987,7 +1987,7 @@ let AfterCreateClientSceneHandler$1 = class AfterCreateClientSceneHandler extend
         EventSystem.get().publish(scene, new AfterAddLoginCom());
     }
 };
-AfterCreateClientSceneHandler$1 = __decorate$b([
+AfterCreateClientSceneHandler$1 = __decorate$c([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler$1);
 
@@ -2057,7 +2057,7 @@ class MsgSerializeMgr extends Singleton {
     }
 }
 
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2073,7 +2073,7 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$a([
+AfterSingletonAddHandler = __decorate$b([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
@@ -2126,7 +2126,7 @@ class MessageDispatcherMgr extends Singleton {
     }
 }
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2138,14 +2138,14 @@ let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHa
         Game.addSingleton(MessageDispatcherMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$9([
+BeforeProgramStartHandler = __decorate$a([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2161,7 +2161,7 @@ let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends 
         }
     }
 };
-NetClientComponentOnReadEvent = __decorate$8([
+NetClientComponentOnReadEvent = __decorate$9([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
 
@@ -2260,7 +2260,7 @@ class NetServices extends Singleton {
     }
 }
 
-var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2271,7 +2271,7 @@ let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHand
         Game.addSingleton(NetServices);
     }
 };
-AfterProgramInitHandler$1 = __decorate$7([
+AfterProgramInitHandler$1 = __decorate$8([
     EventDecorator(AfterProgramInit, SceneType.PROCESS)
 ], AfterProgramInitHandler$1);
 
@@ -2346,10 +2346,10 @@ class WChannel extends AChannel {
         }
         this._msgQueue = [];
     }
-    onMessage(data) {
+    onMessage(evt) {
         try {
             const channelId = this.id;
-            NetServices.get().onRead(this._service.id, channelId, data);
+            NetServices.get().onRead(this._service.id, channelId, evt.data);
         }
         catch (error) {
             coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
@@ -2572,13 +2572,13 @@ class NetCom extends Entity {
         if (session == null) {
             return;
         }
-        {
-            // 屏蔽非Uint8Array类型的数据
-            if (!(data instanceof Uint8Array)) {
-                coreError('NetCom', '非Uint8Array类型的数据');
-                return;
-            }
-        }
+        // if(DEVELOP){
+        //     // 屏蔽非Uint8Array类型的数据
+        //     if(!(data instanceof Uint8Array)){
+        //         coreError('NetCom', '非Uint8Array类型的数据');
+        //         return;
+        //     }
+        // }
         session.lastRecvTime = TimeHelper.clientNow();
         const event = NetComReadEvent.create({ data: data, session: session });
         EventSystem.get().publish(this.domainScene(), event);
@@ -2601,7 +2601,17 @@ class NetCom extends Entity {
     }
 }
 
-var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+/**
+ * 保存客户端的session
+ */
+class SessionCom extends Entity {
+    destroy() {
+        this.session?.dispose();
+        this.session = null;
+    }
+}
+
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2610,11 +2620,35 @@ var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, 
 let AfterCreateClientSceneHandler = class AfterCreateClientSceneHandler extends AEventHandler {
     run(scene, args) {
         scene.addCom(NetCom);
+        scene.addCom(SessionCom);
     }
 };
-AfterCreateClientSceneHandler = __decorate$6([
+AfterCreateClientSceneHandler = __decorate$7([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler);
+
+var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let NetComReadEventHandler = class NetComReadEventHandler extends AEventHandler {
+    run(scene, args) {
+        const session = args.session;
+        const data = args.data;
+        const [opcode, msg] = MsgSerializeMgr.get().deserialize(data);
+        const isResponse = MsgMgr.get().isResponse(opcode);
+        if (isResponse) {
+            session.onResponse(msg);
+            return;
+        }
+        MessageDispatcherMgr.get().handle(session, msg);
+    }
+};
+NetComReadEventHandler = __decorate$6([
+    EventDecorator(NetComReadEvent, SceneType.CLIENT)
+], NetComReadEventHandler);
 
 /**
  * 消息处理器基类
@@ -2633,16 +2667,6 @@ class AMHandler {
                 safeCall(ret);
             }
         }
-    }
-}
-
-/**
- * 保存客户端的session
- */
-class SessionCom extends Entity {
-    destroy() {
-        this.session?.dispose();
-        this.session = null;
     }
 }
 
@@ -2925,13 +2949,13 @@ class MoyeAssets extends Singleton {
     }
     static unloadUnusedAssets() {
         for (const [name, bundleAsset] of this._bundleMap) {
-            bundleAsset.unloadUnusedAssets();
             if (bundleAsset.refCount != 0) {
                 continue;
             }
             if (!bundleAsset.isAutoRelease) {
                 continue;
             }
+            bundleAsset.unloadUnusedAssets();
             MoyeAssets.releaseBundle(bundleAsset);
         }
     }
@@ -3249,7 +3273,7 @@ class MoyeViewMgr extends Entity {
             return view;
         }
         catch (e) {
-            coreError(MoyeViewTag, 'show view errr, {0}', e);
+            coreError(MoyeViewTag, 'show view errr, {0}', e.stack);
         }
         finally {
             lock.dispose();
@@ -3266,10 +3290,23 @@ class MoyeViewMgr extends Entity {
             await this.enterViewHide(view);
         }
         catch (e) {
-            coreError(MoyeViewTag, 'hide view errr, {0}', e);
+            coreError(MoyeViewTag, 'hide view errr, {0}', e.stack);
         }
         finally {
             lock.dispose();
+        }
+    }
+    getView(nameOrType) {
+        let name;
+        if (typeof nameOrType == 'string') {
+            name = nameOrType;
+        }
+        else {
+            name = this._type2Names.get(nameOrType);
+        }
+        if (this._showingViews.has(name)) {
+            const view = this._views.get(name);
+            return view;
         }
     }
     /**

@@ -111,8 +111,6 @@ export class MoyeAssets extends Singleton {
 
     static unloadUnusedAssets() {
         for (const [name, bundleAsset] of this._bundleMap) {
-            bundleAsset.unloadUnusedAssets();
-
             if (bundleAsset.refCount != 0) {
                 continue;
             }
@@ -121,6 +119,7 @@ export class MoyeAssets extends Singleton {
                 continue;
             }
 
+            bundleAsset.unloadUnusedAssets();
             MoyeAssets.releaseBundle(bundleAsset);
         }
     }

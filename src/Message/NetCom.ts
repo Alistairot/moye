@@ -40,13 +40,13 @@ export class NetCom extends Entity {
             return;
         }
 
-        if(DEVELOP){
-            // 屏蔽非Uint8Array类型的数据
-            if(!(data instanceof Uint8Array)){
-                coreError('NetCom', '非Uint8Array类型的数据');
-                return;
-            }
-        }
+        // if(DEVELOP){
+        //     // 屏蔽非Uint8Array类型的数据
+        //     if(!(data instanceof Uint8Array)){
+        //         coreError('NetCom', '非Uint8Array类型的数据');
+        //         return;
+        //     }
+        // }
 
         session.lastRecvTime = TimeHelper.clientNow();
 

@@ -2,6 +2,7 @@ import './AfterSingletonAddHandler';
 import './BeforeProgramStartHandler';
 import './NetClientComponentOnReadEvent';
 import './AfterCreateClientSceneHandler';
+import './NetComReadEventHandler';
 
 // export * from './MoyeMsgType';
 export * from './MsgHandler/MsgHandlerDecorator';
