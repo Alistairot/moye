@@ -1,12 +1,12 @@
 {
-  "name": "moye-client",
+  "name": "moye",
   "version": "1.0.3",
-  "description": "game framework of cocos creator & nodejs",
+  "description": "ecs game framework of cocos creator",
   "main": "dist/moye.mjs",
   "types": "dist/moye.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Alistairot/moye-client"
+    "url": "https://github.com/Alistairot/moye"
   },
   "files": [
     "dist/moye.mjs",

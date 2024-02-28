@@ -1,13 +1,7 @@
 # Moye
-game framework of cocos creator & nodejs  
+ecs game framework of cocos creator  
 
-this repository is Moye Client, support cocos creator version 3.8^
-
-## server
- [nodejs server](https://github.com/Alistairot/moye-server)
- 
-## example
- [moye example](https://github.com/Alistairot/moye-example)
+support cocos creator version 3.8^  
 
 ### install to cocos creator project
 ```bash
