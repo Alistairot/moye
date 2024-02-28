@@ -586,6 +586,20 @@ export declare class SceneFactory {
 export declare class SceneRefCom extends Entity {
 	scene: Scene;
 }
+/**
+ * key对应value数组的map
+ */
+export declare class MultiMap<T, K> {
+	private _map;
+	private readonly _empty;
+	constructor();
+	add(t: T, k: K): void;
+	remove(t: T, k: K): boolean;
+	getAll(t: T): K[];
+	get(t: T): K[];
+	getOne(t: T): K | undefined;
+	contains(t: T, k: K): boolean;
+}
 export interface Entity {
 	currentScene(): Scene;
 	clientScene(): Scene;
@@ -1200,6 +1214,116 @@ export declare class RoundBoxSprite extends UIRenderer {
 	private _activateMaterial;
 	private _updateUVs;
 	private _applySpriteFrame;
+}
+export declare enum UIControllerIndex {
+	Index_0 = 1,
+	Index_1 = 2,
+	Index_2 = 4,
+	Index_3 = 8,
+	Index_4 = 16,
+	Index_5 = 32,
+	Index_6 = 64,
+	Index_7 = 128,
+	Index_8 = 256,
+	Index_9 = 512,
+	Index_10 = 1024,
+	Index_11 = 2048,
+	Index_12 = 4096
+}
+export interface IUIControllerIndexListener {
+	onChangeIndex(index: number): void;
+}
+export declare class UIController extends Component {
+	private _index;
+	set index(v: UIControllerIndex);
+	get index(): UIControllerIndex;
+	private _listeners;
+	protected onDestroy(): void;
+	addListener(listener: IUIControllerIndexListener): void;
+	removeListener(listener: IUIControllerIndexListener): void;
+	notifyListeners(): void;
+}
+export declare enum UIControllerIndexMask {
+	Index_0 = 1,
+	Index_1 = 2,
+	Index_2 = 4,
+	Index_3 = 8,
+	Index_4 = 16,
+	Index_5 = 32,
+	Index_6 = 64,
+	Index_7 = 128,
+	Index_8 = 256,
+	Index_9 = 512,
+	Index_10 = 1024,
+	Index_11 = 2048,
+	Index_12 = 4096
+}
+export declare enum UIControlType {
+	None = 0,
+	Visible = 1,
+	Position = 2,
+	Size = 3,
+	Scale = 4,
+	Angle = 5,
+	Anchor = 6,
+	UIController = 7
+}
+export declare class UIControllerAttr {
+	controlType: UIControlType;
+	indexMask: UIControllerIndexMask;
+	private _positionMap;
+	private _sizeMap;
+	private _scaleMap;
+	private _angleMap;
+	private _anchorMap;
+	private _uiControllerMap;
+	hasIndex(index: number): boolean;
+	setPosition(index: number, pos: Vec3): void;
+	getPosition(index: number): any;
+	setSize(index: number, size: Size): void;
+	getSize(index: number): any;
+	setScale(index: number, scale: Vec3): void;
+	getScale(index: number): any;
+	setAngle(index: number, angle: number): void;
+	getAngle(index: number): any;
+	setAnchor(index: number, anchor: Vec2): void;
+	getAnchor(index: number): any;
+	setUIController(index: number, controllerIndex: number): void;
+	getUIController(index: number): any;
+	clearOtherData(): void;
+	private clearPositionData;
+	private clearSizeData;
+	private clearScaleData;
+	private clearAngleData;
+	private clearAnchorData;
+	private clearUIControllerData;
+}
+export declare class UIControllerListener extends Component {
+	private _controller;
+	set controller(v: UIController);
+	get controller(): UIController;
+	get curIndex(): string;
+	private _attrs;
+	set attrs(v: UIControllerAttr[]);
+	get attrs(): UIControllerAttr[];
+	protected onLoad(): void;
+	protected onDestroy(): void;
+	protected onDisable(): void;
+	onFocusInEditor(): void;
+	onLostFocusInEditor(): void;
+	private registerEditorEvent;
+	private unRegisterEditorEvent;
+	private listenController;
+	private onChangeActive;
+	private onTransformChange;
+	private onSizeChange;
+	private onAnchorChange;
+	private registerTransform;
+	private registerSize;
+	private registerAnchor;
+	private registerUIController;
+	private updateAttr;
+	onChangeIndex(index: number): void;
 }
 declare enum DirectionType {
 	FOUR = 0,

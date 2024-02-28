@@ -1,4 +1,4 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, EventTarget, Vec2, UIOpacity, Input, misc, CCBoolean, RigidBody2D } from 'cc';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, Widget, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, CCBoolean, RigidBody2D } from 'cc';
 import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -1397,13 +1397,13 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$g = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$5, property: property$5 } = _decorator;
+const { ccclass: ccclass$8, property: property$8 } = _decorator;
 let MoyeRuntime = class MoyeRuntime extends Component {
     start() {
         director.addPersistRootNode(this.node);
@@ -1419,8 +1419,8 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$d([
-    ccclass$5('MoyeRuntime')
+MoyeRuntime = __decorate$g([
+    ccclass$8('MoyeRuntime')
 ], MoyeRuntime);
 
 class TimeHelper {
@@ -1835,6 +1835,63 @@ class CancellationToken {
     }
 }
 
+/**
+ * key对应value数组的map
+ */
+class MultiMap {
+    constructor() {
+        this._empty = [];
+        this._map = new Map();
+    }
+    add(t, k) {
+        let list = this._map.get(t);
+        if (list === undefined) {
+            list = [];
+            this._map.set(t, list);
+        }
+        list.push(k);
+    }
+    remove(t, k) {
+        const list = this._map.get(t);
+        if (list === undefined) {
+            return false;
+        }
+        const index = list.indexOf(k);
+        if (index === -1) {
+            return false;
+        }
+        list.splice(index, 1);
+        if (list.length === 0) {
+            this._map.delete(t);
+        }
+        return true;
+    }
+    getAll(t) {
+        const list = this._map.get(t);
+        if (list === undefined) {
+            return [];
+        }
+        return list;
+    }
+    get(t) {
+        return this._map.get(t) ?? this._empty;
+    }
+    getOne(t) {
+        const list = this._map.get(t);
+        if (list !== undefined && list.length > 0) {
+            return list[0];
+        }
+        return undefined;
+    }
+    contains(t, k) {
+        const list = this._map.get(t);
+        if (list === undefined) {
+            return false;
+        }
+        return list.includes(k);
+    }
+}
+
 Entity.prototype.clientScene = function () {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
@@ -1975,7 +2032,7 @@ class LoginCom extends Entity {
 class AfterAddLoginCom extends AEvent {
 }
 
-var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$f = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -1987,7 +2044,7 @@ let AfterCreateClientSceneHandler$1 = class AfterCreateClientSceneHandler extend
         EventSystem.get().publish(scene, new AfterAddLoginCom());
     }
 };
-AfterCreateClientSceneHandler$1 = __decorate$c([
+AfterCreateClientSceneHandler$1 = __decorate$f([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler$1);
 
@@ -2057,7 +2114,7 @@ class MsgSerializeMgr extends Singleton {
     }
 }
 
-var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$e = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2073,7 +2130,7 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$b([
+AfterSingletonAddHandler = __decorate$e([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
@@ -2126,7 +2183,7 @@ class MessageDispatcherMgr extends Singleton {
     }
 }
 
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2138,14 +2195,14 @@ let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHa
         Game.addSingleton(MessageDispatcherMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$a([
+BeforeProgramStartHandler = __decorate$d([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2161,7 +2218,7 @@ let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends 
         }
     }
 };
-NetClientComponentOnReadEvent = __decorate$9([
+NetClientComponentOnReadEvent = __decorate$c([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
 
@@ -2260,7 +2317,7 @@ class NetServices extends Singleton {
     }
 }
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2271,7 +2328,7 @@ let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHand
         Game.addSingleton(NetServices);
     }
 };
-AfterProgramInitHandler$1 = __decorate$8([
+AfterProgramInitHandler$1 = __decorate$b([
     EventDecorator(AfterProgramInit, SceneType.PROCESS)
 ], AfterProgramInitHandler$1);
 
@@ -2611,7 +2668,7 @@ class SessionCom extends Entity {
     }
 }
 
-var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2623,11 +2680,11 @@ let AfterCreateClientSceneHandler = class AfterCreateClientSceneHandler extends 
         scene.addCom(SessionCom);
     }
 };
-AfterCreateClientSceneHandler = __decorate$7([
+AfterCreateClientSceneHandler = __decorate$a([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler);
 
-var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2646,7 +2703,7 @@ let NetComReadEventHandler = class NetComReadEventHandler extends AEventHandler 
         MessageDispatcherMgr.get().handle(session, msg);
     }
 };
-NetComReadEventHandler = __decorate$6([
+NetComReadEventHandler = __decorate$9([
     EventDecorator(NetComReadEvent, SceneType.CLIENT)
 ], NetComReadEventHandler);
 
@@ -2963,7 +3020,7 @@ class MoyeAssets extends Singleton {
 MoyeAssets._bundleMap = new Map();
 MoyeAssets._bundlePathMap = new Map();
 
-var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2974,7 +3031,7 @@ let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandle
         Game.addSingleton(MoyeAssets);
     }
 };
-AfterProgramInitHandler = __decorate$5([
+AfterProgramInitHandler = __decorate$8([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
 
@@ -3356,6 +3413,16 @@ class MoyeViewMgr extends Entity {
             this._layers.set(layer, layerNode);
             const size = this._uiRoot.getComponent(UITransform).contentSize;
             layerNode.addComponent(UITransform).setContentSize(size);
+            const layerWidget = layerNode.addComponent(Widget);
+            layerWidget.top = 0;
+            layerWidget.bottom = 0;
+            layerWidget.left = 0;
+            layerWidget.right = 0;
+            layerWidget.alignMode = Widget.AlignMode.ON_WINDOW_RESIZE;
+            layerWidget.isAlignBottom = true;
+            layerWidget.isAlignLeft = true;
+            layerWidget.isAlignRight = true;
+            layerWidget.isAlignTop = true;
         }
         return layerNode;
     }
@@ -3424,13 +3491,13 @@ class AMoyeView extends Entity {
     }
 }
 
-var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$4, property: property$4, menu: menu$4 } = _decorator;
+const { ccclass: ccclass$7, property: property$7, menu: menu$4 } = _decorator;
 let SizeFollow = class SizeFollow extends Component {
     constructor() {
         super(...arguments);
@@ -3516,42 +3583,42 @@ let SizeFollow = class SizeFollow extends Component {
         }
     }
 };
-__decorate$4([
-    property$4({ type: UITransform })
+__decorate$7([
+    property$7({ type: UITransform })
 ], SizeFollow.prototype, "target", null);
-__decorate$4([
-    property$4({ type: UITransform })
+__decorate$7([
+    property$7({ type: UITransform })
 ], SizeFollow.prototype, "_target", void 0);
-__decorate$4([
-    property$4
+__decorate$7([
+    property$7
 ], SizeFollow.prototype, "heightFollow", null);
-__decorate$4([
-    property$4
+__decorate$7([
+    property$7
 ], SizeFollow.prototype, "_heightFollow", void 0);
-__decorate$4([
-    property$4
+__decorate$7([
+    property$7
 ], SizeFollow.prototype, "widthFollow", null);
-__decorate$4([
-    property$4
+__decorate$7([
+    property$7
 ], SizeFollow.prototype, "_widthFollow", void 0);
-__decorate$4([
-    property$4({ type: CCFloat })
+__decorate$7([
+    property$7({ type: CCFloat })
 ], SizeFollow.prototype, "_heightOffset", void 0);
-__decorate$4([
-    property$4({ type: CCFloat })
+__decorate$7([
+    property$7({ type: CCFloat })
 ], SizeFollow.prototype, "_widthOffset", void 0);
-SizeFollow = __decorate$4([
-    ccclass$4('SizeFollow'),
+SizeFollow = __decorate$7([
+    ccclass$7('SizeFollow'),
     menu$4('moye/SizeFollow')
 ], SizeFollow);
 
-var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$3, property: property$3, executeInEditMode, menu: menu$3 } = _decorator;
+const { ccclass: ccclass$6, property: property$6, executeInEditMode: executeInEditMode$2, menu: menu$3 } = _decorator;
 var WidgetBase;
 (function (WidgetBase) {
     WidgetBase[WidgetBase["LEFT"] = 1] = "LEFT";
@@ -3883,52 +3950,52 @@ let CTWidget = class CTWidget extends Component {
         }
     }
 };
-__decorate$3([
-    property$3({ type: UITransform })
+__decorate$6([
+    property$6({ type: UITransform })
 ], CTWidget.prototype, "target", null);
-__decorate$3([
-    property$3({ type: UITransform })
+__decorate$6([
+    property$6({ type: UITransform })
 ], CTWidget.prototype, "_target", void 0);
-__decorate$3([
-    property$3({ type: Enum(WidgetBase) })
+__decorate$6([
+    property$6({ type: Enum(WidgetBase) })
 ], CTWidget.prototype, "targetDir", null);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_targetDir", void 0);
-__decorate$3([
-    property$3({ type: Enum(WidgetDirection) })
+__decorate$6([
+    property$6({ type: Enum(WidgetDirection) })
 ], CTWidget.prototype, "dir", null);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_dir", void 0);
-__decorate$3([
-    property$3({ type: CCFloat })
+__decorate$6([
+    property$6({ type: CCFloat })
 ], CTWidget.prototype, "visibleOffset", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_isVertical", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_distance", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_changePos", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_targetOldPos", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_targetOldSize", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_selfOldPos", void 0);
-__decorate$3([
-    property$3
+__decorate$6([
+    property$6
 ], CTWidget.prototype, "_selfOldSize", void 0);
-CTWidget = __decorate$3([
-    ccclass$3('CTWidget'),
+CTWidget = __decorate$6([
+    ccclass$6('CTWidget'),
     menu$3('moye/CTWidget'),
-    executeInEditMode
+    executeInEditMode$2
 ], CTWidget);
 
 const RoundBoxAssembler = {
@@ -4151,13 +4218,13 @@ const RoundBoxAssembler = {
     },
 };
 
-var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$2, property: property$2, type, menu: menu$2 } = _decorator;
+const { ccclass: ccclass$5, property: property$5, type, menu: menu$2 } = _decorator;
 var EventType;
 (function (EventType) {
     EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
@@ -4448,64 +4515,647 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
         }
     }
 };
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_sizeMode", void 0);
-__decorate$2([
+__decorate$5([
     type(Sprite.SizeMode)
 ], RoundBoxSprite.prototype, "sizeMode", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_atlas", void 0);
-__decorate$2([
+__decorate$5([
     type(SpriteAtlas)
 ], RoundBoxSprite.prototype, "spriteAtlas", null);
-__decorate$2([
-    property$2({ type: CCInteger, serializable: true })
+__decorate$5([
+    property$5({ type: CCInteger, serializable: true })
 ], RoundBoxSprite.prototype, "_segments", void 0);
-__decorate$2([
-    property$2({ type: CCInteger, serializable: true, min: 1 })
+__decorate$5([
+    property$5({ type: CCInteger, serializable: true, min: 1 })
 ], RoundBoxSprite.prototype, "segments", null);
-__decorate$2([
-    property$2({ type: CCFloat, serializable: true })
+__decorate$5([
+    property$5({ type: CCFloat, serializable: true })
 ], RoundBoxSprite.prototype, "_radius", void 0);
-__decorate$2([
-    property$2({ type: CCFloat, serializable: true, min: 0 })
+__decorate$5([
+    property$5({ type: CCFloat, serializable: true, min: 0 })
 ], RoundBoxSprite.prototype, "radius", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_spriteFrame", void 0);
-__decorate$2([
+__decorate$5([
     type(SpriteFrame)
 ], RoundBoxSprite.prototype, "spriteFrame", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftTop", void 0);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "leftTop", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightTop", void 0);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "rightTop", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftBottom", void 0);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "leftBottom", null);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightBottom", void 0);
-__decorate$2([
-    property$2({ serializable: true })
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "rightBottom", null);
-RoundBoxSprite = __decorate$2([
-    ccclass$2('RoundBoxSprite'),
+RoundBoxSprite = __decorate$5([
+    ccclass$5('RoundBoxSprite'),
     menu$2('moye/RoundBoxSprite')
 ], RoundBoxSprite);
+
+var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$4, property: property$4, executeInEditMode: executeInEditMode$1 } = _decorator;
+var UIControllerIndex;
+(function (UIControllerIndex) {
+    UIControllerIndex[UIControllerIndex["Index_0"] = 1] = "Index_0";
+    UIControllerIndex[UIControllerIndex["Index_1"] = 2] = "Index_1";
+    UIControllerIndex[UIControllerIndex["Index_2"] = 4] = "Index_2";
+    UIControllerIndex[UIControllerIndex["Index_3"] = 8] = "Index_3";
+    UIControllerIndex[UIControllerIndex["Index_4"] = 16] = "Index_4";
+    UIControllerIndex[UIControllerIndex["Index_5"] = 32] = "Index_5";
+    UIControllerIndex[UIControllerIndex["Index_6"] = 64] = "Index_6";
+    UIControllerIndex[UIControllerIndex["Index_7"] = 128] = "Index_7";
+    UIControllerIndex[UIControllerIndex["Index_8"] = 256] = "Index_8";
+    UIControllerIndex[UIControllerIndex["Index_9"] = 512] = "Index_9";
+    UIControllerIndex[UIControllerIndex["Index_10"] = 1024] = "Index_10";
+    UIControllerIndex[UIControllerIndex["Index_11"] = 2048] = "Index_11";
+    UIControllerIndex[UIControllerIndex["Index_12"] = 4096] = "Index_12";
+})(UIControllerIndex || (UIControllerIndex = {}));
+let UIController = class UIController extends Component {
+    constructor() {
+        super(...arguments);
+        this._index = UIControllerIndex.Index_0;
+        this._listeners = [];
+    }
+    set index(v) {
+        if (this._index == v) {
+            return;
+        }
+        this._index = v;
+        this.notifyListeners();
+    }
+    get index() {
+        return this._index;
+    }
+    onDestroy() {
+        this._listeners = [];
+    }
+    addListener(listener) {
+        if (this._listeners.indexOf(listener) == -1) {
+            this._listeners.push(listener);
+        }
+        if (EDITOR) {
+            // 检查是否有null或者undefined 如果有就移除
+            for (let i = this._listeners.length - 1; i >= 0; i--) {
+                if (this._listeners[i] == null || this._listeners[i] == undefined) {
+                    this._listeners.splice(i, 1);
+                }
+            }
+        }
+    }
+    removeListener(listener) {
+        const index = this._listeners.indexOf(listener);
+        if (index != -1) {
+            this._listeners.splice(index, 1);
+        }
+        if (EDITOR) {
+            // 检查是否有null或者undefined 如果有就移除
+            for (let i = this._listeners.length - 1; i >= 0; i--) {
+                if (this._listeners[i] == null || this._listeners[i] == undefined) {
+                    this._listeners.splice(i, 1);
+                }
+            }
+        }
+    }
+    notifyListeners() {
+        for (let i = 0; i < this._listeners.length; i++) {
+            if (this._listeners[i]) {
+                this._listeners[i].onChangeIndex(this._index);
+            }
+        }
+        if (EDITOR) {
+            // 检查是否有null或者undefined 如果有就移除
+            for (let i = this._listeners.length - 1; i >= 0; i--) {
+                if (this._listeners[i] == null || this._listeners[i] == undefined) {
+                    this._listeners.splice(i, 1);
+                }
+            }
+            const selfListener = this.node.getComponent("UIControllerListener");
+            if (selfListener) {
+                selfListener['registerUIController']();
+            }
+        }
+    }
+};
+__decorate$4([
+    property$4
+], UIController.prototype, "_index", void 0);
+__decorate$4([
+    property$4({ type: Enum(UIControllerIndex), displayOrder: 1 })
+], UIController.prototype, "index", null);
+__decorate$4([
+    property$4
+], UIController.prototype, "_listeners", void 0);
+UIController = __decorate$4([
+    ccclass$4('UIController'),
+    executeInEditMode$1
+], UIController);
+
+var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$3, property: property$3, } = _decorator;
+var UIControllerIndexMask;
+(function (UIControllerIndexMask) {
+    UIControllerIndexMask[UIControllerIndexMask["Index_0"] = 1] = "Index_0";
+    UIControllerIndexMask[UIControllerIndexMask["Index_1"] = 2] = "Index_1";
+    UIControllerIndexMask[UIControllerIndexMask["Index_2"] = 4] = "Index_2";
+    UIControllerIndexMask[UIControllerIndexMask["Index_3"] = 8] = "Index_3";
+    UIControllerIndexMask[UIControllerIndexMask["Index_4"] = 16] = "Index_4";
+    UIControllerIndexMask[UIControllerIndexMask["Index_5"] = 32] = "Index_5";
+    UIControllerIndexMask[UIControllerIndexMask["Index_6"] = 64] = "Index_6";
+    UIControllerIndexMask[UIControllerIndexMask["Index_7"] = 128] = "Index_7";
+    UIControllerIndexMask[UIControllerIndexMask["Index_8"] = 256] = "Index_8";
+    UIControllerIndexMask[UIControllerIndexMask["Index_9"] = 512] = "Index_9";
+    UIControllerIndexMask[UIControllerIndexMask["Index_10"] = 1024] = "Index_10";
+    UIControllerIndexMask[UIControllerIndexMask["Index_11"] = 2048] = "Index_11";
+    UIControllerIndexMask[UIControllerIndexMask["Index_12"] = 4096] = "Index_12";
+})(UIControllerIndexMask || (UIControllerIndexMask = {}));
+var UIControlType;
+(function (UIControlType) {
+    UIControlType[UIControlType["None"] = 0] = "None";
+    UIControlType[UIControlType["Visible"] = 1] = "Visible";
+    UIControlType[UIControlType["Position"] = 2] = "Position";
+    UIControlType[UIControlType["Size"] = 3] = "Size";
+    UIControlType[UIControlType["Scale"] = 4] = "Scale";
+    UIControlType[UIControlType["Angle"] = 5] = "Angle";
+    UIControlType[UIControlType["Anchor"] = 6] = "Anchor";
+    UIControlType[UIControlType["UIController"] = 7] = "UIController";
+})(UIControlType || (UIControlType = {}));
+let UIControllerAttr = class UIControllerAttr {
+    constructor() {
+        this.controlType = UIControlType.None;
+        this.indexMask = UIControllerIndexMask.Index_0;
+        this._positionMap = {};
+        this._sizeMap = {};
+        this._scaleMap = {};
+        this._angleMap = {};
+        this._anchorMap = {};
+        this._uiControllerMap = {};
+    }
+    hasIndex(index) {
+        return (this.indexMask & index) != 0;
+    }
+    setPosition(index, pos) {
+        this._positionMap[index] = pos.clone();
+    }
+    getPosition(index) {
+        return this._positionMap[index];
+    }
+    setSize(index, size) {
+        this._sizeMap[index] = size.clone();
+    }
+    getSize(index) {
+        return this._sizeMap[index];
+    }
+    setScale(index, scale) {
+        this._scaleMap[index] = scale.clone();
+    }
+    getScale(index) {
+        return this._scaleMap[index];
+    }
+    setAngle(index, angle) {
+        this._angleMap[index] = angle;
+    }
+    getAngle(index) {
+        return this._angleMap[index];
+    }
+    setAnchor(index, anchor) {
+        this._anchorMap[index] = anchor.clone();
+    }
+    getAnchor(index) {
+        return this._anchorMap[index];
+    }
+    setUIController(index, controllerIndex) {
+        this._uiControllerMap[index] = controllerIndex;
+    }
+    getUIController(index) {
+        return this._uiControllerMap[index];
+    }
+    clearOtherData() {
+        switch (this.controlType) {
+            case UIControlType.Visible:
+                this.clearPositionData();
+                this.clearSizeData();
+                this.clearScaleData();
+                this.clearAngleData();
+                this.clearAnchorData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.Position:
+                this.clearSizeData();
+                this.clearScaleData();
+                this.clearAngleData();
+                this.clearAnchorData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.Size:
+                this.clearPositionData();
+                this.clearScaleData();
+                this.clearAngleData();
+                this.clearAnchorData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.Scale:
+                this.clearPositionData();
+                this.clearSizeData();
+                this.clearAngleData();
+                this.clearAnchorData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.Angle:
+                this.clearPositionData();
+                this.clearSizeData();
+                this.clearScaleData();
+                this.clearAnchorData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.Anchor:
+                this.clearPositionData();
+                this.clearSizeData();
+                this.clearScaleData();
+                this.clearAngleData();
+                this.clearUIControllerData();
+                break;
+            case UIControlType.UIController:
+                this.clearPositionData();
+                this.clearSizeData();
+                this.clearScaleData();
+                this.clearAngleData();
+                this.clearAnchorData();
+                break;
+        }
+    }
+    clearPositionData() {
+        this._positionMap = {};
+    }
+    clearSizeData() {
+        this._sizeMap = {};
+    }
+    clearScaleData() {
+        this._scaleMap = {};
+    }
+    clearAngleData() {
+        this._angleMap = {};
+    }
+    clearAnchorData() {
+        this._anchorMap = {};
+    }
+    clearUIControllerData() {
+        this._uiControllerMap = {};
+    }
+};
+__decorate$3([
+    property$3({ type: Enum(UIControlType) })
+], UIControllerAttr.prototype, "controlType", void 0);
+__decorate$3([
+    property$3({
+        type: BitMask(UIControllerIndexMask),
+        visible() { return this.controlType == UIControlType.Visible; }
+    })
+], UIControllerAttr.prototype, "indexMask", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_positionMap", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_sizeMap", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_scaleMap", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_angleMap", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_anchorMap", void 0);
+__decorate$3([
+    property$3
+], UIControllerAttr.prototype, "_uiControllerMap", void 0);
+UIControllerAttr = __decorate$3([
+    ccclass$3('UIControllerAttr')
+], UIControllerAttr);
+
+var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$2, property: property$2, executeInEditMode } = _decorator;
+let UIControllerListener = class UIControllerListener extends Component {
+    constructor() {
+        super(...arguments);
+        this._controller = null;
+        this._attrs = [];
+    }
+    set controller(v) {
+        if (this._controller == v) {
+            return;
+        }
+        if (this._controller) {
+            this._controller.removeListener(this);
+        }
+        this._controller = v;
+        this.listenController();
+    }
+    get controller() {
+        return this._controller;
+    }
+    get curIndex() {
+        if (!this._controller) {
+            return '';
+        }
+        const str = `${UIControllerIndex[this._controller.index]}`;
+        return str;
+    }
+    set attrs(v) {
+        this._attrs = v;
+        this.updateAttr();
+    }
+    get attrs() {
+        return this._attrs;
+    }
+    onLoad() {
+        this.listenController();
+    }
+    onDestroy() {
+        if (EDITOR) {
+            this.unRegisterEditorEvent();
+        }
+        else {
+            if (!this._controller) {
+                return;
+            }
+            this._controller.removeListener(this);
+        }
+    }
+    onDisable() {
+        // if(EDITOR){
+        //     setTimeout(() => {
+        //         if(!this.node.isValid){
+        //             if (!this._controller) {
+        //                 return;
+        //             }
+        //             console.log('移除监听22');
+        //             this._controller.removeListener(this);
+        //         }
+        //     });
+        // }
+    }
+    onFocusInEditor() {
+        this.registerEditorEvent();
+    }
+    onLostFocusInEditor() {
+        this.unRegisterEditorEvent();
+        // if(!this.node.isValid){
+        //     if (!this._controller) {
+        //         return;
+        //     }
+        //     console.log('移除监听22');
+        //     this._controller.removeListener(this);
+        // }
+    }
+    registerEditorEvent() {
+        this.unRegisterEditorEvent();
+        this.node.on(Node.EventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onChangeActive, this);
+        this.node.on(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
+        this.node.on(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
+        this.node.on(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+    }
+    unRegisterEditorEvent() {
+        this.node.off(Node.EventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onChangeActive, this);
+        this.node.off(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
+        this.node.off(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
+        this.node.off(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+    }
+    listenController() {
+        if (!this._controller) {
+            return;
+        }
+        // this._controller.removeListener(this);
+        this._controller.addListener(this);
+    }
+    onChangeActive() {
+        // this.registerVisible();
+    }
+    onTransformChange() {
+        this.registerTransform();
+    }
+    onSizeChange() {
+        this.registerSize();
+    }
+    onAnchorChange() {
+        this.registerAnchor();
+    }
+    // private registerVisible() {
+    //     if (!this._controller) {
+    //         return;
+    //     }
+    //     let index = this._controller.index;
+    //     for (let i = 0; i < this._attrs.length; i++) {
+    //         let attr = this._attrs[i];
+    //         if (attr.controlType == UIControlType.Visible) {
+    //             // attr.visibleSet.add(index);
+    //         }
+    //     }
+    // }
+    registerTransform() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            if (attr.controlType == UIControlType.Position) {
+                attr.setPosition(index, this.node.position);
+            }
+            else if (attr.controlType == UIControlType.Scale) {
+                attr.setScale(index, this.node.scale);
+            }
+            else if (attr.controlType == UIControlType.Angle) {
+                attr.setAngle(index, this.node.angle);
+            }
+        }
+    }
+    registerSize() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            if (attr.controlType == UIControlType.Size) {
+                const uiTransform = this.node.getComponent(UITransform);
+                attr.setSize(index, uiTransform.contentSize);
+            }
+        }
+    }
+    registerAnchor() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            if (attr.controlType == UIControlType.Anchor) {
+                const uiTransform = this.node.getComponent(UITransform);
+                attr.setAnchor(index, uiTransform.anchorPoint);
+            }
+        }
+    }
+    registerUIController() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            if (attr.controlType == UIControlType.UIController) {
+                attr.setUIController(index, this.node.getComponent(UIController).index);
+            }
+        }
+    }
+    updateAttr() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            attr.clearOtherData();
+        }
+        this.onChangeIndex(index);
+    }
+    onChangeIndex(index) {
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            switch (attr.controlType) {
+                case UIControlType.Visible: {
+                    this.node.active = attr.hasIndex(index);
+                    break;
+                }
+                case UIControlType.Position: {
+                    const pos = attr.getPosition(index);
+                    if (pos) {
+                        this.node.position = pos;
+                    }
+                    else {
+                        attr.setPosition(index, this.node.position);
+                    }
+                    break;
+                }
+                case UIControlType.Size: {
+                    const size = attr.getSize(index);
+                    const uiTransform = this.node.getComponent(UITransform);
+                    if (size) {
+                        uiTransform.setContentSize(size);
+                    }
+                    else {
+                        attr.setSize(index, uiTransform.contentSize);
+                    }
+                    break;
+                }
+                case UIControlType.Scale:
+                    {
+                        const scale = attr.getScale(index);
+                        if (scale) {
+                            this.node.scale = scale;
+                        }
+                        else {
+                            attr.setScale(index, this.node.scale);
+                        }
+                        break;
+                    }
+                case UIControlType.Angle: {
+                    const angle = attr.getAngle(index);
+                    if (angle == null || angle == undefined) {
+                        attr.setAngle(index, this.node.angle);
+                    }
+                    else {
+                        this.node.angle = angle;
+                    }
+                    break;
+                }
+                case UIControlType.Anchor: {
+                    const anchor = attr.getAnchor(index);
+                    if (anchor) {
+                        const uiTransform = this.node.getComponent(UITransform);
+                        uiTransform.setAnchorPoint(anchor);
+                    }
+                    else {
+                        attr.setAnchor(index, this.node.getComponent(UITransform).anchorPoint);
+                    }
+                    break;
+                }
+                case UIControlType.UIController: {
+                    const controllerIndex = attr.getUIController(index);
+                    if (controllerIndex != null && controllerIndex != undefined) {
+                        this.node.getComponent(UIController).index = controllerIndex;
+                    }
+                    else {
+                        attr.setUIController(index, this.node.getComponent(UIController).index);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+};
+__decorate$2([
+    property$2
+], UIControllerListener.prototype, "_controller", void 0);
+__decorate$2([
+    property$2(UIController)
+], UIControllerListener.prototype, "controller", null);
+__decorate$2([
+    property$2({
+        type: [CCString],
+        visible() { return this._controller != null; }
+    })
+], UIControllerListener.prototype, "curIndex", null);
+__decorate$2([
+    property$2
+], UIControllerListener.prototype, "_attrs", void 0);
+__decorate$2([
+    property$2({
+        type: [UIControllerAttr],
+        visible() { return this._controller != null; }
+    })
+], UIControllerListener.prototype, "attrs", null);
+UIControllerListener = __decorate$2([
+    ccclass$2('UIControllerListener'),
+    executeInEditMode
+], UIControllerListener);
 
 var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -5023,4 +5673,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, NetCom, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };

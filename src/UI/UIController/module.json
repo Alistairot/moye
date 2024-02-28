@@ -1,0 +1,14 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "UIController",
+
+    "description-explain":"模块描述",
+    "description": "ui controller like fgui",
+
+    "entry-explain":"入口文件",
+    "entry": "Index.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+    ]
+}

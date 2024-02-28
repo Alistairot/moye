@@ -1,4 +1,4 @@
-import { Node, UITransform } from "cc";
+import { Node, UITransform, Widget } from "cc";
 import { CoroutineLock, DecoratorCollector, Entity, JsHelper, Task, TimeInfo, TimerMgr, Type } from "../../Core/Core";
 import { AMoyeView } from "./AMoyeView";
 import { IViewConfig } from "./IViewConfig";
@@ -213,6 +213,17 @@ export class MoyeViewMgr extends Entity {
 
             const size = this._uiRoot.getComponent(UITransform).contentSize;
             layerNode.addComponent(UITransform).setContentSize(size);
+
+            const layerWidget = layerNode.addComponent(Widget);
+            layerWidget.top = 0;
+            layerWidget.bottom = 0;
+            layerWidget.left = 0;
+            layerWidget.right = 0;
+            layerWidget.alignMode = Widget.AlignMode.ON_WINDOW_RESIZE;
+            layerWidget.isAlignBottom = true;
+            layerWidget.isAlignLeft = true;
+            layerWidget.isAlignRight = true;
+            layerWidget.isAlignTop = true;
         }
 
         return layerNode;

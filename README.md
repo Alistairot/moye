@@ -24,8 +24,3 @@ npm install
 cd gulp
 gulp build
 ```
-
-### todo
-add demo  
-add documentation  
-add cocos-node module  

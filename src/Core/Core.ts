@@ -32,3 +32,4 @@ export * from "./Scene/SceneRefCom";
 export * from "./Task/Task";
 export * from "./Type/Action";
 export * from "./Type/Type";
+export * from "./DataStructure/MultiMap";

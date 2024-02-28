@@ -12,4 +12,5 @@ export * from './UI/AsyncExt/Index';
 export * from './UI/MoyeUI/Index';
 export * from './UI/Relation/Relation';
 export * from './UI/RoundBoxSprite/RoundBoxSprite';
+export * from './UI/UIController/Index';
 export * from './UI/YYJJoystick/Index';

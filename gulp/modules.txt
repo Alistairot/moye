@@ -54,6 +54,10 @@ a simple ui manager
 [export=true]
 圆角矩形
 
+[name=UIController]
+[export=true]
+ui controller like fgui
+
 [name=YYJJoystick]
 [export=true]
 一个摇杆的控制器
