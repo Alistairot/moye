@@ -1,6 +1,6 @@
 import { _decorator, CCInteger, Component, Enum, Node } from 'cc';
 import { EDITOR, EDITOR_NOT_IN_PREVIEW } from 'cc/env';
-const { ccclass, property, executeInEditMode } = _decorator;
+const { ccclass, property, executeInEditMode, menu } = _decorator;
 
 export enum UIControllerIndex {
     Index_0 = 1 << 0,
@@ -23,6 +23,7 @@ interface IUIControllerIndexListener {
 }
 
 @ccclass('UIController')
+@menu('moye/UIController')
 @executeInEditMode
 export class UIController extends Component {
     @property

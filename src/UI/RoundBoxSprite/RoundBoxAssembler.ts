@@ -1,3 +1,4 @@
+// import { IAssembler, IRenderData, RenderData, dynamicAtlasManager } from "cc";
 import { IAssembler, IRenderData, RenderData, dynamicAtlasManager } from "cc";
 import { RoundBoxSprite } from "./RoundBoxSprite";
 
@@ -107,6 +108,13 @@ export const RoundBoxAssembler: IAssembler = {
             this.updateWorldVerts(sprite, chunk);
             renderData.vertDirty = false;
         }
+        if (sprite["_flagChangedVersion"] !== sprite.node["flagChangedVersion"] || renderData.vertDirty) {
+            // const vb = chunk.vertexAccessor.getVertexBuffer(chunk.bufferId);
+            this.updateWorldVerts(sprite, chunk);
+            renderData.vertDirty = false;
+            sprite["_flagChangedVersion"] = sprite.node["flagChangedVersion"];
+        }
+
 
         // quick version
         const bid = chunk.bufferId;

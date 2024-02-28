@@ -1,4 +1,4 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, Widget, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, CCBoolean, RigidBody2D } from 'cc';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, Widget, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, CCBoolean, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
 import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -3497,7 +3497,7 @@ var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$7, property: property$7, menu: menu$4 } = _decorator;
+const { ccclass: ccclass$7, property: property$7, menu: menu$6 } = _decorator;
 let SizeFollow = class SizeFollow extends Component {
     constructor() {
         super(...arguments);
@@ -3609,7 +3609,7 @@ __decorate$7([
 ], SizeFollow.prototype, "_widthOffset", void 0);
 SizeFollow = __decorate$7([
     ccclass$7('SizeFollow'),
-    menu$4('moye/SizeFollow')
+    menu$6('moye/SizeFollow')
 ], SizeFollow);
 
 var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -3618,7 +3618,7 @@ var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$6, property: property$6, executeInEditMode: executeInEditMode$2, menu: menu$3 } = _decorator;
+const { ccclass: ccclass$6, property: property$6, executeInEditMode: executeInEditMode$2, menu: menu$5 } = _decorator;
 var WidgetBase;
 (function (WidgetBase) {
     WidgetBase[WidgetBase["LEFT"] = 1] = "LEFT";
@@ -3994,10 +3994,11 @@ __decorate$6([
 ], CTWidget.prototype, "_selfOldSize", void 0);
 CTWidget = __decorate$6([
     ccclass$6('CTWidget'),
-    menu$3('moye/CTWidget'),
+    menu$5('moye/CTWidget'),
     executeInEditMode$2
 ], CTWidget);
 
+// import { IAssembler, IRenderData, RenderData, dynamicAtlasManager } from "cc";
 const RoundBoxAssembler = {
     // 根据圆角segments参数，构造网格的顶点索引列表
     GetIndexBuffer(sprite) {
@@ -4090,6 +4091,12 @@ const RoundBoxAssembler = {
             // const vb = chunk.vertexAccessor.getVertexBuffer(chunk.bufferId);
             this.updateWorldVerts(sprite, chunk);
             renderData.vertDirty = false;
+        }
+        if (sprite["_flagChangedVersion"] !== sprite.node["flagChangedVersion"] || renderData.vertDirty) {
+            // const vb = chunk.vertexAccessor.getVertexBuffer(chunk.bufferId);
+            this.updateWorldVerts(sprite, chunk);
+            renderData.vertDirty = false;
+            sprite["_flagChangedVersion"] = sprite.node["flagChangedVersion"];
         }
         // quick version
         chunk.bufferId;
@@ -4224,7 +4231,7 @@ var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$5, property: property$5, type, menu: menu$2 } = _decorator;
+const { ccclass: ccclass$5, property: property$5, type, menu: menu$4 } = _decorator;
 var EventType;
 (function (EventType) {
     EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
@@ -4234,6 +4241,11 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
         super(...arguments);
         // 尺寸模式，可以看枚举原本定义的地方有注释说明
         this._sizeMode = Sprite.SizeMode.TRIMMED;
+        /**
+         * @en Grayscale mode.
+         * @zh 是否以灰度模式渲染。
+         */
+        this._useGrayscale = false;
         // 图集
         this._atlas = null;
         // 圆角用三角形模拟扇形的线段数量，越大，则越圆滑
@@ -4257,6 +4269,17 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
         if (value !== Sprite.SizeMode.CUSTOM) {
             this._applySpriteSize();
         }
+    }
+    get grayscale() {
+        return this._useGrayscale;
+    }
+    set grayscale(value) {
+        if (this._useGrayscale === value) {
+            return;
+        }
+        this._useGrayscale = value;
+        this.changeMaterialForDefine();
+        this["updateMaterial"]();
     }
     get spriteAtlas() {
         return this._atlas;
@@ -4383,8 +4406,14 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
             const format = texture.getPixelFormat();
             value = (format === cclegacy.TextureBase.PixelFormat.RGBA_ETC1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_4BPPV1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_2BPPV1);
         }
-        if (value) {
+        if (value && this.grayscale) {
+            this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED_AND_GRAY;
+        }
+        else if (value) {
             this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED;
+        }
+        else if (this.grayscale) {
+            this._instanceMaterialType = InstanceMaterialType.GRAYSCALE;
         }
         else {
             this._instanceMaterialType = InstanceMaterialType.ADD_COLOR_AND_TEXTURE;
@@ -4445,7 +4474,7 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
     }
     _applySpriteSize() {
         if (this._spriteFrame) {
-            if (BUILD || !this._spriteFrame) {
+            if (BUILD || !this._spriteFrame.isDefault) {
                 if (Sprite.SizeMode.RAW === this._sizeMode) {
                     const size = this._spriteFrame.originalSize;
                     this.node._uiProps.uiTransformComp.setContentSize(size);
@@ -4523,6 +4552,12 @@ __decorate$5([
 ], RoundBoxSprite.prototype, "sizeMode", null);
 __decorate$5([
     property$5({ serializable: true })
+], RoundBoxSprite.prototype, "_useGrayscale", void 0);
+__decorate$5([
+    property$5({ type: CCBoolean })
+], RoundBoxSprite.prototype, "grayscale", null);
+__decorate$5([
+    property$5({ serializable: true })
 ], RoundBoxSprite.prototype, "_atlas", void 0);
 __decorate$5([
     type(SpriteAtlas)
@@ -4571,7 +4606,7 @@ __decorate$5([
 ], RoundBoxSprite.prototype, "rightBottom", null);
 RoundBoxSprite = __decorate$5([
     ccclass$5('RoundBoxSprite'),
-    menu$2('moye/RoundBoxSprite')
+    menu$4('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
 var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -4580,7 +4615,7 @@ var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$4, property: property$4, executeInEditMode: executeInEditMode$1 } = _decorator;
+const { ccclass: ccclass$4, property: property$4, executeInEditMode: executeInEditMode$1, menu: menu$3 } = _decorator;
 var UIControllerIndex;
 (function (UIControllerIndex) {
     UIControllerIndex[UIControllerIndex["Index_0"] = 1] = "Index_0";
@@ -4674,6 +4709,7 @@ __decorate$4([
 ], UIController.prototype, "_listeners", void 0);
 UIController = __decorate$4([
     ccclass$4('UIController'),
+    menu$3('moye/UIController'),
     executeInEditMode$1
 ], UIController);
 
@@ -4871,7 +4907,7 @@ var __decorate$2 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$2, property: property$2, executeInEditMode } = _decorator;
+const { ccclass: ccclass$2, property: property$2, executeInEditMode, menu: menu$2 } = _decorator;
 let UIControllerListener = class UIControllerListener extends Component {
     constructor() {
         super(...arguments);
@@ -5154,6 +5190,7 @@ __decorate$2([
 ], UIControllerListener.prototype, "attrs", null);
 UIControllerListener = __decorate$2([
     ccclass$2('UIControllerListener'),
+    menu$2('moye/UIControllerListener'),
     executeInEditMode
 ], UIControllerListener);
 

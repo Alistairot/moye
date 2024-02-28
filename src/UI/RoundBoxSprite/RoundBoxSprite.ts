@@ -1,8 +1,9 @@
-import { _decorator, ccenum, CCFloat, CCInteger, cclegacy, Component, InstanceMaterialType, Material, Node, NodeEventType, RenderTexture, serializeTag, Sprite, SpriteAtlas, SpriteFrame, UIRenderer, Vec2} from 'cc';
+import { _decorator, CCBoolean, CCFloat, CCInteger, cclegacy, InstanceMaterialType, Material, Node, NodeEventType, RenderTexture, Sprite, SpriteAtlas, SpriteFrame, UIRenderer } from 'cc';
 import { BUILD, EDITOR } from 'cc/env';
 import { RoundBoxAssembler } from './RoundBoxAssembler';
 
-const { ccclass, property,type, menu} = _decorator;
+const { ccclass, property, type, menu } = _decorator;
+
 enum EventType {
     SPRITE_FRAME_CHANGED = 'spriteframe-changed',
 }
@@ -11,13 +12,13 @@ enum EventType {
 @menu('moye/RoundBoxSprite')
 export class RoundBoxSprite extends UIRenderer {
     // 尺寸模式，可以看枚举原本定义的地方有注释说明
-    @property({serializable:true})
+    @property({ serializable: true })
     protected _sizeMode = Sprite.SizeMode.TRIMMED;
     @type(Sprite.SizeMode)
-    get sizeMode () {
+    get sizeMode() {
         return this._sizeMode;
     }
-    set sizeMode (value) {
+    set sizeMode(value) {
         if (this._sizeMode === value) {
             return;
         }
@@ -27,23 +28,44 @@ export class RoundBoxSprite extends UIRenderer {
             this._applySpriteSize();
         }
     }
+    /**
+     * @en Grayscale mode.
+     * @zh 是否以灰度模式渲染。
+     */
+
+    @property({ serializable: true })
+    protected _useGrayscale = false;
+
+    @property({ type: CCBoolean })
+    get grayscale(): boolean {
+        return this._useGrayscale;
+    }
+    set grayscale(value) {
+        if (this._useGrayscale === value) {
+            return;
+        }
+        this._useGrayscale = value;
+        this.changeMaterialForDefine();
+        this["updateMaterial"]();
+    }
+
     // 图集
-    @property({serializable:true})
+    @property({ serializable: true })
     protected _atlas: SpriteAtlas | null = null;
     @type(SpriteAtlas)
-    get spriteAtlas () {
+    get spriteAtlas() {
         return this._atlas;
     }
-    set spriteAtlas (value) {
+    set spriteAtlas(value) {
         if (this._atlas === value) {
             return;
         }
         this._atlas = value;
     }
     // 圆角用三角形模拟扇形的线段数量，越大，则越圆滑
-    @property({type:CCInteger, serializable:true})
-        _segments:number = 10;
-    @property({type:CCInteger, serializable:true, min:1})
+    @property({ type: CCInteger, serializable: true })
+        _segments: number = 10;
+    @property({ type: CCInteger, serializable: true, min: 1 })
     public get segments() {
         return this._segments;
     }
@@ -53,9 +75,9 @@ export class RoundBoxSprite extends UIRenderer {
         this._flushAssembler();
     }
     // 圆角半径
-    @property({type:CCFloat, serializable:true})
-        _radius:number = 20;
-    @property({type:CCFloat, serializable:true, min:0})
+    @property({ type: CCFloat, serializable: true })
+        _radius: number = 20;
+    @property({ type: CCFloat, serializable: true, min: 0 })
     public get radius() {
         return this._radius;
     }
@@ -65,13 +87,13 @@ export class RoundBoxSprite extends UIRenderer {
         this.markForUpdateRenderData(true);
     }
 
-    @property({serializable:true})
+    @property({ serializable: true })
     protected _spriteFrame: SpriteFrame | null = null;
     @type(SpriteFrame)
-    get spriteFrame () {
+    get spriteFrame() {
         return this._spriteFrame;
     }
-    set spriteFrame (value) {
+    set spriteFrame(value) {
         if (this._spriteFrame === value) {
             return;
         }
@@ -84,43 +106,43 @@ export class RoundBoxSprite extends UIRenderer {
             this.node.emit(EventType.SPRITE_FRAME_CHANGED, this);
         }
     }
-    @property({serializable:true})
-    protected _leftTop:boolean = true;
-    @property({serializable:true})
-    get leftTop () {
+    @property({ serializable: true })
+    protected _leftTop: boolean = true;
+    @property({ serializable: true })
+    get leftTop() {
         return this._leftTop;
     }
-    set leftTop (value:boolean) {
+    set leftTop(value: boolean) {
         this._leftTop = value;
         this.resetAssembler();
     }
-    @property({serializable:true})
-    protected _rightTop:boolean = true;
-    @property({serializable:true})
-    get rightTop () {
+    @property({ serializable: true })
+    protected _rightTop: boolean = true;
+    @property({ serializable: true })
+    get rightTop() {
         return this._rightTop;
     }
-    set rightTop (value:boolean) {
+    set rightTop(value: boolean) {
         this._rightTop = value;
         this.resetAssembler();
     }
-    @property({serializable:true})
-    protected _leftBottom:boolean = true;
-    @property({serializable:true})
-    get leftBottom () {
+    @property({ serializable: true })
+    protected _leftBottom: boolean = true;
+    @property({ serializable: true })
+    get leftBottom() {
         return this._leftBottom;
     }
-    set leftBottom (value:boolean) {
+    set leftBottom(value: boolean) {
         this._leftBottom = value;
         this.resetAssembler();
     }
-    @property({serializable:true})
-    protected _rightBottom:boolean = true;
-    @property({serializable:true})
-    get rightBottom () {
+    @property({ serializable: true })
+    protected _rightBottom: boolean = true;
+    @property({ serializable: true })
+    get rightBottom() {
         return this._rightBottom;
     }
-    set rightBottom (value:boolean) {
+    set rightBottom(value: boolean) {
         this._rightBottom = value;
         this.resetAssembler();
     }
@@ -128,7 +150,7 @@ export class RoundBoxSprite extends UIRenderer {
         this._flushAssembler();
     }
 
-    public __preload () {
+    public __preload() {
         this.changeMaterialForDefine();
         super.__preload();
 
@@ -138,7 +160,7 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    public onEnable () {
+    public onEnable() {
         super.onEnable();
 
         // Force update uv, material define, active material, etc
@@ -149,7 +171,7 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    public onDestroy () {
+    public onDestroy() {
         if (EDITOR) {
             this.node.off(NodeEventType.SIZE_CHANGED, this._resized, this);
         }
@@ -165,7 +187,7 @@ export class RoundBoxSprite extends UIRenderer {
      * 选取使用精灵图集中的其他精灵。
      * @param name @en Name of the spriteFrame to switch. @zh 要切换的 spriteFrame 名字。
      */
-    public changeSpriteFrameFromAtlas (name: string) {
+    public changeSpriteFrameFromAtlas(name: string) {
         if (!this._atlas) {
             console.warn('SpriteAtlas is null.');
             return;
@@ -177,7 +199,7 @@ export class RoundBoxSprite extends UIRenderer {
     /**
      * @deprecated Since v3.7.0, this is an engine private interface that will be removed in the future.
      */
-    public changeMaterialForDefine () {
+    public changeMaterialForDefine() {
         let texture;
         const lastInstanceMaterialType = this._instanceMaterialType;
         if (this._spriteFrame) {
@@ -189,8 +211,12 @@ export class RoundBoxSprite extends UIRenderer {
             value = (format === cclegacy.TextureBase.PixelFormat.RGBA_ETC1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_4BPPV1 || format === cclegacy.TextureBase.PixelFormat.RGB_A_PVRTC_2BPPV1);
         }
 
-        if (value) {
+        if (value && this.grayscale) {
+            this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED_AND_GRAY;
+        } else if (value) {
             this._instanceMaterialType = InstanceMaterialType.USE_ALPHA_SEPARATED;
+        } else if (this.grayscale) {
+            this._instanceMaterialType = InstanceMaterialType.GRAYSCALE;
         } else {
             this._instanceMaterialType = InstanceMaterialType.ADD_COLOR_AND_TEXTURE;
         }
@@ -201,7 +227,7 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    protected _updateBuiltinMaterial () {
+    protected _updateBuiltinMaterial() {
         let mat = super._updateBuiltinMaterial();
         if (this.spriteFrame && this.spriteFrame.texture instanceof RenderTexture) {
             const defines = { SAMPLE_FROM_RT: true, ...mat.passes[0].defines };
@@ -215,11 +241,11 @@ export class RoundBoxSprite extends UIRenderer {
         return mat;
     }
 
-    protected _render (render) {
+    protected _render(render) {
         render.commitComp(this, this.renderData, this._spriteFrame, this._assembler, null);
     }
 
-    protected _canRender () {
+    protected _canRender() {
         if (!super._canRender()) {
             return false;
         }
@@ -236,7 +262,7 @@ export class RoundBoxSprite extends UIRenderer {
         this._assembler = null;
         this._flushAssembler();
     }
-    protected _flushAssembler () {
+    protected _flushAssembler() {
         const assembler = RoundBoxAssembler;
 
         if (this._assembler !== assembler) {
@@ -258,9 +284,9 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    private _applySpriteSize () {
+    private _applySpriteSize() {
         if (this._spriteFrame) {
-            if (BUILD || !this._spriteFrame) {
+            if (BUILD || !this._spriteFrame.isDefault) {
                 if (Sprite.SizeMode.RAW === this._sizeMode) {
                     const size = this._spriteFrame.originalSize;
                     this.node._uiProps.uiTransformComp!.setContentSize(size);
@@ -274,7 +300,7 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    private _resized () {
+    private _resized() {
         if (!EDITOR) {
             return;
         }
@@ -299,7 +325,7 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    private _activateMaterial () {
+    private _activateMaterial() {
         const spriteFrame = this._spriteFrame;
         const material = this.getRenderMaterial(0);
         if (spriteFrame) {
@@ -313,13 +339,13 @@ export class RoundBoxSprite extends UIRenderer {
         }
     }
 
-    private _updateUVs () {
+    private _updateUVs() {
         if (this._assembler) {
             this._assembler.updateUVs(this);
         }
     }
 
-    private _applySpriteFrame (oldFrame: SpriteFrame | null) {
+    private _applySpriteFrame(oldFrame: SpriteFrame | null) {
         const spriteFrame = this._spriteFrame;
 
         let textureChanged = false;

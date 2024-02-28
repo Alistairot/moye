@@ -1162,6 +1162,13 @@ export declare class RoundBoxSprite extends UIRenderer {
 	protected _sizeMode: import("cc").__private._cocos_2d_components_sprite__SizeMode;
 	get sizeMode(): import("cc").__private._cocos_2d_components_sprite__SizeMode;
 	set sizeMode(value: import("cc").__private._cocos_2d_components_sprite__SizeMode);
+	/**
+	 * @en Grayscale mode.
+	 * @zh 是否以灰度模式渲染。
+	 */
+	protected _useGrayscale: boolean;
+	get grayscale(): boolean;
+	set grayscale(value: boolean);
 	protected _atlas: SpriteAtlas | null;
 	get spriteAtlas(): SpriteAtlas;
 	set spriteAtlas(value: SpriteAtlas);

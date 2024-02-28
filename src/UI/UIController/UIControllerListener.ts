@@ -2,9 +2,10 @@ import { _decorator, CCString, Component, isValid, Node, UITransform, v3 } from 
 import { UIControllerAttr, UIControlType } from './UIControllerAttr';
 import { UIController, UIControllerIndex } from './UIController';
 import { EDITOR } from 'cc/env';
-const { ccclass, property, executeInEditMode } = _decorator;
+const { ccclass, property, executeInEditMode, menu } = _decorator;
 
 @ccclass('UIControllerListener')
+@menu('moye/UIControllerListener')
 @executeInEditMode
 export class UIControllerListener extends Component {
     @property
