@@ -5,11 +5,11 @@ support cocos creator version 3.8^
 
 ### install to cocos creator project
 ```bash
-npm i moye@npm:moye-client
+npm i moye@npm:moye-cocos
 ```
 or
 ```bash
-npm i moye@Alistairot/moye-client
+npm i moye@Alistairot/moye
 ```
 
 ### how to compile src?
