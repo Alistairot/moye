@@ -1,5 +1,5 @@
 {
-  "name": "moye",
+  "name": "moye-cocos",
   "version": "1.0.3",
   "description": "ecs game framework of cocos creator",
   "main": "dist/moye.mjs",
