@@ -1,0 +1,14 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "BgAdapter",
+
+    "description-explain":"模块描述",
+    "description": "适配背景图",
+
+    "entry-explain":"入口文件",
+    "entry": "Index.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+    ]
+}

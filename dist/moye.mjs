@@ -1,4 +1,4 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, Node, UITransform, Widget, CCFloat, Size, NodeEventType, Enum, Vec3, Label, v3, dynamicAtlasManager, Sprite, CCBoolean, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
+import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
 import { NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -1397,13 +1397,13 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$g = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$l = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$8, property: property$8 } = _decorator;
+const { ccclass: ccclass$d, property: property$d } = _decorator;
 let MoyeRuntime = class MoyeRuntime extends Component {
     start() {
         director.addPersistRootNode(this.node);
@@ -1419,8 +1419,8 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$g([
-    ccclass$8('MoyeRuntime')
+MoyeRuntime = __decorate$l([
+    ccclass$d('MoyeRuntime')
 ], MoyeRuntime);
 
 class TimeHelper {
@@ -2032,7 +2032,7 @@ class LoginCom extends Entity {
 class AfterAddLoginCom extends AEvent {
 }
 
-var __decorate$f = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$k = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2044,7 +2044,7 @@ let AfterCreateClientSceneHandler$1 = class AfterCreateClientSceneHandler extend
         EventSystem.get().publish(scene, new AfterAddLoginCom());
     }
 };
-AfterCreateClientSceneHandler$1 = __decorate$f([
+AfterCreateClientSceneHandler$1 = __decorate$k([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler$1);
 
@@ -2114,7 +2114,7 @@ class MsgSerializeMgr extends Singleton {
     }
 }
 
-var __decorate$e = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$j = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2130,7 +2130,7 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$e([
+AfterSingletonAddHandler = __decorate$j([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
@@ -2183,7 +2183,7 @@ class MessageDispatcherMgr extends Singleton {
     }
 }
 
-var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$i = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2195,14 +2195,14 @@ let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHa
         Game.addSingleton(MessageDispatcherMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$d([
+BeforeProgramStartHandler = __decorate$i([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$h = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2218,7 +2218,7 @@ let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends 
         }
     }
 };
-NetClientComponentOnReadEvent = __decorate$c([
+NetClientComponentOnReadEvent = __decorate$h([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
 
@@ -2317,7 +2317,7 @@ class NetServices extends Singleton {
     }
 }
 
-var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$g = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2328,7 +2328,7 @@ let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHand
         Game.addSingleton(NetServices);
     }
 };
-AfterProgramInitHandler$1 = __decorate$b([
+AfterProgramInitHandler$1 = __decorate$g([
     EventDecorator(AfterProgramInit, SceneType.PROCESS)
 ], AfterProgramInitHandler$1);
 
@@ -2668,7 +2668,7 @@ class SessionCom extends Entity {
     }
 }
 
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$f = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2680,11 +2680,11 @@ let AfterCreateClientSceneHandler = class AfterCreateClientSceneHandler extends 
         scene.addCom(SessionCom);
     }
 };
-AfterCreateClientSceneHandler = __decorate$a([
+AfterCreateClientSceneHandler = __decorate$f([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler);
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$e = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2703,7 +2703,7 @@ let NetComReadEventHandler = class NetComReadEventHandler extends AEventHandler 
         MessageDispatcherMgr.get().handle(session, msg);
     }
 };
-NetComReadEventHandler = __decorate$9([
+NetComReadEventHandler = __decorate$e([
     EventDecorator(NetComReadEvent, SceneType.CLIENT)
 ], NetComReadEventHandler);
 
@@ -3020,7 +3020,7 @@ class MoyeAssets extends Singleton {
 MoyeAssets._bundleMap = new Map();
 MoyeAssets._bundlePathMap = new Map();
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -3031,7 +3031,7 @@ let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandle
         Game.addSingleton(MoyeAssets);
     }
 };
-AfterProgramInitHandler = __decorate$8([
+AfterProgramInitHandler = __decorate$d([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
 
@@ -3187,6 +3187,319 @@ class AsyncButtonListener {
         return listener.invoke.bind(listener);
     }
 }
+
+var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$c, property: property$c, menu: menu$b } = _decorator;
+/**
+ * 在不变形的情况下，适配背景
+ * 完全覆盖目标节点
+ */
+let BgAdapter = class BgAdapter extends Component {
+    constructor() {
+        super(...arguments);
+        this.coverNode = null;
+        this.isShowMax = true;
+        this._selfTransform = null;
+    }
+    start() {
+        this._selfTransform = this.node.getComponent(UITransform);
+        this.updateSize();
+        this.coverNode.node.on(Node.EventType.SIZE_CHANGED, this.updateSize, this);
+    }
+    onDestroy() {
+        this.coverNode.node.off(Node.EventType.SIZE_CHANGED, this.updateSize, this);
+        this.coverNode = null;
+        this._selfTransform = null;
+    }
+    updateSize() {
+        let scaleForShowAll = 0;
+        if (this.isShowMax) {
+            scaleForShowAll = Math.max(this.coverNode.width / this._selfTransform.width, this.coverNode.height / this._selfTransform.height);
+        }
+        else {
+            scaleForShowAll = Math.min(this.coverNode.width / this._selfTransform.width, this.coverNode.height / this._selfTransform.height);
+        }
+        const realWidth = this._selfTransform.width * scaleForShowAll;
+        const realHeight = this._selfTransform.height * scaleForShowAll;
+        //   // 2. 基于第一步的数据，再做缩放适配
+        //   this.node.scale = Math.max(
+        //     cc.view.getCanvasSize().width / realWidth, 
+        //     cc.view.getCanvasSize().height / realHeight
+        //    );
+        // console.log('缩放数据=', scaleForShowAll)
+        // console.log('realWidth', realWidth, 'realHeight', realHeight)
+        this._selfTransform.width = realWidth;
+        this._selfTransform.height = realHeight;
+    }
+};
+__decorate$c([
+    property$c(UITransform)
+], BgAdapter.prototype, "coverNode", void 0);
+__decorate$c([
+    property$c(CCBoolean)
+], BgAdapter.prototype, "isShowMax", void 0);
+BgAdapter = __decorate$c([
+    ccclass$c('BgAdapter'),
+    menu$b('moye/BgAdapter')
+], BgAdapter);
+
+var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$b, inspector: inspector$1, property: property$b, disallowMultiple: disallowMultiple$1, menu: menu$a } = _decorator;
+var CenterHorizontalDirection;
+(function (CenterHorizontalDirection) {
+    CenterHorizontalDirection[CenterHorizontalDirection["LEFT_TO_RIGHT"] = 0] = "LEFT_TO_RIGHT";
+    CenterHorizontalDirection[CenterHorizontalDirection["RIGHT_TO_LEFT"] = 1] = "RIGHT_TO_LEFT";
+    CenterHorizontalDirection[CenterHorizontalDirection["CENTER_TO_SIDE"] = 2] = "CENTER_TO_SIDE";
+})(CenterHorizontalDirection || (CenterHorizontalDirection = {}));
+/**
+ * 扩展cocos的layout
+ * 使其支持居中
+ */
+let CenterLayout = class CenterLayout extends Layout {
+    constructor() {
+        super(...arguments);
+        this.centerHorizontalDirection = CenterHorizontalDirection.CENTER_TO_SIDE;
+    }
+    _doLayoutHorizontally(baseWidth, rowBreak, fnPositionY, applyChildren) {
+        const trans = this.node._uiProps.uiTransformComp;
+        const layoutAnchor = trans.anchorPoint;
+        const limit = this._getFixedBreakingNum();
+        let sign = 1;
+        let paddingX = this._paddingLeft;
+        if (this._horizontalDirection === Layout.HorizontalDirection.RIGHT_TO_LEFT) {
+            sign = -1;
+            paddingX = this._paddingRight;
+        }
+        const startPos = (this._horizontalDirection - layoutAnchor.x) * baseWidth + sign * paddingX;
+        let nextX = startPos - sign * this._spacingX;
+        let totalHeight = 0; // total content height (not including spacing)
+        let rowMaxHeight = 0; // maximum height of a single line
+        let tempMaxHeight = 0; //
+        let maxHeight = 0;
+        let isBreak = false;
+        const activeChildCount = this._usefulLayoutObj.length;
+        let newChildWidth = this._cellSize.width;
+        const paddingH = this._getPaddingH();
+        if (this._layoutType !== Layout.Type.GRID && this._resizeMode === Layout.ResizeMode.CHILDREN) {
+            newChildWidth = (baseWidth - paddingH - (activeChildCount - 1) * this._spacingX) / activeChildCount;
+        }
+        const children = this._usefulLayoutObj;
+        for (let i = 0; i < children.length; ++i) {
+            const childTrans = children[i];
+            const child = childTrans.node;
+            const scale = child.scale;
+            const childScaleX = this._getUsedScaleValue(scale.x);
+            const childScaleY = this._getUsedScaleValue(scale.y);
+            // for resizing children
+            if (this._resizeMode === Layout.ResizeMode.CHILDREN) {
+                childTrans.width = newChildWidth / childScaleX;
+                if (this._layoutType === Layout.Type.GRID) {
+                    childTrans.height = this._cellSize.height / childScaleY;
+                }
+            }
+            const anchorX = Math.abs(this._horizontalDirection - childTrans.anchorX);
+            const childBoundingBoxWidth = childTrans.width * childScaleX;
+            const childBoundingBoxHeight = childTrans.height * childScaleY;
+            if (childBoundingBoxHeight > tempMaxHeight) {
+                maxHeight = Math.max(tempMaxHeight, maxHeight);
+                rowMaxHeight = tempMaxHeight || childBoundingBoxHeight;
+                tempMaxHeight = childBoundingBoxHeight;
+            }
+            nextX += sign * (anchorX * childBoundingBoxWidth + this._spacingX);
+            const rightBoundaryOfChild = sign * (1 - anchorX) * childBoundingBoxWidth;
+            if (rowBreak) {
+                if (limit > 0) {
+                    isBreak = (i / limit) > 0 && (i % limit === 0);
+                    if (isBreak) {
+                        rowMaxHeight = tempMaxHeight > childBoundingBoxHeight ? tempMaxHeight : rowMaxHeight;
+                    }
+                }
+                else if (childBoundingBoxWidth > baseWidth - paddingH) {
+                    if (nextX > startPos + sign * (anchorX * childBoundingBoxWidth)) {
+                        isBreak = true;
+                    }
+                }
+                else {
+                    const boundary = (1 - this._horizontalDirection - layoutAnchor.x) * baseWidth;
+                    const rowBreakBoundary = nextX + rightBoundaryOfChild + sign * (sign > 0 ? this._paddingRight : this._paddingLeft);
+                    isBreak = Math.abs(rowBreakBoundary) > Math.abs(boundary);
+                }
+                if (isBreak) {
+                    nextX = startPos + sign * (anchorX * childBoundingBoxWidth);
+                    if (childBoundingBoxHeight !== tempMaxHeight) {
+                        rowMaxHeight = tempMaxHeight;
+                    }
+                    // In unconstrained mode, the second height size is always what we need when a line feed condition is required to trigger
+                    totalHeight += rowMaxHeight + this._spacingY;
+                    rowMaxHeight = tempMaxHeight = childBoundingBoxHeight;
+                }
+            }
+            const finalPositionY = fnPositionY(child, childTrans, totalHeight);
+            if (applyChildren) {
+                child.setPosition(nextX, finalPositionY);
+            }
+            nextX += rightBoundaryOfChild;
+        }
+        rowMaxHeight = Math.max(rowMaxHeight, tempMaxHeight);
+        const containerResizeBoundary = Math.max(maxHeight, totalHeight + rowMaxHeight) + this._getPaddingV();
+        // --start--
+        if (children.length > 0 && this.centerHorizontalDirection == CenterHorizontalDirection.CENTER_TO_SIDE) {
+            const centerX = (0.5 - layoutAnchor.x) * baseWidth;
+            let rowWidth = 0;
+            let nextRowX = -1;
+            let lastRowY = Number.MIN_SAFE_INTEGER;
+            sign = -1;
+            for (let i = children.length - 1; i >= 0; i--) {
+                const child = children[i];
+                const childScaleX = this._getUsedScaleValue(child.node.scale.x);
+                const anchorX = child.getComponent(UITransform).anchorX;
+                const childBoundingBoxWidth = child.getComponent(UITransform).width * childScaleX;
+                if (Math.abs(child.node.position.y - lastRowY) > 1) {
+                    lastRowY = child.node.position.y;
+                    rowWidth = child.node.position.x + (1 - anchorX) * childBoundingBoxWidth + this.paddingRight;
+                    rowWidth = baseWidth * layoutAnchor.x + rowWidth;
+                    const lastRowEndX = centerX + rowWidth * 0.5;
+                    nextRowX = lastRowEndX + sign * paddingX - sign * this.spacingX;
+                }
+                if (!child.node.activeInHierarchy) {
+                    continue;
+                }
+                nextRowX = nextRowX + sign * anchorX * childBoundingBoxWidth + sign * this.spacingX;
+                child.node.setPosition(new Vec3(nextRowX, child.node.position.y, 0));
+                const rightBoundaryOfChild = sign * (1 - anchorX) * childBoundingBoxWidth;
+                nextRowX += rightBoundaryOfChild;
+            }
+        }
+        // --end--
+        return containerResizeBoundary;
+    }
+    _getUsedScaleValue(value) {
+        return this.affectedByScale ? Math.abs(value) : 1;
+    }
+};
+__decorate$b([
+    property$b({
+        type: Enum(CenterHorizontalDirection)
+    })
+], CenterLayout.prototype, "centerHorizontalDirection", void 0);
+CenterLayout = __decorate$b([
+    ccclass$b,
+    disallowMultiple$1(),
+    menu$a('moye/CenterLayout'),
+    inspector$1("packages://custom_inspector/centerlayout.js")
+], CenterLayout);
+
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$a, inspector, property: property$a, disallowMultiple, menu: menu$9 } = _decorator;
+let MoyeLabel = class MoyeLabel extends Label {
+    constructor() {
+        super(...arguments);
+        this._tempString = '';
+        this._clearOnRun = false;
+    }
+    set clearOnRun(value) {
+        if (value == this._clearOnRun) {
+            return;
+        }
+        this._clearOnRun = value;
+        if (value) {
+            this.string = this._string;
+        }
+        else {
+            this.string = this._tempString;
+        }
+    }
+    get clearOnRun() {
+        return this._clearOnRun;
+    }
+    set string(value) {
+        if (this.clearOnRun && EDITOR) {
+            this._tempString = value;
+            this._string = ' ';
+            this.markForUpdateRenderData();
+        }
+        else {
+            super.string = value;
+        }
+    }
+    get string() {
+        if (this.clearOnRun && EDITOR) {
+            return this._tempString;
+        }
+        else {
+            return this._string;
+        }
+    }
+};
+__decorate$a([
+    property$a({
+        editorOnly: true,
+    })
+], MoyeLabel.prototype, "_tempString", void 0);
+__decorate$a([
+    property$a
+], MoyeLabel.prototype, "_clearOnRun", void 0);
+__decorate$a([
+    property$a({
+        type: CCBoolean,
+        displayName: "运行时清空",
+        tooltip: "运行时清空",
+    })
+], MoyeLabel.prototype, "clearOnRun", null);
+MoyeLabel = __decorate$a([
+    ccclass$a,
+    disallowMultiple(),
+    menu$9('moye/MoyeLabel'),
+    inspector("packages://custom_inspector/moyeLabel.js")
+], MoyeLabel);
+
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$9, property: property$9, menu: menu$8 } = _decorator;
+/**
+ * 富文本点击事件监听
+ */
+let RichTextListener = class RichTextListener extends Component {
+    constructor() {
+        super(...arguments);
+        this._cbs = [];
+    }
+    onDestroy() {
+        this._cbs = [];
+    }
+    onClicked(eventTouch, param) {
+        // console.log("onClicked", param);
+        for (const cb of this._cbs) {
+            cb(param);
+        }
+    }
+    addListener(cb) {
+        this._cbs.push(cb);
+    }
+};
+RichTextListener = __decorate$9([
+    ccclass$9('RichTextListener'),
+    menu$8('moye/RichTextListener')
+], RichTextListener);
 
 const ViewDecoratorType = "ViewDecorator";
 function ViewDecorator(name, layer, viewCfg) {
@@ -3490,6 +3803,61 @@ class AMoyeView extends Entity {
         this.node.setSiblingIndex(-1);
     }
 }
+
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$8, property: property$8, executeInEditMode: executeInEditMode$3, menu: menu$7 } = _decorator;
+/**
+ * 节点不参与构建
+ * 也就是构建后的文件不会存在该节点
+ */
+let NodeNotBuild = class NodeNotBuild extends Component {
+    constructor() {
+        super(...arguments);
+        this._destroyOnRun = true;
+    }
+    set destroyOnRun(value) {
+        this._destroyOnRun = value;
+    }
+    get destroyOnRun() {
+        return this._destroyOnRun;
+    }
+    onLoad() {
+    }
+    onEnable() {
+        if (EDITOR) {
+            this.node.hideFlags = this.node.hideFlags | CCObject.Flags.EditorOnly;
+        }
+        else {
+            if (this._destroyOnRun) {
+                this.node.destroy();
+            }
+        }
+    }
+    onDisable() {
+        // 取消标志位
+        this.node.hideFlags = this.node.hideFlags & ~CCObject.Flags.EditorOnly;
+    }
+    onDestroy() {
+        // 取消标志位
+        this.node.hideFlags = this.node.hideFlags & ~CCObject.Flags.EditorOnly;
+    }
+};
+__decorate$8([
+    property$8
+], NodeNotBuild.prototype, "_destroyOnRun", void 0);
+__decorate$8([
+    property$8({ type: CCBoolean, tooltip: "运行时销毁节点", displayName: "运行时销毁节点" })
+], NodeNotBuild.prototype, "destroyOnRun", null);
+NodeNotBuild = __decorate$8([
+    ccclass$8('NodeNotBuild'),
+    menu$7('moye/NodeNotBuild'),
+    executeInEditMode$3
+], NodeNotBuild);
 
 var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -5710,4 +6078,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, ObjectPool, ObjectWait, Options, Program, RecycleObj, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Options, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };

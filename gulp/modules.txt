@@ -42,9 +42,25 @@ wait something to be done
 [export=true]
 async extension
 
+[name=BgAdapter]
+[export=true]
+适配背景图
+
+[name=CenterLayout]
+[export=true]
+适配背景图
+
+[name=MoyeLabel]
+[export=true]
+扩展一下原生的label 可以支持运行时清空内容, 能有效减少构建后prefab的大小
+
 [name=MoyeUI]
 [export=true]
 a simple ui manager
+
+[name=NodeNotBuild]
+[export=true]
+添加到节点上后 节点不会被构建
 
 [name=Relation]
 [export=true]

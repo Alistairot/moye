@@ -1,0 +1,10 @@
+{
+    "name": "CenterLayout",
+
+    "description": "适配背景图",
+
+    "entry": "Index.ts",
+
+    "deps": [
+    ]
+}

@@ -967,6 +967,27 @@ export declare class AsyncButtonListener {
 	invoke(...args: any[]): Promise<void>;
 	static create(func: ActionAnyArgs): Action<void>;
 }
+/**
+ * 在不变形的情况下，适配背景
+ * 完全覆盖目标节点
+ */
+export declare class BgAdapter extends Component {
+	coverNode: UITransform;
+	isShowMax: boolean;
+	private _selfTransform;
+	start(): void;
+	protected onDestroy(): void;
+	private updateSize;
+}
+/**
+ * 富文本点击事件监听
+ */
+export declare class RichTextListener extends Component {
+	private _cbs;
+	protected onDestroy(): void;
+	protected onClicked(eventTouch: EventTouch, param: string): void;
+	addListener(cb: ActionAnyArgs): void;
+}
 export declare enum ViewLayer {
 	/**
 	 * 场景UI，如：点击建筑查看建筑信息---一般置于场景之上，界面UI之下
@@ -1091,6 +1112,19 @@ export declare class MoyeViewMgr extends Entity {
 }
 export declare const ViewDecoratorType = "ViewDecorator";
 export declare function ViewDecorator(name: string, layer: ViewLayer, viewCfg?: Type<IMoyeViewConfig>): (target: Type<AMoyeView>) => void;
+/**
+ * 节点不参与构建
+ * 也就是构建后的文件不会存在该节点
+ */
+export declare class NodeNotBuild extends Component {
+	private _destroyOnRun;
+	set destroyOnRun(value: boolean);
+	get destroyOnRun(): boolean;
+	protected onLoad(): void;
+	protected onEnable(): void;
+	protected onDisable(): void;
+	protected onDestroy(): void;
+}
 export declare class SizeFollow extends Component {
 	get target(): UITransform;
 	set target(value: UITransform);

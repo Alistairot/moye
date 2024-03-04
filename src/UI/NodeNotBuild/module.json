@@ -1,0 +1,14 @@
+{
+    "name-explain":"唯一模块名",
+    "name": "NodeNotBuild",
+
+    "description-explain":"模块描述",
+    "description": "添加到节点上后 节点不会被构建",
+
+    "entry-explain":"入口文件",
+    "entry": "Index.ts",
+
+    "deps-explain":"依赖的模块",
+    "deps": [
+    ]
+}
