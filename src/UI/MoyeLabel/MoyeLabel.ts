@@ -3,11 +3,11 @@ import { EDITOR } from "cc/env";
 
 const { ccclass, inspector, property, disallowMultiple, menu } = _decorator;
 
-@ccclass
+@ccclass("MoyeLabel")
 @disallowMultiple()
 @menu('moye/MoyeLabel')
-@inspector("packages://custom_inspector/moyeLabel.js")
-export default class MoyeLabel extends Label {
+// @inspector("packages://custom_inspector/moyeLabel.js")
+export class MoyeLabel extends Label {
     @property({
         editorOnly: true,
     })

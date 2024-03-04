@@ -65,7 +65,6 @@ export default class YYJJoystickPlayer extends Component {
         fastSpeed = 200;
 
     @property({
-        type: CCBoolean,
         tooltip: "最快速度",
     })
         isRotation: boolean = true;

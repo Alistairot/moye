@@ -2000,6 +2000,59 @@ class EventCom extends Entity {
     }
 }
 
+class LocalStorageHelper {
+    static getNumber(key, defaultValue) {
+        const item = localStorage.getItem(key);
+        if (!item) {
+            return defaultValue;
+        }
+        try {
+            return Number(item);
+        }
+        catch (e) {
+            return defaultValue;
+        }
+    }
+    static setNumber(key, value) {
+        localStorage.setItem(key, value.toString());
+    }
+    static getString(key, defaultValue) {
+        const item = localStorage.getItem(key);
+        if (!item) {
+            return defaultValue;
+        }
+        return item;
+    }
+    static setString(key, value) {
+        localStorage.setItem(key, value);
+    }
+    static setBoolean(key, value) {
+        localStorage.setItem(key, value ? '1' : '0');
+    }
+    static getBoolean(key, defaultValue) {
+        const item = localStorage.getItem(key);
+        if (!item) {
+            return defaultValue;
+        }
+        return item == '1';
+    }
+    static setObject(value) {
+        localStorage.setItem(value.constructor.name, JSON.stringify(value));
+    }
+    static getObject(obj) {
+        const item = localStorage.getItem(obj.name);
+        if (!item) {
+            return null;
+        }
+        try {
+            return JSON.parse(item);
+        }
+        catch (e) {
+            return null;
+        }
+    }
+}
+
 class LoginCom extends Entity {
     constructor() {
         super(...arguments);
@@ -3393,10 +3446,10 @@ __decorate$b([
     })
 ], CenterLayout.prototype, "centerHorizontalDirection", void 0);
 CenterLayout = __decorate$b([
-    ccclass$b,
+    ccclass$b("CenterLayout"),
     disallowMultiple$1(),
-    menu$a('moye/CenterLayout'),
-    inspector$1("packages://custom_inspector/centerlayout.js")
+    menu$a('moye/CenterLayout')
+    // @inspector("packages://custom_inspector/centerlayout.js")
 ], CenterLayout);
 
 var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -3462,10 +3515,10 @@ __decorate$a([
     })
 ], MoyeLabel.prototype, "clearOnRun", null);
 MoyeLabel = __decorate$a([
-    ccclass$a,
+    ccclass$a("MoyeLabel"),
     disallowMultiple(),
-    menu$9('moye/MoyeLabel'),
-    inspector("packages://custom_inspector/moyeLabel.js")
+    menu$9('moye/MoyeLabel')
+    // @inspector("packages://custom_inspector/moyeLabel.js")
 ], MoyeLabel);
 
 var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -6032,7 +6085,6 @@ __decorate([
 ], YYJJoystickPlayer.prototype, "fastSpeed", void 0);
 __decorate([
     property({
-        type: CCBoolean,
         tooltip: "最快速度",
     })
 ], YYJJoystickPlayer.prototype, "isRotation", void 0);
@@ -6078,4 +6130,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, Logger, LoginCom, MoyeAssets, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Options, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CenterLayout, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, LocalStorageHelper, Logger, LoginCom, MoyeAssets, MoyeLabel, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Options, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };

@@ -12,11 +12,11 @@ enum CenterHorizontalDirection {
  * 扩展cocos的layout
  * 使其支持居中
  */
-@ccclass
+@ccclass("CenterLayout")
 @disallowMultiple()
 @menu('moye/CenterLayout')
-@inspector("packages://custom_inspector/centerlayout.js")
-export default class CenterLayout extends Layout {
+// @inspector("packages://custom_inspector/centerlayout.js")
+export class CenterLayout extends Layout {
     @property({
         type: Enum(CenterHorizontalDirection)
     })

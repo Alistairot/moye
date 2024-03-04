@@ -1,14 +1,10 @@
 {
-    "name-explain":"唯一模块名",
     "name": "MoyeLabel",
 
-    "description-explain":"模块描述",
     "description": "扩展一下原生的label 可以支持运行时清空内容, 能有效减少构建后prefab的大小",
 
-    "entry-explain":"入口文件",
     "entry": "Index.ts",
 
-    "deps-explain":"依赖的模块",
     "deps": [
     ]
 }

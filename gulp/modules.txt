@@ -10,6 +10,10 @@ quick get current scene and client scene
 [export=true]
 dynamic event component
 
+[name=LocalStorage]
+[export=true]
+LocalStorage
+
 [name=Login]
 [export=true]
 Login module

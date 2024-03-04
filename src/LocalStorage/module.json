@@ -1,0 +1,11 @@
+{
+    "name": "LocalStorage",
+
+    "description": "LocalStorage",
+
+    "entry": "Index.ts",
+
+    "deps": [
+        "Core"
+    ]
+}
