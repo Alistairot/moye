@@ -11,9 +11,4 @@ export class Options extends Singleton {
      * 不能控制框架层的输出
      */
     logLevel: number = 1;
-
-    /**
-     * 是否开发阶段
-     */
-    develop: boolean = true;
 }

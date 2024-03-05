@@ -20,7 +20,7 @@ export class CoroutineLockItem {
         this.task = Task.create();
 
         // 开发阶段进行检查 60s还没解锁一般都是bug了
-        if(Options.get().develop){
+        if(DEVELOP){
             this.setTimeout(60 * 1000, 'CoroutineLock timeout');
         }
     }
@@ -32,6 +32,10 @@ export class CoroutineLockItem {
      * @returns 
      */
     private setTimeout(timeout: number, info: string) {
+        if(!DEVELOP){
+            return;
+        }
+
         this.deleteTimeout();
 
         this._timerId = TimerMgr.get().newOnceTimer(timeout, this.timeout.bind(this));
@@ -39,6 +43,10 @@ export class CoroutineLockItem {
     }
 
     private deleteTimeout() {
+        if(!DEVELOP){
+            return;
+        }
+
         if(this._timerId == null){
             return;
         }
@@ -48,6 +56,10 @@ export class CoroutineLockItem {
     }
 
     private async timeout() {
+        if(!DEVELOP){
+            return;
+        }
+        
         coreWarn(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
     }
 

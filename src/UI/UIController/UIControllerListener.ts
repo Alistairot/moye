@@ -76,18 +76,6 @@ export class UIControllerListener extends Component {
     }
 
     protected onDisable(): void {
-        // if(EDITOR){
-        //     setTimeout(() => {
-        //         if(!this.node.isValid){
-        //             if (!this._controller) {
-        //                 return;
-        //             }
-
-        //             console.log('移除监听22');
-        //             this._controller.removeListener(this);
-        //         }
-        //     });
-        // }
     }
 
     onFocusInEditor(): void {

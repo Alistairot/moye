@@ -149,10 +149,6 @@ class Options extends Singleton {
          * 不能控制框架层的输出
          */
         this.logLevel = 1;
-        /**
-         * 是否开发阶段
-         */
-        this.develop = true;
     }
 }
 
@@ -1601,7 +1597,7 @@ class CoroutineLockItem {
         this.key = key;
         this.task = Task.create();
         // 开发阶段进行检查 60s还没解锁一般都是bug了
-        if (Options.get().develop) {
+        {
             this.setTimeout(60 * 1000, 'CoroutineLock timeout');
         }
     }
@@ -3863,7 +3859,7 @@ var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$8, property: property$8, executeInEditMode: executeInEditMode$3, menu: menu$7 } = _decorator;
+const { ccclass: ccclass$8, property: property$8, executeInEditMode: executeInEditMode$4, menu: menu$7 } = _decorator;
 /**
  * 节点不参与构建
  * 也就是构建后的文件不会存在该节点
@@ -3909,7 +3905,7 @@ __decorate$8([
 NodeNotBuild = __decorate$8([
     ccclass$8('NodeNotBuild'),
     menu$7('moye/NodeNotBuild'),
-    executeInEditMode$3
+    executeInEditMode$4
 ], NodeNotBuild);
 
 var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -3918,7 +3914,7 @@ var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, 
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$7, property: property$7, menu: menu$6 } = _decorator;
+const { ccclass: ccclass$7, property: property$7, menu: menu$6, executeInEditMode: executeInEditMode$3, requireComponent } = _decorator;
 let SizeFollow = class SizeFollow extends Component {
     constructor() {
         super(...arguments);
@@ -3932,30 +3928,46 @@ let SizeFollow = class SizeFollow extends Component {
         return this._target;
     }
     set target(value) {
+        if (this._target != null) {
+            this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+        }
         this._target = value;
+        if (this._target == null) {
+            return;
+        }
+        if (EDITOR) {
+            if (this._target.getComponent(Label)) {
+                console.info("检查到目标节点上有Label组件, 请注意设置string后调用updateRenderData(true)");
+            }
+        }
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
         this.updateSizeOffset();
     }
     set heightFollow(val) {
         this._heightFollow = val;
-        this.updateSizeOffset();
     }
     get heightFollow() {
         return this._heightFollow;
     }
     set widthFollow(val) {
         this._widthFollow = val;
-        this.updateSizeOffset();
     }
     get widthFollow() {
         return this._widthFollow;
     }
     onLoad() {
+        if (EDITOR) {
+            this.node.on(NodeEventType.SIZE_CHANGED, this.onSelfSizeChange, this);
+        }
         if (this._target == null) {
             return;
         }
         this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
     }
     onDestroy() {
+        if (EDITOR) {
+            this.node.off(NodeEventType.SIZE_CHANGED, this.onSelfSizeChange, this);
+        }
         if (this._target == null) {
             return;
         }
@@ -3967,12 +3979,17 @@ let SizeFollow = class SizeFollow extends Component {
         this._target = null;
     }
     onTargetSizeChange() {
+        this.updateSelfSize();
+    }
+    onSelfSizeChange() {
+        if (this._target == null) {
+            return;
+        }
+        this.updateSizeOffset();
+    }
+    updateSelfSize() {
         const selfTrans = this.node.getComponent(UITransform);
         const targetTrans = this._target;
-        // console.log('onTargetSizeChange targetTrans', targetTrans);
-        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
-        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
-        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
         this._changeSize.set(selfTrans.contentSize);
         if (this._widthFollow) {
             this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
@@ -3980,28 +3997,17 @@ let SizeFollow = class SizeFollow extends Component {
         if (this._heightFollow) {
             this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
         }
-        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
-        // console.log('onTargetSizeChange this.node', this.node);
         selfTrans.setContentSize(this._changeSize);
-        // selfTrans.setContentSize(new Size(this._changeSize));
-        // selfTrans.height = 300;
     }
     updateSizeOffset() {
-        if (this._target == null) {
-            return;
-        }
         const selfTrans = this.node.getComponent(UITransform);
         const targetTrans = this._target;
-        if (this._widthFollow) {
-            const selfWidth = selfTrans.width;
-            const targetWidth = targetTrans.width;
-            this._widthOffset = selfWidth - targetWidth;
-        }
-        if (this._heightFollow) {
-            const selfHeight = selfTrans.height;
-            const targetHeight = targetTrans.height;
-            this._heightOffset = selfHeight - targetHeight;
-        }
+        const selfWidth = selfTrans.width;
+        const targetWidth = targetTrans.width;
+        this._widthOffset = selfWidth - targetWidth;
+        const selfHeight = selfTrans.height;
+        const targetHeight = targetTrans.height;
+        this._heightOffset = selfHeight - targetHeight;
     }
 };
 __decorate$7([
@@ -4011,13 +4017,13 @@ __decorate$7([
     property$7({ type: UITransform })
 ], SizeFollow.prototype, "_target", void 0);
 __decorate$7([
-    property$7
+    property$7({ displayName: "高度跟随" })
 ], SizeFollow.prototype, "heightFollow", null);
 __decorate$7([
     property$7
 ], SizeFollow.prototype, "_heightFollow", void 0);
 __decorate$7([
-    property$7
+    property$7({ displayName: "宽度跟随" })
 ], SizeFollow.prototype, "widthFollow", null);
 __decorate$7([
     property$7
@@ -4030,7 +4036,9 @@ __decorate$7([
 ], SizeFollow.prototype, "_widthOffset", void 0);
 SizeFollow = __decorate$7([
     ccclass$7('SizeFollow'),
-    menu$6('moye/SizeFollow')
+    menu$6('moye/SizeFollow'),
+    requireComponent(UITransform),
+    executeInEditMode$3
 ], SizeFollow);
 
 var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
@@ -5377,17 +5385,6 @@ let UIControllerListener = class UIControllerListener extends Component {
         }
     }
     onDisable() {
-        // if(EDITOR){
-        //     setTimeout(() => {
-        //         if(!this.node.isValid){
-        //             if (!this._controller) {
-        //                 return;
-        //             }
-        //             console.log('移除监听22');
-        //             this._controller.removeListener(this);
-        //         }
-        //     });
-        // }
     }
     onFocusInEditor() {
         this.registerEditorEvent();

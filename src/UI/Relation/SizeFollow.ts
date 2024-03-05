@@ -1,24 +1,44 @@
 import { _decorator, CCBoolean, CCFloat, Component, Label, Node, NodeEventType, Size, UITransform } from 'cc';
-const { ccclass, property, menu } = _decorator;
+import { EDITOR } from 'cc/env';
+
+const { ccclass, property, menu, executeInEditMode, requireComponent } = _decorator;
 
 @ccclass('SizeFollow')
 @menu('moye/SizeFollow')
+@requireComponent(UITransform)
+@executeInEditMode
 export class SizeFollow extends Component {
     get target(): UITransform {
         return this._target;
     }
     @property({ type: UITransform })
     set target(value: UITransform) {
+        if(this._target != null){
+            this._target.node.off(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+        }
+
         this._target = value;
+
+        if (this._target == null) {
+            return;
+        }
+
+        if (EDITOR) {
+            if (this._target.getComponent(Label)) {
+                console.info("检查到目标节点上有Label组件, 请注意设置string后调用updateRenderData(true)");
+            }
+        }
+
+        this._target.node.on(NodeEventType.SIZE_CHANGED, this.onTargetSizeChange, this);
+
         this.updateSizeOffset();
     }
     @property({ type: UITransform })
     private _target: UITransform;
 
-    @property
+    @property({ displayName: "高度跟随" })
     set heightFollow(val: boolean) {
         this._heightFollow = val;
-        this.updateSizeOffset();
     }
     get heightFollow(): boolean {
         return this._heightFollow;
@@ -26,10 +46,9 @@ export class SizeFollow extends Component {
     @property
     private _heightFollow = true;
 
-    @property
+    @property({ displayName: "宽度跟随" })
     set widthFollow(val: boolean) {
         this._widthFollow = val;
-        this.updateSizeOffset();
     }
     get widthFollow(): boolean {
         return this._widthFollow;
@@ -45,7 +64,11 @@ export class SizeFollow extends Component {
     private _changeSize: Size = new Size();
 
     protected onLoad(): void {
-        if(this._target == null) {
+        if (EDITOR) {
+            this.node.on(NodeEventType.SIZE_CHANGED, this.onSelfSizeChange, this);
+        }
+
+        if (this._target == null) {
             return;
         }
 
@@ -53,11 +76,15 @@ export class SizeFollow extends Component {
     }
 
     protected onDestroy(): void {
-        if(this._target == null) {
+        if (EDITOR) {
+            this.node.off(NodeEventType.SIZE_CHANGED, this.onSelfSizeChange, this);
+        }
+
+        if (this._target == null) {
             return;
         }
 
-        if(!this._target.isValid){
+        if (!this._target.isValid) {
             this._target = null;
             return;
         }
@@ -67,50 +94,44 @@ export class SizeFollow extends Component {
     }
 
     private onTargetSizeChange() {
+        this.updateSelfSize();
+    }
+
+    private onSelfSizeChange() {
+        if(this._target == null){
+            return;
+        }
+        
+        this.updateSizeOffset();
+    }
+
+    private updateSelfSize() {
         const selfTrans = this.node.getComponent(UITransform);
         const targetTrans = this._target;
-        // console.log('onTargetSizeChange targetTrans', targetTrans);
-        // console.log('onTargetSizeChange targetTrans.height', targetTrans.height);
-        // console.log('onTargetSizeChange this._heightOffset', this._heightOffset);
-        // console.log('onTargetSizeChange this._heightFollow', this._heightFollow);
-        
+
         this._changeSize.set(selfTrans.contentSize);
 
-        if(this._widthFollow){
+        if (this._widthFollow) {
             this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
         }
 
-        if(this._heightFollow){
+        if (this._heightFollow) {
             this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
         }
 
-        // console.log('onTargetSizeChange this._changeSize', this._changeSize);
-        // console.log('onTargetSizeChange this.node', this.node);
         selfTrans.setContentSize(this._changeSize);
-        // selfTrans.setContentSize(new Size(this._changeSize));
-        // selfTrans.height = 300;
     }
 
     private updateSizeOffset() {
-        if(this._target == null) {
-            return;
-        }
-
         const selfTrans = this.node.getComponent(UITransform);
         const targetTrans = this._target;
 
-        if (this._widthFollow) {
-            const selfWidth = selfTrans.width;
-            const targetWidth = targetTrans.width;
+        const selfWidth = selfTrans.width;
+        const targetWidth = targetTrans.width;
+        this._widthOffset = selfWidth - targetWidth;
 
-            this._widthOffset = selfWidth - targetWidth;
-        }
-
-        if (this._heightFollow) {
-            const selfHeight = selfTrans.height;
-            const targetHeight = targetTrans.height;
-
-            this._heightOffset = selfHeight - targetHeight;
-        }
+        const selfHeight = selfTrans.height;
+        const targetHeight = targetTrans.height;
+        this._heightOffset = selfHeight - targetHeight;
     }
 }

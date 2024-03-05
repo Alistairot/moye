@@ -440,10 +440,6 @@ export declare class Options extends Singleton {
 	 * 不能控制框架层的输出
 	 */
 	logLevel: number;
-	/**
-	 * 是否开发阶段
-	 */
-	develop: boolean;
 }
 export declare class JsHelper {
 	static getMethodName(): string;
@@ -1173,6 +1169,8 @@ export declare class SizeFollow extends Component {
 	protected onLoad(): void;
 	protected onDestroy(): void;
 	private onTargetSizeChange;
+	private onSelfSizeChange;
+	private updateSelfSize;
 	private updateSizeOffset;
 }
 declare enum WidgetDirection {
