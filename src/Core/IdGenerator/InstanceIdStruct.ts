@@ -1,5 +1,5 @@
 import { TimeInfo } from "../Time/TimeInfo";
-import { coreError, coreWarn } from '../Logger/CoreLogHelper';
+import { moyeErrorF, moyeWarnF } from '../Logger/CoreLogHelper';
 import { IdGeneratorTag } from "./LogTag";
 import { JsHelper } from "../JavaScript/JsHelper";
 
@@ -40,7 +40,7 @@ export class InstanceIdStruct {
             this._lastTime = this.timeSinceEpoch();
 
             if (this._lastTime <= 0) {
-                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
+                moyeWarnF(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -58,7 +58,7 @@ export class InstanceIdStruct {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
 
-                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
+                moyeErrorF(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
 

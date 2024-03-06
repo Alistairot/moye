@@ -1,5 +1,5 @@
 import { safeCall } from "../../Core/Core";
-import { coreWarn } from "../../Core/Logger/CoreLogHelper";
+import { moyeWarnF } from "../../Core/Logger/CoreLogHelper";
 import { DEVELOP } from "../../Macro";
 import { Session } from "../Session";
 
@@ -25,7 +25,7 @@ export abstract class AMHandler<A>{
             const ret: any = this.run(session, msg);
 
             if (ret instanceof Promise) {
-                coreWarn('AMHandler', '{0}.run 请不要使用异步, 因为异步没办法保证消息接收后的处理顺序', this.constructor.name);
+                moyeWarnF('AMHandler', '{0}.run 请不要使用异步, 因为异步没办法保证消息接收后的处理顺序', this.constructor.name);
                 safeCall(ret);
             }
         } else {

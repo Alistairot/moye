@@ -1,5 +1,5 @@
-import { _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
-import { NATIVE, EDITOR, BUILD } from 'cc/env';
+import { debug as debug$1, log as log$1, warn as warn$1, error as error$1, _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
+import { DEBUG, NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
  * 单例基类
@@ -113,13 +113,6 @@ class JsHelper {
      * ```
      */
     static formatStr(str, ...args) {
-        // 开发阶段打印出错误
-        if (typeof str != "string") {
-            {
-                const err = new Error('formatStr args err');
-                return err.name + err.stack;
-            }
-        }
         if (args.length == 0) {
             return str;
         }
@@ -137,113 +130,100 @@ class JsHelper {
     }
 }
 
-class Options extends Singleton {
-    constructor() {
-        super(...arguments);
-        /**
-         * 是否是服务端
-         */
-        this.isServer = false;
-        /**
-         * log等级 越低输出信息越多
-         * 不能控制框架层的输出
-         */
-        this.logLevel = 1;
+class LoggerDefault {
+    debug(...data) {
+        if (DEBUG) {
+            debug$1(...data);
+        }
+    }
+    log(...data) {
+        if (DEBUG) {
+            log$1(...data);
+        }
+    }
+    warn(...data) {
+        if (DEBUG) {
+            warn$1(...data);
+        }
+    }
+    error(...data) {
+        if (DEBUG) {
+            error$1(...data);
+        }
     }
 }
 
-class LoggerDefault {
-    log(str) {
-        console.log(str);
-    }
-    warn(str) {
-        console.warn(str);
-    }
-    error(str) {
-        console.error(str);
-    }
-}
+var LoggerLevel;
+(function (LoggerLevel) {
+    LoggerLevel[LoggerLevel["Debug"] = 0] = "Debug";
+    LoggerLevel[LoggerLevel["Log"] = 1] = "Log";
+    LoggerLevel[LoggerLevel["Warn"] = 2] = "Warn";
+    LoggerLevel[LoggerLevel["Error"] = 3] = "Error";
+})(LoggerLevel || (LoggerLevel = {}));
 
 /**
  * Logger
  */
 class Logger extends Singleton {
+    constructor() {
+        super(...arguments);
+        this.level = LoggerLevel.Debug;
+    }
     set iLog(value) {
         this._logInst = value;
     }
     get _iLog() {
         if (!this._logInst) {
             this._logInst = new LoggerDefault();
-            this._logInst.warn('not set iLog, use default logger');
         }
         return this._logInst;
     }
-    log(str, ...args) {
-        if (this.checkLogLevel(Logger.LOG_LEVEL)) {
+    debug(...args) {
+        if (this.checkLogLevel(LoggerLevel.Debug)) {
+            this._iLog.debug(...args);
+        }
+    }
+    debugF(str, ...args) {
+        if (this.checkLogLevel(LoggerLevel.Debug)) {
+            const formatStr = JsHelper.formatStr(str, ...args);
+            this._iLog.debug(formatStr);
+        }
+    }
+    log(...args) {
+        if (this.checkLogLevel(LoggerLevel.Log)) {
+            this._iLog.log(...args);
+        }
+    }
+    logF(str, ...args) {
+        if (this.checkLogLevel(LoggerLevel.Log)) {
             const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.log(formatStr);
         }
     }
-    warn(str, ...args) {
-        if (this.checkLogLevel(Logger.WARN_LEVEL)) {
+    warn(...args) {
+        if (this.checkLogLevel(LoggerLevel.Warn)) {
+            this._iLog.warn(...args);
+        }
+    }
+    warnF(str, ...args) {
+        if (this.checkLogLevel(LoggerLevel.Warn)) {
             const formatStr = JsHelper.formatStr(str, ...args);
             this._iLog.warn(formatStr);
         }
     }
-    /**
-     * 错误打印会带上堆栈 用于定位错误
-     * 错误打印不会受到logLevel的影响 一定会打印
-     * 非必要不要调用这个 特别是不要在在循环里面调用 否则日志文件两下就爆炸了
-     * @param str
-     * @param args
-     */
-    error(str, ...args) {
+    error(...args) {
+        this._iLog.error(...args);
+    }
+    errorF(str, ...args) {
         const formatStr = JsHelper.formatStr(str, ...args);
         this._iLog.error(formatStr);
     }
     checkLogLevel(level) {
-        return Options.get().logLevel <= level;
-    }
-    /**
-     * 不受logLevel影响的log
-     * @param str
-     * @param args
-     */
-    coreLog(str) {
-        this._iLog.log(str);
-    }
-    /**
-     * 不受logLevel影响的log
-     * @param str
-     * @param args
-     */
-    coreWarn(str) {
-        this._iLog.warn(str);
-    }
-    /**
-     * 错误打印会带上堆栈 用于定位错误
-     * 错误打印不会受到logLevel的影响 一定会打印
-     * 非必要不要调用这个 特别是不要在在循环里面调用 否则日志文件两下就爆炸了
-     * @param str
-     * @param args
-     */
-    coreError(str) {
-        this._iLog.error(str);
+        return this.level <= level;
     }
 }
-Logger.LOG_LEVEL = 1;
-Logger.WARN_LEVEL = 2;
-/**
- * ```
- * log("hello {0}", "world") => hello world
- * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
- * log("hello {{qaq}} {0}", "world") => hello {qaq} world
- * ```
- * @param str
- * @param args
- */
-function log(str, ...args) {
-    Logger.get().log(str, ...args);
+function debug(...args) {
+    Logger.get().debug(...args);
 }
 /**
  * ```
@@ -254,8 +234,11 @@ function log(str, ...args) {
  * @param str
  * @param args
  */
-function warn(str, ...args) {
-    Logger.get().warn(str, ...args);
+function debugF(str, ...args) {
+    Logger.get().debugF(str, ...args);
+}
+function log(...args) {
+    Logger.get().log(...args);
 }
 /**
  * ```
@@ -266,42 +249,68 @@ function warn(str, ...args) {
  * @param str
  * @param args
  */
-function error(str, ...args) {
-    Logger.get().error(str, ...args);
+function logF(str, ...args) {
+    Logger.get().logF(str, ...args);
+}
+function warn(...args) {
+    Logger.get().warn(...args);
+}
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
+function warnF(str, ...args) {
+    Logger.get().warnF(str, ...args);
+}
+function error(...args) {
+    Logger.get().error(...args);
+}
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
+function errorF(str, ...args) {
+    Logger.get().errorF(str, ...args);
 }
 
-// 框架内部用这个log 区分外部的log 不进行导出
-function coreLog(tag, str, ...args) {
+function moyeLogF(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.get();
-        inst.coreLog(output);
+        Logger.get().log(output);
     }
     catch (e) {
-        console.log(output);
+        log$1(output);
     }
 }
-function coreWarn(tag, str, ...args) {
+function moyeWarnF(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.get();
-        inst.coreWarn(output);
+        Logger.get().warn(output);
     }
     catch (e) {
-        console.warn(output);
+        warn$1(output);
     }
 }
-function coreError(tag, str, ...args) {
+function moyeErrorF(tag, str, ...args) {
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
     try {
-        const inst = Logger.get();
-        inst.coreError(output);
+        Logger.get().error(output);
     }
     catch (e) {
-        console.error(output);
+        error$1(output);
     }
 }
 
@@ -337,7 +346,7 @@ class IdStruct {
         if (this._lastTime == 0) {
             this._lastTime = this.timeSinceEpoch();
             if (this._lastTime <= 0) {
-                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
+                moyeWarnF(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -351,7 +360,7 @@ class IdStruct {
             if (this._idCount > powValueBit$1) {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
-                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
+                moyeErrorF(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
         const struct = IdStruct.inst;
@@ -429,7 +438,7 @@ class InstanceIdStruct {
         if (this._lastTime == 0) {
             this._lastTime = this.timeSinceEpoch();
             if (this._lastTime <= 0) {
-                coreWarn(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
+                moyeWarnF(IdGeneratorTag, '{0}: lastTime less than 0: {1}', (new this).constructor.name, this._lastTime);
                 this._lastTime = 1;
             }
         }
@@ -443,7 +452,7 @@ class InstanceIdStruct {
             if (this._idCount > powValueBit) {
                 ++this._lastTime; // 借用下一秒
                 this._idCount = 0;
-                coreError(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
+                moyeErrorF(IdGeneratorTag, '{0}: idCount per sec overflow: {1} {2}', (new this).constructor.name, time, this._lastTime);
             }
         }
         const struct = InstanceIdStruct.inst;
@@ -1027,7 +1036,7 @@ class Scene extends Entity {
         this.isNew = true;
         this.domain = this;
         this.isRegister = true;
-        coreLog('scene', 'scene create sceneType = {0}, name = {1}, id = {2}', this.sceneType, this.name, this.id);
+        moyeLogF('scene', 'scene create sceneType = {0}, name = {1}, id = {2}', this.sceneType, this.name, this.id);
     }
 }
 
@@ -1620,11 +1629,11 @@ class CoroutineLockItem {
         this._timerId = null;
     }
     async timeout() {
-        coreWarn(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
+        moyeWarnF(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
     }
     dispose() {
         if (this.key == null) {
-            coreWarn(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
+            moyeWarnF(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
             return;
         }
         this.deleteTimeout();
@@ -1713,7 +1722,6 @@ class Program {
     static init(rootNode) {
         MoyeEventCenter.inst.publish(new BeforeProgramInit());
         Game.addSingleton(ObjectPool, false);
-        Game.addSingleton(Options);
         Game.addSingleton(Logger);
         Game.addSingleton(EventSystem);
         Game.addSingleton(TimeInfo);
@@ -1751,7 +1759,7 @@ async function safeCall(promise) {
         return await promise;
     }
     catch (e) {
-        coreError('safeCall', e);
+        moyeErrorF('safeCall', e);
     }
 }
 
@@ -1762,19 +1770,19 @@ class AEventHandler {
             await this.run(scene, a);
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e.stack);
+            moyeErrorF(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
     handle(scene, a) {
         try {
             const ret = this.run(scene, a);
             if (ret instanceof Promise) {
-                coreWarn(EventHandlerTag, '{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
+                moyeWarnF(EventHandlerTag, '{0}的run方法是异步的, 请尽量不要用publish来通知', this.constructor.name);
                 safeCall(ret);
             }
         }
         catch (e) {
-            coreError(EventHandlerTag, 'error:{0}', e.stack);
+            moyeErrorF(EventHandlerTag, 'error:{0}', e.stack);
         }
     }
 }
@@ -1794,7 +1802,7 @@ class CancellationToken {
      */
     add(callback) {
         if (callback == null) {
-            coreError(CancellationTokenTag, 'CancellationToken add error, callback is null');
+            moyeErrorF(CancellationTokenTag, 'CancellationToken add error, callback is null');
             return;
         }
         this._actions.add(callback);
@@ -1808,7 +1816,7 @@ class CancellationToken {
      */
     cancel() {
         if (this._actions == null) {
-            coreError(CancellationTokenTag, 'CancellationToken cancel error, repeat cancel');
+            moyeErrorF(CancellationTokenTag, 'CancellationToken cancel error, repeat cancel');
             return;
         }
         this.invoke();
@@ -1826,7 +1834,7 @@ class CancellationToken {
             runActions.clear();
         }
         catch (e) {
-            coreError(CancellationTokenTag, e);
+            moyeErrorF(CancellationTokenTag, e);
         }
     }
 }
@@ -2323,7 +2331,7 @@ class NetServices extends Singleton {
     registerErrorCallback(serviceId, action) {
         {
             if (this._errorCallback.has(serviceId)) {
-                coreError(NetworkTag, '重复注册servece的errorCallback, serviceId={0}', serviceId);
+                moyeErrorF(NetworkTag, '重复注册servece的errorCallback, serviceId={0}', serviceId);
             }
         }
         this._errorCallback.set(serviceId, action);
@@ -2458,7 +2466,7 @@ class WChannel extends AChannel {
             NetServices.get().onRead(this._service.id, channelId, evt.data);
         }
         catch (error) {
-            coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
+            moyeErrorF(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
             // 出现任何消息解析异常都要断开Session，防止客户端伪造消息
             this.onError(NetworkErrorCode.ERR_ChannelReadError);
         }
@@ -2613,7 +2621,7 @@ class Session extends Entity {
     }
     send(msg) {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
+            moyeLogF(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
             return;
         }
         try {
@@ -2623,12 +2631,12 @@ class Session extends Entity {
             NetServices.get().sendMessage(this.serviceId, this.id, data);
         }
         catch (error) {
-            coreError(MessageTag, 'session send error={0}', error.stack);
+            moyeErrorF(MessageTag, 'session send error={0}', error.stack);
         }
     }
     async call(req) {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
+            moyeLogF(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
             const response = new RpcResponse({ error: MessageErrorCode.ERR_SessionDisposed });
             return response;
         }
@@ -2769,7 +2777,7 @@ class AMHandler {
             // 开发阶段检测
             const ret = this.run(session, msg);
             if (ret instanceof Promise) {
-                coreWarn('AMHandler', '{0}.run 请不要使用异步, 因为异步没办法保证消息接收后的处理顺序', this.constructor.name);
+                moyeWarnF('AMHandler', '{0}.run 请不要使用异步, 因为异步没办法保证消息接收后的处理顺序', this.constructor.name);
                 safeCall(ret);
             }
         }
@@ -2867,7 +2875,7 @@ class AssetOperationHandle {
     }
     dispose() {
         if (this.isDisposed) {
-            coreError(MoyeAssetTag, '重复销毁AssetOperationHandle');
+            moyeErrorF(MoyeAssetTag, '重复销毁AssetOperationHandle');
             return;
         }
         this.isDisposed = true;
@@ -2893,7 +2901,7 @@ class BundleAssetProvider {
         const assetType = this.assetInfo.assetType;
         this.bundleAsset.bundle.load(assetPath, assetType, (err, asset) => {
             if (err) {
-                coreError(MoyeAssetTag, '加载资源错误:{0},{1}', this.assetInfo.uuid, err);
+                moyeErrorF(MoyeAssetTag, '加载资源错误:{0},{1}', this.assetInfo.uuid, err);
             }
             else {
                 this.asset = asset;
@@ -2917,10 +2925,10 @@ class BundleAssetProvider {
     }
     releaseHandle(handle) {
         if (this.refCount <= 0) {
-            coreWarn(MoyeAssetTag, "Asset provider reference count is already zero. There may be resource leaks !");
+            moyeWarnF(MoyeAssetTag, "Asset provider reference count is already zero. There may be resource leaks !");
         }
         if (this._handleSet.delete(handle) == false) {
-            coreError(MoyeAssetTag, "Should never get here !");
+            moyeErrorF(MoyeAssetTag, "Should never get here !");
         }
         // 引用计数减少
         this.refCount--;
@@ -2999,7 +3007,7 @@ class MoyeAssets extends Singleton {
             return assetOperationHandle;
         }
         catch (e) {
-            coreError(MoyeAssetTag, e);
+            moyeErrorF(MoyeAssetTag, e);
         }
     }
     static async loadBundleAsync(bundleName) {
@@ -3022,13 +3030,13 @@ class MoyeAssets extends Singleton {
                 }
             }
             const bundlePath = this._bundlePathMap.get(bundleName);
-            coreLog(MoyeAssetTag, '加载bundle: {0}', bundlePath);
+            moyeLogF(MoyeAssetTag, '加载bundle: {0}', bundlePath);
             assetManager.loadBundle(bundlePath, (err, bundle) => {
                 if (err) {
-                    coreLog(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
+                    moyeLogF(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
                 }
                 else {
-                    coreLog(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
+                    moyeLogF(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
                 }
                 task.setResult(bundle);
             });
@@ -3046,12 +3054,12 @@ class MoyeAssets extends Singleton {
     }
     static releaseBundle(bundleAsset) {
         if (bundleAsset.refCount != 0) {
-            coreError(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
+            moyeErrorF(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
             return;
         }
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
-        coreLog(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
+        moyeLogF(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
     }
     static unloadUnusedAssets() {
         for (const [name, bundleAsset] of this._bundleMap) {
@@ -3176,7 +3184,7 @@ class ObjectWait extends Entity {
         if (!this._tasks.has(type)) {
             return;
         }
-        coreWarn('上一个wait已经取消, {0}', type.name);
+        moyeWarnF('上一个wait已经取消, {0}', type.name);
         const obj = this.createWaitInstance(type, WaitError.CANCEL);
         this.notify(obj);
     }
@@ -3483,7 +3491,17 @@ let MoyeLabel = class MoyeLabel extends Label {
             this.markForUpdateRenderData();
         }
         else {
-            super.string = value;
+            if (value === null || value === undefined) {
+                value = '';
+            }
+            else {
+                value = value.toString();
+            }
+            if (this._string === value) {
+                return;
+            }
+            this._string = value;
+            this.markForUpdateRenderData();
         }
     }
     get string() {
@@ -3642,7 +3660,7 @@ class MoyeViewMgr extends Entity {
      */
     init(uiRoot, globalViewCfg) {
         if (this._uiRoot != null) {
-            return coreError(MoyeViewTag, 'MoyeViewMgr is already inited');
+            return moyeErrorF(MoyeViewTag, 'MoyeViewMgr is already inited');
         }
         this._uiRoot = uiRoot;
         this._globalViewCfgType = globalViewCfg;
@@ -3659,11 +3677,11 @@ class MoyeViewMgr extends Entity {
             name = this._type2Names.get(nameOrType);
         }
         if (JsHelper.isNullOrEmpty(name)) {
-            coreError(MoyeViewTag, 'MoyeView name is null or empty, name={0}', name);
+            moyeErrorF(MoyeViewTag, 'MoyeView name is null or empty, name={0}', name);
             return;
         }
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-        coreLog(MoyeViewTag, 'show view, name={0}', name);
+        moyeLogF(MoyeViewTag, 'show view, name={0}', name);
         try {
             if (this._uiRoot == null) {
                 throw new Error('MoyeViewMgr is not inited');
@@ -3692,7 +3710,7 @@ class MoyeViewMgr extends Entity {
             return view;
         }
         catch (e) {
-            coreError(MoyeViewTag, 'show view errr, {0}', e.stack);
+            moyeErrorF(MoyeViewTag, 'show view errr, {0}', e.stack);
         }
         finally {
             lock.dispose();
@@ -3700,7 +3718,7 @@ class MoyeViewMgr extends Entity {
     }
     async hide(name) {
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-        coreLog(MoyeViewTag, 'hide view, name={0}', name);
+        moyeLogF(MoyeViewTag, 'hide view, name={0}', name);
         try {
             if (!this._showingViews.has(name)) {
                 return;
@@ -3709,7 +3727,7 @@ class MoyeViewMgr extends Entity {
             await this.enterViewHide(view);
         }
         catch (e) {
-            coreError(MoyeViewTag, 'hide view errr, {0}', e.stack);
+            moyeErrorF(MoyeViewTag, 'hide view errr, {0}', e.stack);
         }
         finally {
             lock.dispose();
@@ -6127,4 +6145,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CenterLayout, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, LocalStorageHelper, Logger, LoginCom, MoyeAssets, MoyeLabel, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Options, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, error, log, safeCall, warn };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CenterLayout, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, LocalStorageHelper, Logger, LoginCom, MoyeAssets, MoyeLabel, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIControlType, UIController, UIControllerAttr, UIControllerIndex, UIControllerIndexMask, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, debug, debugF, error, errorF, log, logF, safeCall, warn, warnF };

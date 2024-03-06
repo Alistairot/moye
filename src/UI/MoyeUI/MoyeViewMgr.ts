@@ -6,7 +6,7 @@ import { ViewDecoratorType } from "./ViewDecorator";
 import { ViewLayer } from "./ViewLayer";
 import { ViewCleanCom } from "./ViewCleanCom";
 import { IMoyeViewConfig } from "./IMoyeViewConfig";
-import { coreError, coreLog } from "../../Core/Logger/CoreLogHelper";
+import { moyeErrorF, moyeLogF } from "../../Core/Logger/CoreLogHelper";
 import { MoyeViewTag } from "./LogTag";
 
 const viewLoadLock = "MoyeViewLoadLock";
@@ -49,7 +49,7 @@ export class MoyeViewMgr extends Entity {
      */
     init(uiRoot: Node, globalViewCfg: Type<IMoyeViewConfig>) {
         if (this._uiRoot != null) {
-            return coreError(MoyeViewTag, 'MoyeViewMgr is already inited');
+            return moyeErrorF(MoyeViewTag, 'MoyeViewMgr is already inited');
         }
 
         this._uiRoot = uiRoot;
@@ -74,12 +74,12 @@ export class MoyeViewMgr extends Entity {
         }
 
         if (JsHelper.isNullOrEmpty(name)) {
-            coreError(MoyeViewTag, 'MoyeView name is null or empty, name={0}', name);
+            moyeErrorF(MoyeViewTag, 'MoyeView name is null or empty, name={0}', name);
             return;
         }
 
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-        coreLog(MoyeViewTag, 'show view, name={0}', name);
+        moyeLogF(MoyeViewTag, 'show view, name={0}', name);
         try {
             if (this._uiRoot == null) {
                 throw new Error('MoyeViewMgr is not inited');
@@ -114,7 +114,7 @@ export class MoyeViewMgr extends Entity {
 
             return view;
         } catch (e) {
-            coreError(MoyeViewTag, 'show view errr, {0}', e.stack);
+            moyeErrorF(MoyeViewTag, 'show view errr, {0}', e.stack);
         } finally {
             lock.dispose();
         }
@@ -122,7 +122,7 @@ export class MoyeViewMgr extends Entity {
 
     async hide(name: string): Promise<void> {
         const lock = await CoroutineLock.get().wait(viewLoadLock, name);
-        coreLog(MoyeViewTag, 'hide view, name={0}', name);
+        moyeLogF(MoyeViewTag, 'hide view, name={0}', name);
         try {
             if (!this._showingViews.has(name)) {
                 return;
@@ -132,7 +132,7 @@ export class MoyeViewMgr extends Entity {
 
             await this.enterViewHide(view);
         } catch (e) {
-            coreError(MoyeViewTag, 'hide view errr, {0}', e.stack);
+            moyeErrorF(MoyeViewTag, 'hide view errr, {0}', e.stack);
         } finally {
             lock.dispose();
         }

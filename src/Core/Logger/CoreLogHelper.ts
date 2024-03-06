@@ -1,12 +1,26 @@
 import { JsHelper } from "../JavaScript/JsHelper";
-import { CORE_LOG, CORE_WARN } from "../../Macro";
-import { ICoreLog } from "./ICoreLog";
+import { MOYE_OUTPUT_DEBUG, MOYE_OUTPUT_LOG, MOYE_OUTPUT_WARN } from "../../Macro";
 import { Logger } from "./Logger";
+import { debug, error, log, warn } from "cc";
 
 // 框架内部用这个log 区分外部的log 不进行导出
 
-export function coreLog(tag: string, str: string, ...args: any[]) {
-    if(!CORE_LOG){
+export function moyeDebug(tag: string, str: string) {
+    if(!MOYE_OUTPUT_DEBUG){
+        return;
+    }
+
+    const output = `[${tag}]: ${str}`;
+
+    try{
+        Logger.get().debug(output);
+    }catch(e){
+        debug(output);
+    }
+}
+
+export function moyeDebugF(tag: string, str: string, ...args: any[]) {
+    if(!MOYE_OUTPUT_DEBUG){
         return;
     }
 
@@ -14,15 +28,28 @@ export function coreLog(tag: string, str: string, ...args: any[]) {
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.get() as unknown as ICoreLog;
-        inst.coreLog(output);
+        Logger.get().debug(output);
     }catch(e){
-        console.log(output);
+        debug(output);
     }
 }
 
-export function coreWarn(tag: string, str: string, ...args: any[]) {
-    if(!CORE_WARN){
+export function moyeLog(tag: string, str: string) {
+    if(!MOYE_OUTPUT_LOG){
+        return;
+    }
+
+    const output = `[${tag}]: ${str}`;
+
+    try{
+        Logger.get().log(output);
+    }catch(e){
+        log(output);
+    }
+}
+
+export function moyeLogF(tag: string, str: string, ...args: any[]) {
+    if(!MOYE_OUTPUT_LOG){
         return;
     }
 
@@ -30,21 +57,58 @@ export function coreWarn(tag: string, str: string, ...args: any[]) {
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.get() as unknown as ICoreLog;
-        inst.coreWarn(output);
+        Logger.get().log(output);
     }catch(e){
-        console.warn(output);
+        log(output);
     }
 }
 
-export function coreError(tag: string, str: string, ...args: any[]) {
+export function moyeWarn(tag: string, str: string) {
+    if(!MOYE_OUTPUT_WARN){
+        return;
+    }
+
+    const output = `[${tag}]: ${str}`;
+
+    try{
+        Logger.get().warn(output);
+    }catch(e){
+        warn(output);
+    }
+}
+
+export function moyeWarnF(tag: string, str: string, ...args: any[]) {
+    if(!MOYE_OUTPUT_WARN){
+        return;
+    }
+
     const formatStr = JsHelper.formatStr(str, ...args);
     const output = `[${tag}]: ${formatStr}`;
 
     try{
-        const inst = Logger.get() as unknown as ICoreLog;
-        inst.coreError(output);
+        Logger.get().warn(output);
     }catch(e){
-        console.error(output);
+        warn(output);
+    }
+}
+
+export function moyeError(tag: string, str: string) {
+    const output = `[${tag}]: ${str}`;
+
+    try{
+        Logger.get().error(output);
+    }catch(e){
+        error(output);
+    }
+}
+
+export function moyeErrorF(tag: string, str: string, ...args: any[]) {
+    const formatStr = JsHelper.formatStr(str, ...args);
+    const output = `[${tag}]: ${formatStr}`;
+
+    try{
+        Logger.get().error(output);
+    }catch(e){
+        error(output);
     }
 }

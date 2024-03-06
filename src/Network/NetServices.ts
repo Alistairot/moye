@@ -1,5 +1,5 @@
 import { Singleton } from "../Core/Core";
-import { coreError } from "../Core/Logger/CoreLogHelper";
+import { moyeErrorF } from "../Core/Logger/CoreLogHelper";
 import { DEVELOP } from "../Macro";
 import { AService, AServiceDataType } from "./AService";
 import { IPEndPoint } from "./IPEndPoint";
@@ -70,7 +70,7 @@ export class NetServices extends Singleton {
     registerErrorCallback(serviceId: number, action: ErrorCallback) {
         if (DEVELOP) {
             if (this._errorCallback.has(serviceId)) {
-                coreError(NetworkTag, '重复注册servece的errorCallback, serviceId={0}', serviceId);
+                moyeErrorF(NetworkTag, '重复注册servece的errorCallback, serviceId={0}', serviceId);
             }
         }
 

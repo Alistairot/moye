@@ -8,7 +8,7 @@ import { Singleton } from "../Core/Singleton/Singleton";
 import { CoroutineLock } from "../Core/CoroutineLock/CoroutineLock";
 import { AssetLockType } from "./AssetLockType";
 import { Task } from "../Core/Task/Task";
-import { coreError, coreLog } from "../Core/Logger/CoreLogHelper";
+import { moyeErrorF, moyeLogF } from "../Core/Logger/CoreLogHelper";
 import { MoyeAssetTag } from "./LogTag";
 
 export class MoyeAssets extends Singleton {
@@ -40,7 +40,7 @@ export class MoyeAssets extends Singleton {
 
             return assetOperationHandle as unknown as AssetOperationHandle;
         }catch(e){
-            coreError(MoyeAssetTag, e);
+            moyeErrorF(MoyeAssetTag, e);
         }
     }
 
@@ -72,13 +72,13 @@ export class MoyeAssets extends Singleton {
 
             const bundlePath = this._bundlePathMap.get(bundleName);
 
-            coreLog(MoyeAssetTag, '加载bundle: {0}', bundlePath);
+            moyeLogF(MoyeAssetTag, '加载bundle: {0}', bundlePath);
 
             assetManager.loadBundle(bundlePath, (err, bundle) => {
                 if (err) {
-                    coreLog(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
+                    moyeLogF(MoyeAssetTag, '加载Bundle错误, bundle={0}, error={1}', bundleName, err);
                 } else {
-                    coreLog(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
+                    moyeLogF(MoyeAssetTag, '加载Bundle完成, bundle={0}', bundleName);
                 }
 
                 task.setResult(bundle);
@@ -99,14 +99,14 @@ export class MoyeAssets extends Singleton {
 
     static releaseBundle(bundleAsset: BundleAsset) {
         if (bundleAsset.refCount != 0) {
-            coreError(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
+            moyeErrorF(MoyeAssetTag, '释放的bundle:{0}, 引用计数不为0', bundleAsset.bundleName);
             return;
         }
 
         this._bundleMap.delete(bundleAsset.bundleName);
         assetManager.removeBundle(bundleAsset.bundle);
 
-        coreLog(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
+        moyeLogF(MoyeAssetTag, '卸载bundle:{0}', bundleAsset.bundleName);
     }
 
     static unloadUnusedAssets() {

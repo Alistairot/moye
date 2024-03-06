@@ -3,7 +3,7 @@ import { AChannel } from '../Network/AChannel';
 import { IPEndPoint } from '../Network/IPEndPoint';
 import { AServiceDataType } from '../Network/AService';
 import { NetServices, NetworkErrorCode } from '../Network/Index';
-import { coreError } from '../Core/Logger/CoreLogHelper';
+import { moyeErrorF } from '../Core/Logger/CoreLogHelper';
 import { NetworkWebsocketTag } from './NetworkWebsocketTag';
 
 
@@ -50,7 +50,7 @@ export class WChannel extends AChannel {
 
             NetServices.get().onRead(this._service.id, channelId, evt.data);
         } catch (error) {
-            coreError(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
+            moyeErrorF(NetworkWebsocketTag, 'Channel onMessage, remoteAddress={1} error={0}', error.stack, this.remoteAddress.toString());
             // 出现任何消息解析异常都要断开Session，防止客户端伪造消息
             this.onError(NetworkErrorCode.ERR_ChannelReadError);
         }

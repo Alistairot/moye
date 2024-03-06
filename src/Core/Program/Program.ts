@@ -1,6 +1,5 @@
 import { Node } from "cc";
 import { Game } from "../Singleton/Game";
-import { Options } from "../Options/Options";
 import { Logger } from "../Logger/Logger";
 import { EventSystem } from "../EventSystem/EventSystem";
 import { TimeInfo } from "../Time/TimeInfo";
@@ -22,7 +21,6 @@ export class Program {
         MoyeEventCenter.inst.publish(new BeforeProgramInit());
 
         Game.addSingleton(ObjectPool, false);
-        Game.addSingleton(Options);
         Game.addSingleton(Logger);
         Game.addSingleton(EventSystem);
         Game.addSingleton(TimeInfo);

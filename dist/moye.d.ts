@@ -160,51 +160,36 @@ export declare abstract class RecycleObj {
 	dispose(): void;
 }
 export interface ILog {
-	log(str: string): void;
-	warn(str: string): void;
-	error(str: string): void;
+	debug(...data: any[]): void;
+	log(...data: any[]): void;
+	warn(...data: any[]): void;
+	error(...data: any[]): void;
+}
+declare enum LoggerLevel {
+	Debug = 0,
+	Log = 1,
+	Warn = 2,
+	Error = 3
 }
 /**
  * Logger
  */
 export declare class Logger extends Singleton {
+	level: LoggerLevel;
 	set iLog(value: ILog);
-	static readonly LOG_LEVEL = 1;
-	static readonly WARN_LEVEL = 2;
 	private _logInst;
 	private get _iLog();
-	log(str: string, ...args: any[]): void;
-	warn(str: string, ...args: any[]): void;
-	/**
-	 * 错误打印会带上堆栈 用于定位错误
-	 * 错误打印不会受到logLevel的影响 一定会打印
-	 * 非必要不要调用这个 特别是不要在在循环里面调用 否则日志文件两下就爆炸了
-	 * @param str
-	 * @param args
-	 */
-	error(str: string, ...args: any[]): void;
+	debug(...args: any[]): void;
+	debugF(str: string, ...args: any[]): void;
+	log(...args: any[]): void;
+	logF(str: string, ...args: any[]): void;
+	warn(...args: any[]): void;
+	warnF(str: string, ...args: any[]): void;
+	error(...args: any[]): void;
+	errorF(str: string, ...args: any[]): void;
 	private checkLogLevel;
-	/**
-	 * 不受logLevel影响的log
-	 * @param str
-	 * @param args
-	 */
-	private coreLog;
-	/**
-	 * 不受logLevel影响的log
-	 * @param str
-	 * @param args
-	 */
-	private coreWarn;
-	/**
-	 * 错误打印会带上堆栈 用于定位错误
-	 * 错误打印不会受到logLevel的影响 一定会打印
-	 * 非必要不要调用这个 特别是不要在在循环里面调用 否则日志文件两下就爆炸了
-	 * @param str
-	 * @param args
-	 */
-	private coreError;
 }
+export declare function debug(...args: any[]): void;
 /**
  * ```
  * log("hello {0}", "world") => hello world
@@ -214,7 +199,8 @@ export declare class Logger extends Singleton {
  * @param str
  * @param args
  */
-export declare function log(str: string, ...args: any[]): void;
+export declare function debugF(str: string, ...args: any[]): void;
+export declare function log(...args: any[]): void;
 /**
  * ```
  * log("hello {0}", "world") => hello world
@@ -224,7 +210,8 @@ export declare function log(str: string, ...args: any[]): void;
  * @param str
  * @param args
  */
-export declare function warn(str: string, ...args: any[]): void;
+export declare function logF(str: string, ...args: any[]): void;
+export declare function warn(...args: any[]): void;
 /**
  * ```
  * log("hello {0}", "world") => hello world
@@ -234,7 +221,18 @@ export declare function warn(str: string, ...args: any[]): void;
  * @param str
  * @param args
  */
-export declare function error(str: string, ...args: any[]): void;
+export declare function warnF(str: string, ...args: any[]): void;
+export declare function error(...args: any[]): void;
+/**
+ * ```
+ * log("hello {0}", "world") => hello world
+ * log("hello {0} {1} {0}", "world1", "world2") => hello world1 world2 world1
+ * log("hello {{qaq}} {0}", "world") => hello {qaq} world
+ * ```
+ * @param str
+ * @param args
+ */
+export declare function errorF(str: string, ...args: any[]): void;
 export declare class IdGenerator extends Singleton {
 	generateInstanceId(): bigint;
 	generateId(): bigint;
@@ -429,17 +427,6 @@ export declare class TimeHelper {
 	static clientNow(): number;
 	static clientNowSeconds(): number;
 	static serverNow(): number;
-}
-export declare class Options extends Singleton {
-	/**
-	 * 是否是服务端
-	 */
-	readonly isServer: boolean;
-	/**
-	 * log等级 越低输出信息越多
-	 * 不能控制框架层的输出
-	 */
-	logLevel: number;
 }
 export declare class JsHelper {
 	static getMethodName(): string;

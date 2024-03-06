@@ -1,4 +1,4 @@
-import { coreLog } from '../Logger/CoreLogHelper';
+import { moyeLogF } from '../Logger/CoreLogHelper';
 import { Entity } from './Entity';
 
 
@@ -47,7 +47,7 @@ export class Scene extends Entity {
         this.domain = this;
         this.isRegister = true;
 
-        coreLog('scene', 'scene create sceneType = {0}, name = {1}, id = {2}', this.sceneType, this.name, this.id);
+        moyeLogF('scene', 'scene create sceneType = {0}, name = {1}, id = {2}', this.sceneType, this.name, this.id);
     }
 }
 

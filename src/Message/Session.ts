@@ -1,4 +1,4 @@
-import { coreError, coreLog, coreWarn } from "../Core/Logger/CoreLogHelper";
+import { moyeErrorF, moyeLogF, moyeWarnF } from "../Core/Logger/CoreLogHelper";
 import { IPEndPoint } from "../Network/IPEndPoint";
 import { NetServices } from "../Network/NetServices";
 import { TimeHelper } from "../Core/Time/TimeHelper";
@@ -43,7 +43,7 @@ export class Session extends Entity {
 
     send(msg: object) {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
+            moyeLogF(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', msg.constructor.name, this.id);
             return;
         }
 
@@ -54,13 +54,13 @@ export class Session extends Entity {
             this.lastSendTime = TimeHelper.clientNow();
             NetServices.get().sendMessage(this.serviceId, this.id, data);
         } catch (error) {
-            coreError(MessageTag, 'session send error={0}', error.stack);
+            moyeErrorF(MessageTag, 'session send error={0}', error.stack);
         }
     }
 
     async call(req: IRpcResquest): Promise<IRpcResponse> {
         if (this.isDisposed) {
-            coreLog(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
+            moyeLogF(MessageTag, 'session已经销毁,不能发送消息, message={0}, sessionId={1}', req.constructor.name, this.id);
             const response = new RpcResponse({ error: MessageErrorCode.ERR_SessionDisposed });
             return response;
         }

@@ -20,7 +20,6 @@ export * from "./EventSystem/EventDecorator";
 export * from "./EventSystem/EventSystem";
 export * from "./Time/TimeInfo";
 export * from "./Time/TimeHelper";
-export * from "./Options/Options";
 export * from "./JavaScript/JsHelper";
 export * from "./JavaScript/safeCall";
 export * from "./Decorator/DecoratorCollector";

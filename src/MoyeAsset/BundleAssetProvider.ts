@@ -4,7 +4,7 @@ import { AssetOperationHandle } from "./AssetOperationHandle";
 import { AssetSystem } from "./AssetSystem";
 import { IBundleAsset } from "./IBundleAsset";
 import { Task } from "../Core/Task/Task";
-import { coreError, coreWarn } from "../Core/Logger/CoreLogHelper";
+import { moyeErrorF, moyeWarnF } from "../Core/Logger/CoreLogHelper";
 import { MoyeAssetTag } from "./LogTag";
 
 export class BundleAssetProvider {
@@ -23,7 +23,7 @@ export class BundleAssetProvider {
 
         this.bundleAsset.bundle.load(assetPath, assetType, (err, asset) => {
             if (err) {
-                coreError(MoyeAssetTag, '加载资源错误:{0},{1}', this.assetInfo.uuid, err);
+                moyeErrorF(MoyeAssetTag, '加载资源错误:{0},{1}', this.assetInfo.uuid, err);
             } else {
                 this.asset = asset;
             }
@@ -56,11 +56,11 @@ export class BundleAssetProvider {
 
     releaseHandle(handle: AssetOperationHandle) {
         if (this.refCount <= 0) {
-            coreWarn(MoyeAssetTag, "Asset provider reference count is already zero. There may be resource leaks !");
+            moyeWarnF(MoyeAssetTag, "Asset provider reference count is already zero. There may be resource leaks !");
         }
 
         if (this._handleSet.delete(handle) == false) {
-            coreError(MoyeAssetTag, "Should never get here !");
+            moyeErrorF(MoyeAssetTag, "Should never get here !");
         }
 
         // 引用计数减少

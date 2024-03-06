@@ -10,5 +10,6 @@ export const DEVELOP = true;
 /**
  * 是否打印框架的输出信息
  */
-export const CORE_LOG = true;
-export const CORE_WARN = true;
+export const MOYE_OUTPUT_DEBUG = true;
+export const MOYE_OUTPUT_LOG = true;
+export const MOYE_OUTPUT_WARN = true;

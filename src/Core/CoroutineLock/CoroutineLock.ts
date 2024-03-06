@@ -1,8 +1,7 @@
 
 import { DEVELOP } from "../../Macro";
-import { coreError, coreWarn } from "../Logger/CoreLogHelper";
+import { moyeErrorF, moyeWarnF } from "../Logger/CoreLogHelper";
 import { ObjectPool } from "../ObjectPool/ObjectPool";
-import { Options } from "../Options/Options";
 import { Singleton } from "../Singleton/Singleton";
 import { Task } from "../Task/Task";
 import { TimerMgr } from "../Timer/TimerMgr";
@@ -59,13 +58,13 @@ export class CoroutineLockItem {
         if(!DEVELOP){
             return;
         }
-        
-        coreWarn(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
+
+        moyeWarnF(CoroutineLockTag, 'CoroutineLock timeout key: {0}, info: {1}', this.key, this._timeoutInfo);
     }
 
     dispose() {
         if(this.key == null){
-            coreWarn(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
+            moyeWarnF(CoroutineLockTag, 'repeat dispose CoroutineLockItem');
             return;
         }
 

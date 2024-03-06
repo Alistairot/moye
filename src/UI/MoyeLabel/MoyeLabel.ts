@@ -45,7 +45,18 @@ export class MoyeLabel extends Label {
             this._string = ' ';
             this.markForUpdateRenderData();
         } else {
-            super.string = value;
+            if (value === null || value === undefined) {
+                value = '';
+            } else {
+                value = value.toString();
+            }
+    
+            if (this._string === value) {
+                return;
+            }
+    
+            this._string = value;
+            this.markForUpdateRenderData();
         }
     }
 

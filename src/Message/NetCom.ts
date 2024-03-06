@@ -1,6 +1,6 @@
 
 import { Entity, EventSystem, TimeHelper } from "../Core/Core";
-import { coreError } from "../Core/Logger/CoreLogHelper";
+import { moyeErrorF } from "../Core/Logger/CoreLogHelper";
 import { DEVELOP } from "../Macro";
 import { AServiceDataType } from "../Network/AService";
 import { IPEndPoint } from "../Network/IPEndPoint";

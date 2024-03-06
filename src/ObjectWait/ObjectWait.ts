@@ -1,5 +1,5 @@
 import { Action, CancellationToken, Entity, Task, TimerMgr, Type } from "../Core/Core";
-import { coreWarn } from "../Core/Logger/CoreLogHelper";
+import { moyeWarnF } from "../Core/Logger/CoreLogHelper";
 import { AWait } from "./AWait";
 import { WaitError } from "./WaitError";
 
@@ -97,7 +97,7 @@ export class ObjectWait extends Entity {
             return;
         }
 
-        coreWarn('上一个wait已经取消, {0}', type.name);
+        moyeWarnF('上一个wait已经取消, {0}', type.name);
         const obj = this.createWaitInstance(type, WaitError.CANCEL);
         this.notify(obj);
     }

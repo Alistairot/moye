@@ -1,5 +1,6 @@
-export interface ILog{
-    log(str: string): void
-    warn(str: string): void
-    error(str: string): void
+export interface ILog {
+    debug(...data: any[]): void
+    log(...data: any[]): void
+    warn(...data: any[]): void
+    error(...data: any[]): void
 }
