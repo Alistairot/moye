@@ -23,7 +23,7 @@ export class UIControllerAttr {
     set controlType(v: UIControlType) {
         this._controlType = v;
 
-        this.clearData();
+        this.resetData();
     }
 
     get controlType() {
@@ -77,61 +77,56 @@ export class UIControllerAttr {
     })
         visible: UIControlType_Visible;
 
-
-
-
-
-
-    isVisible(index: number) {
-        return this.visible.isVisible(index);
+    isVisible(indexMask: number) {
+        return this.visible.isVisible(indexMask);
     }
 
-    setPosition(index: number, pos: Vec3) {
-        this.position.setRecord(index, pos);
+    setPosition(indexMask: number, pos: Vec3) {
+        this.position.setRecord(indexMask, pos);
     }
 
-    getPosition(index: number) {
-        return this.position.getRecord(index);
+    getPosition(indexMask: number) {
+        return this.position.getRecord(indexMask);
     }
 
-    setSize(index: number, size: Size) {
-        this.size.setRecord(index, size);
+    setSize(indexMask: number, size: Size) {
+        this.size.setRecord(indexMask, size);
     }
 
-    getSize(index: number) {
-        return this.size.getRecord(index);
+    getSize(indexMask: number) {
+        return this.size.getRecord(indexMask);
     }
 
-    setScale(index: number, scale: Vec3) {
-        this.scale.setRecord(index, scale);
+    setScale(indexMask: number, scale: Vec3) {
+        this.scale.setRecord(indexMask, scale);
     }
 
-    getScale(index: number) {
-        return this.scale.getRecord(index);
+    getScale(indexMask: number) {
+        return this.scale.getRecord(indexMask);
     }
 
-    setAngle(index: number, angle: number) {
-        this.angle.setRecord(index, angle);
+    setAngle(indexMask: number, angle: number) {
+        this.angle.setRecord(indexMask, angle);
     }
 
-    getAngle(index: number) {
-        return this.angle.getRecord(index);
+    getAngle(indexMask: number) {
+        return this.angle.getRecord(indexMask);
     }
 
-    setAnchor(index: number, anchor: Vec2) {
-        this.anchor.setRecord(index, anchor);
+    setAnchor(indexMask: number, anchor: Vec2) {
+        this.anchor.setRecord(indexMask, anchor);
     }
 
-    getAnchor(index: number) {
-        return this.anchor.getRecord(index);
+    getAnchor(indexMask: number) {
+        return this.anchor.getRecord(indexMask);
     }
 
-    setUIController(index: number, controllerIndex: number) {
-        this.controller.setRecord(index, controllerIndex);
+    setUIController(indexMask: number, controllerIndex: number) {
+        this.controller.setRecord(indexMask, controllerIndex);
     }
 
-    getUIController(index: number) {
-        return this.controller.getRecord(index);
+    getUIController(indexMask: number) {
+        return this.controller.getRecord(indexMask);
     }
 
     getTransition(): UIController_Transition | null {
@@ -151,15 +146,15 @@ export class UIControllerAttr {
         }
     }
 
-    private clearData() {
+    private resetData() {
         if(!DEBUG)
         {
             return;
         }
-        
+
         if (this.controlType != UIControlType.Position) {
             this.position = null;
-        } else if(this.position == null) {
+        } else if(!this.position) {
             this.position = new UIControlType_Position();
         }
 
@@ -195,7 +190,7 @@ export class UIControllerAttr {
 
         if (this.controlType != UIControlType.Visible) {
             this.visible = null;
-        } else if(this.visible == null){
+        } else if(!this.visible){
             this.visible = new UIControlType_Visible();
         }
 

@@ -1316,52 +1316,6 @@ declare class UIController_Transition {
 	duration: number;
 	delay: number;
 }
-declare class UIControlType_Position {
-	set transition(value: boolean);
-	get transition(): boolean;
-	transitionAttr: UIController_Transition;
-	private _transition;
-	private _recordMap;
-	getRecord(index: number): any;
-	setRecord(index: number, pos: Vec3): void;
-}
-declare class UIControlType_Size {
-	set transition(value: boolean);
-	get transition(): boolean;
-	transitionAttr: UIController_Transition;
-	private _transition;
-	private _recordMap;
-	getRecord(index: number): Size;
-	setRecord(index: number, pos: Size): void;
-}
-declare class UIControlType_Scale {
-	set transition(value: boolean);
-	get transition(): boolean;
-	transitionAttr: UIController_Transition;
-	private _transition;
-	private _recordMap;
-	getRecord(index: number): Vec3;
-	setRecord(index: number, pos: Vec3): void;
-}
-declare class UIControlType_Controller {
-	private _recordMap;
-	getRecord(index: number): number;
-	setRecord(index: number, value: number): void;
-}
-declare class UIControlType_Angle {
-	set transition(value: boolean);
-	get transition(): boolean;
-	transitionAttr: UIController_Transition;
-	private _transition;
-	private _recordMap;
-	getRecord(index: number): number;
-	setRecord(index: number, value: number): void;
-}
-declare class UIControlType_Anchor {
-	private _recordMap;
-	getRecord(index: number): Vec2;
-	setRecord(index: number, value: Vec2): void;
-}
 declare enum UIControllerIndexMask {
 	Index_0 = 1,
 	Index_1 = 2,
@@ -1377,9 +1331,55 @@ declare enum UIControllerIndexMask {
 	Index_11 = 2048,
 	Index_12 = 4096
 }
+declare class UIControlType_Position {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): Vec3;
+	setRecord(indexMask: UIControllerIndexMask, value: Vec3): void;
+}
+declare class UIControlType_Size {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): Size;
+	setRecord(indexMask: UIControllerIndexMask, value: Size): void;
+}
+declare class UIControlType_Scale {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): Vec3;
+	setRecord(indexMask: UIControllerIndexMask, value: Vec3): void;
+}
+declare class UIControlType_Controller {
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): number;
+	setRecord(indexMask: UIControllerIndexMask, value: number): void;
+}
+declare class UIControlType_Angle {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): number;
+	setRecord(indexMask: UIControllerIndexMask, value: number): void;
+}
+declare class UIControlType_Anchor {
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): Vec2;
+	setRecord(indexMask: UIControllerIndexMask, value: Vec2): void;
+}
 declare class UIControlType_Visible {
 	indexMask: UIControllerIndexMask;
-	isVisible(index: number): boolean;
+	isVisible(index: UIControllerIndexMask): boolean;
 }
 export declare class UIControllerAttr {
 	set controlType(v: UIControlType);
@@ -1392,21 +1392,21 @@ export declare class UIControllerAttr {
 	scale: UIControlType_Scale;
 	size: UIControlType_Size;
 	visible: UIControlType_Visible;
-	isVisible(index: number): boolean;
-	setPosition(index: number, pos: Vec3): void;
-	getPosition(index: number): any;
-	setSize(index: number, size: Size): void;
-	getSize(index: number): Size;
-	setScale(index: number, scale: Vec3): void;
-	getScale(index: number): Vec3;
-	setAngle(index: number, angle: number): void;
-	getAngle(index: number): number;
-	setAnchor(index: number, anchor: Vec2): void;
-	getAnchor(index: number): Vec2;
-	setUIController(index: number, controllerIndex: number): void;
-	getUIController(index: number): number;
+	isVisible(indexMask: number): boolean;
+	setPosition(indexMask: number, pos: Vec3): void;
+	getPosition(indexMask: number): Vec3;
+	setSize(indexMask: number, size: Size): void;
+	getSize(indexMask: number): Size;
+	setScale(indexMask: number, scale: Vec3): void;
+	getScale(indexMask: number): Vec3;
+	setAngle(indexMask: number, angle: number): void;
+	getAngle(indexMask: number): number;
+	setAnchor(indexMask: number, anchor: Vec2): void;
+	getAnchor(indexMask: number): Vec2;
+	setUIController(indexMask: number, controllerIndex: number): void;
+	getUIController(indexMask: number): number;
 	getTransition(): UIController_Transition | null;
-	private clearData;
+	private resetData;
 }
 export declare class UIControllerListener extends Component {
 	private _controller;
@@ -1433,7 +1433,7 @@ export declare class UIControllerListener extends Component {
 	private registerAnchor;
 	private registerUIController;
 	private updateAttr;
-	onChangeIndex(index: number): void;
+	onChangeIndex(indexMask: number): void;
 }
 declare enum DirectionType {
 	FOUR = 0,

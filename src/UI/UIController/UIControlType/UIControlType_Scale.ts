@@ -1,5 +1,6 @@
 import { _decorator, BitMask, CCFloat, Component, Enum, Node, Size, Vec2, Vec3 } from 'cc';
 import { UIController_Transition } from '../UIController_Transition';
+import { UIControllerIndexMask } from '../UIControllerIndexMask';
 const { ccclass, property, } = _decorator;
 
 @ccclass('UIControlType_Scale')
@@ -31,14 +32,30 @@ export class UIControlType_Scale {
     @property
     private _transition: boolean = false;
     
-    @property
-    private _recordMap = {};
+    @property([Vec3])
+    private _records: Vec3[] = [];
 
-    getRecord(index: number): Vec3 {
-        return this._recordMap[index];
+    getRecord(indexMask: UIControllerIndexMask) {
+        const index = Math.log2(indexMask);
+
+        return this._records[index];
     }
 
-    setRecord(index: number, pos: Vec3){
-        this._recordMap[index] = pos.clone();
+    setRecord(indexMask: UIControllerIndexMask, value: Vec3) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+
+            this._records.length = end;
+
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }else{
+            this._records[index] = value.clone();
+        }
     }
 }

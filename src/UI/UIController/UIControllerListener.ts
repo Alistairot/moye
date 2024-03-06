@@ -229,22 +229,22 @@ export class UIControllerListener extends Component {
             return;
         }
 
-        const index = this._controller.index;
+        const indexMask = this._controller.index;
 
-        this.onChangeIndex(index);
+        this.onChangeIndex(indexMask);
     }
 
-    onChangeIndex(index: number): void {
+    onChangeIndex(indexMask: number): void {
         for (let i = 0; i < this._attrs.length; i++) {
             const attr = this._attrs[i];
 
             switch (attr.controlType) {
             case UIControlType.Visible: {
-                this.node.active = attr.isVisible(index);
+                this.node.active = attr.isVisible(indexMask);
                 break;
             }
             case UIControlType.Position: {
-                const pos = attr.getPosition(index);
+                const pos = attr.getPosition(indexMask);
 
                 if (pos) {
                     const transition = attr.getTransition();
@@ -255,14 +255,14 @@ export class UIControllerListener extends Component {
                     }
 
                 } else {
-                    attr.setPosition(index, this.node.position);
+                    attr.setPosition(indexMask, this.node.position);
                 }
 
                 break;
             }
 
             case UIControlType.Size: {
-                const size = attr.getSize(index);
+                const size = attr.getSize(indexMask);
                 const uiTransform = this.node.getComponent(UITransform);
 
                 if (size) {
@@ -273,13 +273,13 @@ export class UIControllerListener extends Component {
                         uiTransform.setContentSize(size);
                     }
                 } else {
-                    attr.setSize(index, uiTransform.contentSize);
+                    attr.setSize(indexMask, uiTransform.contentSize);
                 }
                 break;
             }
             case UIControlType.Scale:
             {
-                const scale = attr.getScale(index);
+                const scale = attr.getScale(indexMask);
 
                 if (scale) {
                     const transition = attr.getTransition();
@@ -289,19 +289,19 @@ export class UIControllerListener extends Component {
                         this.node.scale = scale;
                     }
                 } else {
-                    attr.setScale(index, this.node.scale);
+                    attr.setScale(indexMask, this.node.scale);
                 }
                 break;
             }
             case UIControlType.Angle: {
-                const angle = attr.getAngle(index);
+                const angle = attr.getAngle(indexMask);
 
                 if (angle == null || angle == undefined) {
                     const transition = attr.getTransition();
                     if (!EDITOR && transition != null) {
                         TransitionHelper.angle(this.node, angle, transition);
                     } else {
-                        attr.setAngle(index, this.node.angle);
+                        attr.setAngle(indexMask, this.node.angle);
                     }
                 } else {
                     this.node.angle = angle;
@@ -310,23 +310,23 @@ export class UIControllerListener extends Component {
                 break;
             }
             case UIControlType.Anchor: {
-                const anchor = attr.getAnchor(index);
+                const anchor = attr.getAnchor(indexMask);
 
                 if (anchor) {
                     const uiTransform = this.node.getComponent(UITransform);
                     uiTransform.setAnchorPoint(anchor);
                 } else {
-                    attr.setAnchor(index, this.node.getComponent(UITransform).anchorPoint);
+                    attr.setAnchor(indexMask, this.node.getComponent(UITransform).anchorPoint);
                 }
                 break;
             }
             case UIControlType.UIController: {
-                const controllerIndex = attr.getUIController(index);
+                const controllerIndex = attr.getUIController(indexMask);
 
                 if (controllerIndex != null && controllerIndex != undefined) {
                     this.node.getComponent(UIController).index = controllerIndex;
                 } else {
-                    attr.setUIController(index, this.node.getComponent(UIController).index);
+                    attr.setUIController(indexMask, this.node.getComponent(UIController).index);
                 }
                 break;
             }

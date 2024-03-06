@@ -10,7 +10,7 @@ export class UIControlType_Visible {
     })
         indexMask: UIControllerIndexMask = UIControllerIndexMask.Index_0;
 
-    isVisible(index: number): boolean {
+    isVisible(index: UIControllerIndexMask): boolean {
         return (this.indexMask & index) != 0;
     }
 }

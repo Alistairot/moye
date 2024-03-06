@@ -1,4 +1,4 @@
-import { debug as debug$1, log as log$1, warn as warn$1, error as error$1, _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, BitMask, Tween, tween, CCString, EventTarget, Vec2, UIOpacity, Input, misc, RigidBody2D } from 'cc';
+import { debug as debug$1, log as log$1, warn as warn$1, error as error$1, _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, Vec2, BitMask, Tween, tween, CCString, EventTarget, UIOpacity, Input, misc, RigidBody2D } from 'cc';
 import { DEBUG, NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -5215,7 +5215,7 @@ const { ccclass: ccclass$a, property: property$a, } = _decorator;
 let UIControlType_Position = class UIControlType_Position {
     constructor() {
         this._transition = false;
-        this._recordMap = {};
+        this._records = [];
     }
     set transition(value) {
         this._transition = value;
@@ -5229,12 +5229,24 @@ let UIControlType_Position = class UIControlType_Position {
     get transition() {
         return this._transition;
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, pos) {
-        console.log('pos setRecord', index, pos);
-        this._recordMap[index] = pos.clone();
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }
+        else {
+            this._records[index] = value.clone();
+        }
     }
 };
 __decorate$a([
@@ -5253,8 +5265,8 @@ __decorate$a([
     property$a
 ], UIControlType_Position.prototype, "_transition", void 0);
 __decorate$a([
-    property$a
-], UIControlType_Position.prototype, "_recordMap", void 0);
+    property$a([Vec3])
+], UIControlType_Position.prototype, "_records", void 0);
 UIControlType_Position = __decorate$a([
     ccclass$a('UIControlType_Position')
 ], UIControlType_Position);
@@ -5269,7 +5281,7 @@ const { ccclass: ccclass$9, property: property$9, } = _decorator;
 let UIControlType_Size = class UIControlType_Size {
     constructor() {
         this._transition = false;
-        this._recordMap = {};
+        this._records = [];
     }
     set transition(value) {
         this._transition = value;
@@ -5283,11 +5295,24 @@ let UIControlType_Size = class UIControlType_Size {
     get transition() {
         return this._transition;
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, pos) {
-        this._recordMap[index] = pos.clone();
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }
+        else {
+            this._records[index] = value.clone();
+        }
     }
 };
 __decorate$9([
@@ -5306,8 +5331,8 @@ __decorate$9([
     property$9
 ], UIControlType_Size.prototype, "_transition", void 0);
 __decorate$9([
-    property$9
-], UIControlType_Size.prototype, "_recordMap", void 0);
+    property$9([Size])
+], UIControlType_Size.prototype, "_records", void 0);
 UIControlType_Size = __decorate$9([
     ccclass$9('UIControlType_Size')
 ], UIControlType_Size);
@@ -5322,7 +5347,7 @@ const { ccclass: ccclass$8, property: property$8, } = _decorator;
 let UIControlType_Scale = class UIControlType_Scale {
     constructor() {
         this._transition = false;
-        this._recordMap = {};
+        this._records = [];
     }
     set transition(value) {
         this._transition = value;
@@ -5336,11 +5361,24 @@ let UIControlType_Scale = class UIControlType_Scale {
     get transition() {
         return this._transition;
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, pos) {
-        this._recordMap[index] = pos.clone();
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }
+        else {
+            this._records[index] = value.clone();
+        }
     }
 };
 __decorate$8([
@@ -5359,8 +5397,8 @@ __decorate$8([
     property$8
 ], UIControlType_Scale.prototype, "_transition", void 0);
 __decorate$8([
-    property$8
-], UIControlType_Scale.prototype, "_recordMap", void 0);
+    property$8([Vec3])
+], UIControlType_Scale.prototype, "_records", void 0);
 UIControlType_Scale = __decorate$8([
     ccclass$8('UIControlType_Scale')
 ], UIControlType_Scale);
@@ -5374,18 +5412,31 @@ var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, 
 const { ccclass: ccclass$7, property: property$7, } = _decorator;
 let UIControlType_Controller = class UIControlType_Controller {
     constructor() {
-        this._recordMap = {};
+        this._records = [];
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, value) {
-        this._recordMap[index] = value;
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value;
+            }
+        }
+        else {
+            this._records[index] = value;
+        }
     }
 };
 __decorate$7([
-    property$7
-], UIControlType_Controller.prototype, "_recordMap", void 0);
+    property$7([CCFloat])
+], UIControlType_Controller.prototype, "_records", void 0);
 UIControlType_Controller = __decorate$7([
     ccclass$7('UIControlType_Controller')
 ], UIControlType_Controller);
@@ -5400,7 +5451,7 @@ const { ccclass: ccclass$6, property: property$6, } = _decorator;
 let UIControlType_Angle = class UIControlType_Angle {
     constructor() {
         this._transition = false;
-        this._recordMap = {};
+        this._records = [];
     }
     set transition(value) {
         this._transition = value;
@@ -5414,11 +5465,24 @@ let UIControlType_Angle = class UIControlType_Angle {
     get transition() {
         return this._transition;
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, value) {
-        this._recordMap[index] = value;
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value;
+            }
+        }
+        else {
+            this._records[index] = value;
+        }
     }
 };
 __decorate$6([
@@ -5437,8 +5501,8 @@ __decorate$6([
     property$6
 ], UIControlType_Angle.prototype, "_transition", void 0);
 __decorate$6([
-    property$6
-], UIControlType_Angle.prototype, "_recordMap", void 0);
+    property$6([CCFloat])
+], UIControlType_Angle.prototype, "_records", void 0);
 UIControlType_Angle = __decorate$6([
     ccclass$6('UIControlType_Angle')
 ], UIControlType_Angle);
@@ -5452,18 +5516,31 @@ var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, 
 const { ccclass: ccclass$5, property: property$5, } = _decorator;
 let UIControlType_Anchor = class UIControlType_Anchor {
     constructor() {
-        this._recordMap = {};
+        this._records = [];
     }
-    getRecord(index) {
-        return this._recordMap[index];
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
     }
-    setRecord(index, value) {
-        this._recordMap[index] = value.clone();
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }
+        else {
+            this._records[index] = value.clone();
+        }
     }
 };
 __decorate$5([
-    property$5
-], UIControlType_Anchor.prototype, "_recordMap", void 0);
+    property$5([Vec2])
+], UIControlType_Anchor.prototype, "_records", void 0);
 UIControlType_Anchor = __decorate$5([
     ccclass$5('UIControlType_Anchor')
 ], UIControlType_Anchor);
@@ -5522,49 +5599,49 @@ let UIControllerAttr = class UIControllerAttr {
     }
     set controlType(v) {
         this._controlType = v;
-        this.clearData();
+        this.resetData();
     }
     get controlType() {
         return this._controlType;
     }
-    isVisible(index) {
-        return this.visible.isVisible(index);
+    isVisible(indexMask) {
+        return this.visible.isVisible(indexMask);
     }
-    setPosition(index, pos) {
-        this.position.setRecord(index, pos);
+    setPosition(indexMask, pos) {
+        this.position.setRecord(indexMask, pos);
     }
-    getPosition(index) {
-        return this.position.getRecord(index);
+    getPosition(indexMask) {
+        return this.position.getRecord(indexMask);
     }
-    setSize(index, size) {
-        this.size.setRecord(index, size);
+    setSize(indexMask, size) {
+        this.size.setRecord(indexMask, size);
     }
-    getSize(index) {
-        return this.size.getRecord(index);
+    getSize(indexMask) {
+        return this.size.getRecord(indexMask);
     }
-    setScale(index, scale) {
-        this.scale.setRecord(index, scale);
+    setScale(indexMask, scale) {
+        this.scale.setRecord(indexMask, scale);
     }
-    getScale(index) {
-        return this.scale.getRecord(index);
+    getScale(indexMask) {
+        return this.scale.getRecord(indexMask);
     }
-    setAngle(index, angle) {
-        this.angle.setRecord(index, angle);
+    setAngle(indexMask, angle) {
+        this.angle.setRecord(indexMask, angle);
     }
-    getAngle(index) {
-        return this.angle.getRecord(index);
+    getAngle(indexMask) {
+        return this.angle.getRecord(indexMask);
     }
-    setAnchor(index, anchor) {
-        this.anchor.setRecord(index, anchor);
+    setAnchor(indexMask, anchor) {
+        this.anchor.setRecord(indexMask, anchor);
     }
-    getAnchor(index) {
-        return this.anchor.getRecord(index);
+    getAnchor(indexMask) {
+        return this.anchor.getRecord(indexMask);
     }
-    setUIController(index, controllerIndex) {
-        this.controller.setRecord(index, controllerIndex);
+    setUIController(indexMask, controllerIndex) {
+        this.controller.setRecord(indexMask, controllerIndex);
     }
-    getUIController(index) {
-        return this.controller.getRecord(index);
+    getUIController(indexMask) {
+        return this.controller.getRecord(indexMask);
     }
     getTransition() {
         switch (this.controlType) {
@@ -5582,11 +5659,14 @@ let UIControllerAttr = class UIControllerAttr {
             }
         }
     }
-    clearData() {
+    resetData() {
+        if (!DEBUG) {
+            return;
+        }
         if (this.controlType != UIControlType.Position) {
             this.position = null;
         }
-        else if (this.position == null) {
+        else if (!this.position) {
             this.position = new UIControlType_Position();
         }
         if (this.controlType != UIControlType.Size) {
@@ -5622,7 +5702,7 @@ let UIControllerAttr = class UIControllerAttr {
         if (this.controlType != UIControlType.Visible) {
             this.visible = null;
         }
-        else if (this.visible == null) {
+        else if (!this.visible) {
             this.visible = new UIControlType_Visible();
         }
     }
@@ -5898,19 +5978,19 @@ let UIControllerListener = class UIControllerListener extends Component {
         if (!this._controller) {
             return;
         }
-        const index = this._controller.index;
-        this.onChangeIndex(index);
+        const indexMask = this._controller.index;
+        this.onChangeIndex(indexMask);
     }
-    onChangeIndex(index) {
+    onChangeIndex(indexMask) {
         for (let i = 0; i < this._attrs.length; i++) {
             const attr = this._attrs[i];
             switch (attr.controlType) {
                 case UIControlType.Visible: {
-                    this.node.active = attr.isVisible(index);
+                    this.node.active = attr.isVisible(indexMask);
                     break;
                 }
                 case UIControlType.Position: {
-                    const pos = attr.getPosition(index);
+                    const pos = attr.getPosition(indexMask);
                     if (pos) {
                         const transition = attr.getTransition();
                         if (!EDITOR && transition != null) {
@@ -5921,12 +6001,12 @@ let UIControllerListener = class UIControllerListener extends Component {
                         }
                     }
                     else {
-                        attr.setPosition(index, this.node.position);
+                        attr.setPosition(indexMask, this.node.position);
                     }
                     break;
                 }
                 case UIControlType.Size: {
-                    const size = attr.getSize(index);
+                    const size = attr.getSize(indexMask);
                     const uiTransform = this.node.getComponent(UITransform);
                     if (size) {
                         const transition = attr.getTransition();
@@ -5938,13 +6018,13 @@ let UIControllerListener = class UIControllerListener extends Component {
                         }
                     }
                     else {
-                        attr.setSize(index, uiTransform.contentSize);
+                        attr.setSize(indexMask, uiTransform.contentSize);
                     }
                     break;
                 }
                 case UIControlType.Scale:
                     {
-                        const scale = attr.getScale(index);
+                        const scale = attr.getScale(indexMask);
                         if (scale) {
                             const transition = attr.getTransition();
                             if (!EDITOR && transition != null) {
@@ -5955,19 +6035,19 @@ let UIControllerListener = class UIControllerListener extends Component {
                             }
                         }
                         else {
-                            attr.setScale(index, this.node.scale);
+                            attr.setScale(indexMask, this.node.scale);
                         }
                         break;
                     }
                 case UIControlType.Angle: {
-                    const angle = attr.getAngle(index);
+                    const angle = attr.getAngle(indexMask);
                     if (angle == null || angle == undefined) {
                         const transition = attr.getTransition();
                         if (!EDITOR && transition != null) {
                             TransitionHelper.angle(this.node, angle, transition);
                         }
                         else {
-                            attr.setAngle(index, this.node.angle);
+                            attr.setAngle(indexMask, this.node.angle);
                         }
                     }
                     else {
@@ -5976,23 +6056,23 @@ let UIControllerListener = class UIControllerListener extends Component {
                     break;
                 }
                 case UIControlType.Anchor: {
-                    const anchor = attr.getAnchor(index);
+                    const anchor = attr.getAnchor(indexMask);
                     if (anchor) {
                         const uiTransform = this.node.getComponent(UITransform);
                         uiTransform.setAnchorPoint(anchor);
                     }
                     else {
-                        attr.setAnchor(index, this.node.getComponent(UITransform).anchorPoint);
+                        attr.setAnchor(indexMask, this.node.getComponent(UITransform).anchorPoint);
                     }
                     break;
                 }
                 case UIControlType.UIController: {
-                    const controllerIndex = attr.getUIController(index);
+                    const controllerIndex = attr.getUIController(indexMask);
                     if (controllerIndex != null && controllerIndex != undefined) {
                         this.node.getComponent(UIController).index = controllerIndex;
                     }
                     else {
-                        attr.setUIController(index, this.node.getComponent(UIController).index);
+                        attr.setUIController(indexMask, this.node.getComponent(UIController).index);
                     }
                     break;
                 }
