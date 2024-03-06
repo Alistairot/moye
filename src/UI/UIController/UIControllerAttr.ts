@@ -1,193 +1,204 @@
-import { _decorator, BitMask, Component, Enum, Node, Size, Vec2, Vec3 } from 'cc';
+import { _decorator, BitMask, CCFloat, Component, Enum, Node, Size, Vec2, Vec3 } from 'cc';
 import { UIController, UIControllerIndex } from './UIController';
+import { UIControlType } from './UIControlType/UIControlType';
+import { UIControlType_Position } from './UIControlType/UIControlType_Position';
+import { UIController_Transition } from './UIController_Transition';
+import { UIControlType_Size } from './UIControlType/UIControlType_Size';
+import { UIControlType_Scale } from './UIControlType/UIControlType_Scale';
+import { UIControlType_Controller } from './UIControlType/UIControlType_Controller';
+import { UIControlType_Angle } from './UIControlType/UIControlType_Angle';
+import { UIControlType_Anchor } from './UIControlType/UIControlType_Anchor';
+import { UIControllerIndexMask } from './UIControllerIndexMask';
+import { UIControlType_Visible } from './UIControlType/UIControlType_Visible';
+import { DEBUG } from 'cc/env';
 const { ccclass, property, } = _decorator;
 
-export enum UIControllerIndexMask {
-    Index_0 = 1 << 0,
-    Index_1 = 1 << 1,
-    Index_2 = 1 << 2,
-    Index_3 = 1 << 3,
-    Index_4 = 1 << 4,
-    Index_5 = 1 << 5,
-    Index_6 = 1 << 6,
-    Index_7 = 1 << 7,
-    Index_8 = 1 << 8,
-    Index_9 = 1 << 9,
-    Index_10 = 1 << 10,
-    Index_11 = 1 << 11,
-    Index_12 = 1 << 12,
-}
 
-export enum UIControlType {
-    None,
-    Visible,
-    Position,
-    Size,
-    Scale,
-    Angle,
-    Anchor,
-    UIController,
-}
+
+
 
 @ccclass('UIControllerAttr')
 export class UIControllerAttr {
     @property({ type: Enum(UIControlType) })
-    public controlType: UIControlType = UIControlType.None;
+    set controlType(v: UIControlType) {
+        this._controlType = v;
+
+        this.clearData();
+    }
+
+    get controlType() {
+        return this._controlType;
+    }
+
+    @property
+    private _controlType: UIControlType = UIControlType.None;
 
     @property({
-        type: BitMask(UIControllerIndexMask),
+        displayName: "位置",
+        type: UIControlType_Position,
+        visible() { return this.controlType == UIControlType.Position; }
+    })
+        position: UIControlType_Position;
+    @property({
+        displayName: "锚点",
+        type: UIControlType_Anchor,
+        visible() { return this.controlType == UIControlType.Anchor; }
+    })
+        anchor: UIControlType_Anchor;
+    @property({
+        displayName: "角度",
+        type: UIControlType_Angle,
+        visible() { return this.controlType == UIControlType.Angle; }
+    })
+        angle: UIControlType_Angle;
+    @property({
+        displayName: "控制器",
+        type: UIControlType_Controller,
+        visible() { return this.controlType == UIControlType.UIController; }
+    })
+        controller: UIControlType_Controller;
+    @property({
+        displayName: "缩放",
+        type: UIControlType_Scale,
+        visible() { return this.controlType == UIControlType.Scale; }
+    })
+        scale: UIControlType_Scale;
+    @property({
+        displayName: "尺寸",
+        type: UIControlType_Size,
+        visible() { return this.controlType == UIControlType.Size; }
+    })
+        size: UIControlType_Size;
+
+    @property({
+        displayName: "可见",
+        type: UIControlType_Visible,
         visible() { return this.controlType == UIControlType.Visible; }
     })
-    public indexMask: UIControllerIndexMask = UIControllerIndexMask.Index_0;
+        visible: UIControlType_Visible;
 
 
-    @property
-    private _positionMap = {};
 
-    @property
-    private _sizeMap = {};
 
-    @property
-    private _scaleMap = {};
 
-    @property
-    private _angleMap = {};
 
-    @property
-    private _anchorMap = {};
-
-    @property
-    private _uiControllerMap = {};
-
-    hasIndex(index: number) {
-        return (this.indexMask & index) != 0;
+    isVisible(index: number) {
+        return this.visible.isVisible(index);
     }
 
     setPosition(index: number, pos: Vec3) {
-        this._positionMap[index] = pos.clone();
+        this.position.setRecord(index, pos);
     }
 
     getPosition(index: number) {
-        return this._positionMap[index];
+        return this.position.getRecord(index);
     }
 
     setSize(index: number, size: Size) {
-        this._sizeMap[index] = size.clone();
+        this.size.setRecord(index, size);
     }
 
     getSize(index: number) {
-        return this._sizeMap[index];
+        return this.size.getRecord(index);
     }
 
     setScale(index: number, scale: Vec3) {
-        this._scaleMap[index] = scale.clone();
+        this.scale.setRecord(index, scale);
     }
 
     getScale(index: number) {
-        return this._scaleMap[index];
+        return this.scale.getRecord(index);
     }
 
     setAngle(index: number, angle: number) {
-        this._angleMap[index] = angle;
+        this.angle.setRecord(index, angle);
     }
 
     getAngle(index: number) {
-        return this._angleMap[index];
+        return this.angle.getRecord(index);
     }
 
     setAnchor(index: number, anchor: Vec2) {
-        this._anchorMap[index] = anchor.clone();
+        this.anchor.setRecord(index, anchor);
     }
 
     getAnchor(index: number) {
-        return this._anchorMap[index];
+        return this.anchor.getRecord(index);
     }
 
     setUIController(index: number, controllerIndex: number) {
-        this._uiControllerMap[index] = controllerIndex;
+        this.controller.setRecord(index, controllerIndex);
     }
 
     getUIController(index: number) {
-        return this._uiControllerMap[index];
+        return this.controller.getRecord(index);
     }
 
-    clearOtherData(){
+    getTransition(): UIController_Transition | null {
         switch (this.controlType) {
-        case UIControlType.Visible:
-            this.clearPositionData();
-            this.clearSizeData();
-            this.clearScaleData();
-            this.clearAngleData();
-            this.clearAnchorData();
-            this.clearUIControllerData();
-            break;
-        case UIControlType.Position:
-            this.clearSizeData();
-            this.clearScaleData();
-            this.clearAngleData();
-            this.clearAnchorData();
-            this.clearUIControllerData();
-            break;
-
-        case UIControlType.Size:
-            this.clearPositionData();
-            this.clearScaleData();
-            this.clearAngleData();
-            this.clearAnchorData();
-            this.clearUIControllerData();
-            break;
-        case UIControlType.Scale:
-            this.clearPositionData();
-            this.clearSizeData();
-            this.clearAngleData();
-            this.clearAnchorData();
-            this.clearUIControllerData();
-            break;
-        case UIControlType.Angle:
-            this.clearPositionData();
-            this.clearSizeData();
-            this.clearScaleData();
-            this.clearAnchorData();
-            this.clearUIControllerData();
-            break;
-        case UIControlType.Anchor:
-            this.clearPositionData();
-            this.clearSizeData();
-            this.clearScaleData();
-            this.clearAngleData();
-            this.clearUIControllerData();
-            break;
-        case UIControlType.UIController:
-            this.clearPositionData();
-            this.clearSizeData();
-            this.clearScaleData();
-            this.clearAngleData();
-            this.clearAnchorData();
-            break;
+        case UIControlType.Position: {
+            return this.position.transitionAttr;
+        }
+        case UIControlType.Size: {
+            return this.size.transitionAttr;
+        }
+        case UIControlType.Scale: {
+            return this.scale.transitionAttr;
+        }
+        case UIControlType.Angle: {
+            return this.angle.transitionAttr;
+        }
         }
     }
 
-    private clearPositionData(){
-        this._positionMap = {};
-    }
+    private clearData() {
+        if(!DEBUG)
+        {
+            return;
+        }
+        
+        if (this.controlType != UIControlType.Position) {
+            this.position = null;
+        } else if(this.position == null) {
+            this.position = new UIControlType_Position();
+        }
 
-    private clearSizeData(){
-        this._sizeMap = {};
-    }
+        if (this.controlType != UIControlType.Size) {
+            this.size = null;
+        } else if(this.size == null){
+            this.size = new UIControlType_Size();
+        }
 
-    private clearScaleData(){
-        this._scaleMap = {};
-    }
+        if (this.controlType != UIControlType.Scale) {
+            this.scale = null;
+        } else if(this.scale == null){
+            this.scale = new UIControlType_Scale();
+        }
 
-    private clearAngleData(){
-        this._angleMap = {};
-    }
+        if (this.controlType != UIControlType.Angle) {
+            this.angle = null;
+        } else if(this.angle == null){
+            this.angle = new UIControlType_Angle();
+        }
 
-    private clearAnchorData(){
-        this._anchorMap = {};
-    }
+        if (this.controlType != UIControlType.Anchor) {
+            this.anchor = null;
+        } else if(this.anchor == null){
+            this.anchor = new UIControlType_Anchor();
+        }
 
-    private clearUIControllerData(){
-        this._uiControllerMap = {};
+        if (this.controlType != UIControlType.UIController) {
+            this.controller = null;
+        } else if(this.controller == null){
+            this.controller = new UIControlType_Controller();
+        }
+
+        if (this.controlType != UIControlType.Visible) {
+            this.visible = null;
+        } else if(this.visible == null){
+            this.visible = new UIControlType_Visible();
+        }
+
+
     }
 }

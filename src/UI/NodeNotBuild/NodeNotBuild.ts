@@ -1,4 +1,4 @@
-import { _decorator, CCBoolean, CCObject, Component, Node } from 'cc';
+import { _decorator, CCBoolean, CCObject, CCString, Component, Node } from 'cc';
 import { EDITOR } from 'cc/env';
 
 const { ccclass, property, executeInEditMode, menu } = _decorator;
@@ -11,10 +11,13 @@ const { ccclass, property, executeInEditMode, menu } = _decorator;
 @menu('moye/NodeNotBuild')
 @executeInEditMode
 export class NodeNotBuild extends Component {
+    @property({ displayName: "注释", tooltip: "注释", editorOnly: true, multiline: true })
+        note: string = '节点不参与构建';
+
     @property
     private _destroyOnRun: boolean = true;
 
-    @property({type: CCBoolean, tooltip: "运行时销毁节点", displayName: "运行时销毁节点"})
+    @property({ type: CCBoolean, tooltip: "运行时销毁节点", displayName: "运行时销毁节点" })
     set destroyOnRun(value: boolean) {
         this._destroyOnRun = value;
     }
@@ -27,11 +30,10 @@ export class NodeNotBuild extends Component {
     }
 
     protected onEnable(): void {
-        if(EDITOR){
+        if (EDITOR) {
             this.node.hideFlags = this.node.hideFlags | CCObject.Flags.EditorOnly;
-        }else{
-            if(this._destroyOnRun)
-            {
+        } else {
+            if (this._destroyOnRun) {
                 this.node.destroy();
             }
         }

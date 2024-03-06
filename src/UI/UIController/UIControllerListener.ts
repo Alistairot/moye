@@ -1,7 +1,9 @@
-import { _decorator, CCString, Component, isValid, Node, UITransform, v3 } from 'cc';
-import { UIControllerAttr, UIControlType } from './UIControllerAttr';
+import { _decorator, CCString, Component, isValid, Node, Tween, tween, UITransform, v3 } from 'cc';
+import { UIControllerAttr } from './UIControllerAttr';
 import { UIController, UIControllerIndex } from './UIController';
 import { EDITOR } from 'cc/env';
+import { UIControlType } from './UIControlType/UIControlType';
+import { TransitionHelper } from './TransitionHelper';
 const { ccclass, property, executeInEditMode, menu } = _decorator;
 
 @ccclass('UIControllerListener')
@@ -31,7 +33,8 @@ export class UIControllerListener extends Component {
     }
 
     @property({
-        type: [CCString],
+        type: CCString,
+        displayName: '当前控制器下标',
         visible() { return this._controller != null; }
     })
     get curIndex() {
@@ -228,13 +231,6 @@ export class UIControllerListener extends Component {
 
         const index = this._controller.index;
 
-
-        for (let i = 0; i < this._attrs.length; i++) {
-            const attr = this._attrs[i];
-
-            attr.clearOtherData();
-        }
-
         this.onChangeIndex(index);
     }
 
@@ -244,15 +240,20 @@ export class UIControllerListener extends Component {
 
             switch (attr.controlType) {
             case UIControlType.Visible: {
-                this.node.active = attr.hasIndex(index);
+                this.node.active = attr.isVisible(index);
                 break;
             }
             case UIControlType.Position: {
-
                 const pos = attr.getPosition(index);
 
                 if (pos) {
-                    this.node.position = pos;
+                    const transition = attr.getTransition();
+                    if (!EDITOR && transition != null) {
+                        TransitionHelper.position(this.node, pos, transition);
+                    } else {
+                        this.node.position = pos;
+                    }
+
                 } else {
                     attr.setPosition(index, this.node.position);
                 }
@@ -262,10 +263,15 @@ export class UIControllerListener extends Component {
 
             case UIControlType.Size: {
                 const size = attr.getSize(index);
-
                 const uiTransform = this.node.getComponent(UITransform);
+
                 if (size) {
-                    uiTransform.setContentSize(size);
+                    const transition = attr.getTransition();
+                    if (!EDITOR && transition != null) {
+                        TransitionHelper.size(uiTransform, size, transition);
+                    } else {
+                        uiTransform.setContentSize(size);
+                    }
                 } else {
                     attr.setSize(index, uiTransform.contentSize);
                 }
@@ -276,7 +282,12 @@ export class UIControllerListener extends Component {
                 const scale = attr.getScale(index);
 
                 if (scale) {
-                    this.node.scale = scale;
+                    const transition = attr.getTransition();
+                    if (!EDITOR && transition != null) {
+                        TransitionHelper.scale(this.node, scale, transition);
+                    } else {
+                        this.node.scale = scale;
+                    }
                 } else {
                     attr.setScale(index, this.node.scale);
                 }
@@ -286,7 +297,12 @@ export class UIControllerListener extends Component {
                 const angle = attr.getAngle(index);
 
                 if (angle == null || angle == undefined) {
-                    attr.setAngle(index, this.node.angle);
+                    const transition = attr.getTransition();
+                    if (!EDITOR && transition != null) {
+                        TransitionHelper.angle(this.node, angle, transition);
+                    } else {
+                        attr.setAngle(index, this.node.angle);
+                    }
                 } else {
                     this.node.angle = angle;
                 }

@@ -1132,6 +1132,7 @@ export declare function ViewDecorator(name: string, layer: ViewLayer, viewCfg?: 
  * 也就是构建后的文件不会存在该节点
  */
 export declare class NodeNotBuild extends Component {
+	note: string;
 	private _destroyOnRun;
 	set destroyOnRun(value: boolean);
 	get destroyOnRun(): boolean;
@@ -1301,7 +1302,67 @@ export declare class UIController extends Component {
 	removeListener(listener: IUIControllerIndexListener): void;
 	notifyListeners(): void;
 }
-export declare enum UIControllerIndexMask {
+declare enum UIControlType {
+	None = 0,
+	Visible = 1,
+	Position = 2,
+	Size = 3,
+	Scale = 4,
+	Angle = 5,
+	Anchor = 6,
+	UIController = 7
+}
+declare class UIController_Transition {
+	duration: number;
+	delay: number;
+}
+declare class UIControlType_Position {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _recordMap;
+	getRecord(index: number): any;
+	setRecord(index: number, pos: Vec3): void;
+}
+declare class UIControlType_Size {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _recordMap;
+	getRecord(index: number): Size;
+	setRecord(index: number, pos: Size): void;
+}
+declare class UIControlType_Scale {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _recordMap;
+	getRecord(index: number): Vec3;
+	setRecord(index: number, pos: Vec3): void;
+}
+declare class UIControlType_Controller {
+	private _recordMap;
+	getRecord(index: number): number;
+	setRecord(index: number, value: number): void;
+}
+declare class UIControlType_Angle {
+	set transition(value: boolean);
+	get transition(): boolean;
+	transitionAttr: UIController_Transition;
+	private _transition;
+	private _recordMap;
+	getRecord(index: number): number;
+	setRecord(index: number, value: number): void;
+}
+declare class UIControlType_Anchor {
+	private _recordMap;
+	getRecord(index: number): Vec2;
+	setRecord(index: number, value: Vec2): void;
+}
+declare enum UIControllerIndexMask {
 	Index_0 = 1,
 	Index_1 = 2,
 	Index_2 = 4,
@@ -1316,45 +1377,36 @@ export declare enum UIControllerIndexMask {
 	Index_11 = 2048,
 	Index_12 = 4096
 }
-export declare enum UIControlType {
-	None = 0,
-	Visible = 1,
-	Position = 2,
-	Size = 3,
-	Scale = 4,
-	Angle = 5,
-	Anchor = 6,
-	UIController = 7
+declare class UIControlType_Visible {
+	indexMask: UIControllerIndexMask;
+	isVisible(index: number): boolean;
 }
 export declare class UIControllerAttr {
-	controlType: UIControlType;
-	indexMask: UIControllerIndexMask;
-	private _positionMap;
-	private _sizeMap;
-	private _scaleMap;
-	private _angleMap;
-	private _anchorMap;
-	private _uiControllerMap;
-	hasIndex(index: number): boolean;
+	set controlType(v: UIControlType);
+	get controlType(): UIControlType;
+	private _controlType;
+	position: UIControlType_Position;
+	anchor: UIControlType_Anchor;
+	angle: UIControlType_Angle;
+	controller: UIControlType_Controller;
+	scale: UIControlType_Scale;
+	size: UIControlType_Size;
+	visible: UIControlType_Visible;
+	isVisible(index: number): boolean;
 	setPosition(index: number, pos: Vec3): void;
 	getPosition(index: number): any;
 	setSize(index: number, size: Size): void;
-	getSize(index: number): any;
+	getSize(index: number): Size;
 	setScale(index: number, scale: Vec3): void;
-	getScale(index: number): any;
+	getScale(index: number): Vec3;
 	setAngle(index: number, angle: number): void;
-	getAngle(index: number): any;
+	getAngle(index: number): number;
 	setAnchor(index: number, anchor: Vec2): void;
-	getAnchor(index: number): any;
+	getAnchor(index: number): Vec2;
 	setUIController(index: number, controllerIndex: number): void;
-	getUIController(index: number): any;
-	clearOtherData(): void;
-	private clearPositionData;
-	private clearSizeData;
-	private clearScaleData;
-	private clearAngleData;
-	private clearAnchorData;
-	private clearUIControllerData;
+	getUIController(index: number): number;
+	getTransition(): UIController_Transition | null;
+	private clearData;
 }
 export declare class UIControllerListener extends Component {
 	private _controller;
