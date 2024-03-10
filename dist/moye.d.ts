@@ -1296,6 +1296,12 @@ export declare class UIController extends Component {
 	private _listeners;
 	private _callbacks;
 	protected onDestroy(): void;
+	/**
+	 * 不会触发addListener的回调
+	 * @param index
+	 * @returns
+	 */
+	setIndex(index: UIControllerIndex): void;
 	addListener(listener: (controller: UIController, index: number) => any): void;
 	removeListener(listener: (controller: UIController, index: number) => any): void;
 	private _addListener;

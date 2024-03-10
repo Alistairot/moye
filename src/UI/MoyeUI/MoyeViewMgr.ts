@@ -208,8 +208,17 @@ export class MoyeViewMgr extends Entity {
             layerNode = new Node();
             layerNode.name = ViewLayer[layer];
             layerNode.parent = this._uiRoot;
-            layerNode.setSiblingIndex(layer);
+
             this._layers.set(layer, layerNode);
+
+            // 对所有的layer进行排序
+            for(let i = ViewLayer.SCENE; i <= ViewLayer.TOP; i++){
+                if(!this._layers.has(i)){
+                    continue;
+                }
+                const tmpLayerNode = this._layers.get(i);
+                tmpLayerNode.setSiblingIndex(-1);
+            }
 
             const size = this._uiRoot.getComponent(UITransform).contentSize;
             layerNode.addComponent(UITransform).setContentSize(size);

@@ -3789,8 +3789,15 @@ class MoyeViewMgr extends Entity {
             layerNode = new Node();
             layerNode.name = ViewLayer[layer];
             layerNode.parent = this._uiRoot;
-            layerNode.setSiblingIndex(layer);
             this._layers.set(layer, layerNode);
+            // 对所有的layer进行排序
+            for (let i = ViewLayer.SCENE; i <= ViewLayer.TOP; i++) {
+                if (!this._layers.has(i)) {
+                    continue;
+                }
+                const tmpLayerNode = this._layers.get(i);
+                tmpLayerNode.setSiblingIndex(-1);
+            }
             const size = this._uiRoot.getComponent(UITransform).contentSize;
             layerNode.addComponent(UITransform).setContentSize(size);
             const layerWidget = layerNode.addComponent(Widget);
@@ -5104,6 +5111,22 @@ let UIController = class UIController extends Component {
         this._listeners = [];
         this._callbacks = [];
     }
+    /**
+     * 不会触发addListener的回调
+     * @param index
+     * @returns
+     */
+    setIndex(index) {
+        if (this._index == index) {
+            return;
+        }
+        this._index = index;
+        for (let i = 0; i < this._listeners.length; i++) {
+            if (this._listeners[i]) {
+                this._listeners[i].onChangeIndex(this._index);
+            }
+        }
+    }
     addListener(listener) {
         this._callbacks.push(listener);
     }
@@ -5145,6 +5168,9 @@ let UIController = class UIController extends Component {
             if (this._listeners[i]) {
                 this._listeners[i].onChangeIndex(this._index);
             }
+        }
+        for (let i = 0; i < this._callbacks.length; i++) {
+            this._callbacks[i](this, this._index);
         }
         if (EDITOR) {
             // 检查是否有null或者undefined 如果有就移除

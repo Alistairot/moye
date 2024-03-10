@@ -46,11 +46,31 @@ export class UIController extends Component {
     @property
     private _listeners: IUIControllerIndexListener[] = [];
 
-    private _callbacks: Function[] = [];
+    private _callbacks: ((controller: UIController, index: number) => any)[] = [];
 
     protected onDestroy(): void {
         this._listeners = [];
         this._callbacks = [];
+    }
+
+    /**
+     * 不会触发addListener的回调
+     * @param index 
+     * @returns 
+     */
+    setIndex(index: UIControllerIndex) {
+        if (this._index == index) {
+            return;
+        }
+
+        this._index = index;
+
+        for (let i = 0; i < this._listeners.length; i++) {
+
+            if (this._listeners[i]) {
+                this._listeners[i].onChangeIndex(this._index);
+            }
+        }
     }
 
     addListener(listener: (controller: UIController, index: number) => any) {
@@ -101,6 +121,10 @@ export class UIController extends Component {
             if (this._listeners[i]) {
                 this._listeners[i].onChangeIndex(this._index);
             }
+        }
+
+        for (let i = 0; i < this._callbacks.length; i++) {
+            this._callbacks[i](this, this._index);
         }
 
         if (EDITOR) {
