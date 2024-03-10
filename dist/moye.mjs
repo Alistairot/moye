@@ -1,4 +1,4 @@
-import { debug as debug$1, log as log$1, warn as warn$1, error as error$1, _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, Vec2, BitMask, Tween, tween, CCString, EventTarget, UIOpacity, Input, misc, RigidBody2D } from 'cc';
+import { debug as debug$1, log as log$1, warn as warn$1, error as error$1, _decorator, Component, director, SpriteFrame, Texture2D, instantiate, native, assetManager, UITransform, CCBoolean, Node, Enum, Layout, Vec3, Label, Widget, CCObject, CCFloat, Size, NodeEventType, v3, dynamicAtlasManager, Sprite, SpriteAtlas, CCInteger, UIRenderer, cclegacy, InstanceMaterialType, RenderTexture, Material, Vec2, BitMask, Color, Tween, tween, CCString, EventTarget, UIOpacity, Input, misc, RigidBody2D } from 'cc';
 import { DEBUG, NATIVE, EDITOR, BUILD } from 'cc/env';
 
 /**
@@ -1402,13 +1402,13 @@ class EventSystem extends Singleton {
     }
 }
 
-var __decorate$t = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$u = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$l, property: property$l } = _decorator;
+const { ccclass: ccclass$m, property: property$m } = _decorator;
 let MoyeRuntime = class MoyeRuntime extends Component {
     start() {
         director.addPersistRootNode(this.node);
@@ -1424,8 +1424,8 @@ let MoyeRuntime = class MoyeRuntime extends Component {
         Game.dispose();
     }
 };
-MoyeRuntime = __decorate$t([
-    ccclass$l('MoyeRuntime')
+MoyeRuntime = __decorate$u([
+    ccclass$m('MoyeRuntime')
 ], MoyeRuntime);
 
 class TimeHelper {
@@ -2089,7 +2089,7 @@ class LoginCom extends Entity {
 class AfterAddLoginCom extends AEvent {
 }
 
-var __decorate$s = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$t = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2101,7 +2101,7 @@ let AfterCreateClientSceneHandler$1 = class AfterCreateClientSceneHandler extend
         EventSystem.get().publish(scene, new AfterAddLoginCom());
     }
 };
-AfterCreateClientSceneHandler$1 = __decorate$s([
+AfterCreateClientSceneHandler$1 = __decorate$t([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler$1);
 
@@ -2171,7 +2171,7 @@ class MsgSerializeMgr extends Singleton {
     }
 }
 
-var __decorate$r = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$s = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2187,7 +2187,7 @@ let AfterSingletonAddHandler = class AfterSingletonAddHandler extends AEventHand
         }
     }
 };
-AfterSingletonAddHandler = __decorate$r([
+AfterSingletonAddHandler = __decorate$s([
     EventDecorator(AfterSingletonAdd, SceneType.PROCESS)
 ], AfterSingletonAddHandler);
 
@@ -2240,7 +2240,7 @@ class MessageDispatcherMgr extends Singleton {
     }
 }
 
-var __decorate$q = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$r = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2252,14 +2252,14 @@ let BeforeProgramStartHandler = class BeforeProgramStartHandler extends AEventHa
         Game.addSingleton(MessageDispatcherMgr);
     }
 };
-BeforeProgramStartHandler = __decorate$q([
+BeforeProgramStartHandler = __decorate$r([
     EventDecorator(BeforeProgramStart, SceneType.PROCESS)
 ], BeforeProgramStartHandler);
 
 class NetClientComponentOnRead extends AEvent {
 }
 
-var __decorate$p = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$q = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2275,7 +2275,7 @@ let NetClientComponentOnReadEvent = class NetClientComponentOnReadEvent extends 
         }
     }
 };
-NetClientComponentOnReadEvent = __decorate$p([
+NetClientComponentOnReadEvent = __decorate$q([
     EventDecorator(NetClientComponentOnRead, SceneType.CLIENT)
 ], NetClientComponentOnReadEvent);
 
@@ -2374,7 +2374,7 @@ class NetServices extends Singleton {
     }
 }
 
-var __decorate$o = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$p = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2385,7 +2385,7 @@ let AfterProgramInitHandler$1 = class AfterProgramInitHandler extends AEventHand
         Game.addSingleton(NetServices);
     }
 };
-AfterProgramInitHandler$1 = __decorate$o([
+AfterProgramInitHandler$1 = __decorate$p([
     EventDecorator(AfterProgramInit, SceneType.PROCESS)
 ], AfterProgramInitHandler$1);
 
@@ -2725,7 +2725,7 @@ class SessionCom extends Entity {
     }
 }
 
-var __decorate$n = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$o = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2737,11 +2737,11 @@ let AfterCreateClientSceneHandler = class AfterCreateClientSceneHandler extends 
         scene.addCom(SessionCom);
     }
 };
-AfterCreateClientSceneHandler = __decorate$n([
+AfterCreateClientSceneHandler = __decorate$o([
     EventDecorator(AfterCreateClientScene, SceneType.CLIENT)
 ], AfterCreateClientSceneHandler);
 
-var __decorate$m = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$n = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -2760,7 +2760,7 @@ let NetComReadEventHandler = class NetComReadEventHandler extends AEventHandler 
         MessageDispatcherMgr.get().handle(session, msg);
     }
 };
-NetComReadEventHandler = __decorate$m([
+NetComReadEventHandler = __decorate$n([
     EventDecorator(NetComReadEvent, SceneType.CLIENT)
 ], NetComReadEventHandler);
 
@@ -3077,7 +3077,7 @@ class MoyeAssets extends Singleton {
 MoyeAssets._bundleMap = new Map();
 MoyeAssets._bundlePathMap = new Map();
 
-var __decorate$l = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$m = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
@@ -3088,7 +3088,7 @@ let AfterProgramInitHandler = class AfterProgramInitHandler extends AEventHandle
         Game.addSingleton(MoyeAssets);
     }
 };
-AfterProgramInitHandler = __decorate$l([
+AfterProgramInitHandler = __decorate$m([
     EventDecorator(AfterProgramInit, SceneType.NONE)
 ], AfterProgramInitHandler);
 
@@ -3245,13 +3245,13 @@ class AsyncButtonListener {
     }
 }
 
-var __decorate$k = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$l = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$k, property: property$k, menu: menu$b } = _decorator;
+const { ccclass: ccclass$l, property: property$l, menu: menu$b } = _decorator;
 /**
  * 在不变形的情况下，适配背景
  * 完全覆盖目标节点
@@ -3294,24 +3294,24 @@ let BgAdapter = class BgAdapter extends Component {
         this._selfTransform.height = realHeight;
     }
 };
-__decorate$k([
-    property$k(UITransform)
+__decorate$l([
+    property$l(UITransform)
 ], BgAdapter.prototype, "coverNode", void 0);
-__decorate$k([
-    property$k(CCBoolean)
+__decorate$l([
+    property$l(CCBoolean)
 ], BgAdapter.prototype, "isShowMax", void 0);
-BgAdapter = __decorate$k([
-    ccclass$k('BgAdapter'),
+BgAdapter = __decorate$l([
+    ccclass$l('BgAdapter'),
     menu$b('moye/BgAdapter')
 ], BgAdapter);
 
-var __decorate$j = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$k = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$j, inspector: inspector$1, property: property$j, disallowMultiple: disallowMultiple$1, menu: menu$a } = _decorator;
+const { ccclass: ccclass$k, inspector: inspector$1, property: property$k, disallowMultiple: disallowMultiple$1, menu: menu$a } = _decorator;
 var CenterHorizontalDirection;
 (function (CenterHorizontalDirection) {
     CenterHorizontalDirection[CenterHorizontalDirection["LEFT_TO_RIGHT"] = 0] = "LEFT_TO_RIGHT";
@@ -3444,25 +3444,25 @@ let CenterLayout = class CenterLayout extends Layout {
         return this.affectedByScale ? Math.abs(value) : 1;
     }
 };
-__decorate$j([
-    property$j({
+__decorate$k([
+    property$k({
         type: Enum(CenterHorizontalDirection)
     })
 ], CenterLayout.prototype, "centerHorizontalDirection", void 0);
-CenterLayout = __decorate$j([
-    ccclass$j("CenterLayout"),
+CenterLayout = __decorate$k([
+    ccclass$k("CenterLayout"),
     disallowMultiple$1(),
     menu$a('moye/CenterLayout')
     // @inspector("packages://custom_inspector/centerlayout.js")
 ], CenterLayout);
 
-var __decorate$i = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$j = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$i, inspector, property: property$i, disallowMultiple, menu: menu$9 } = _decorator;
+const { ccclass: ccclass$j, inspector, property: property$j, disallowMultiple, menu: menu$9 } = _decorator;
 let MoyeLabel = class MoyeLabel extends Label {
     constructor() {
         super(...arguments);
@@ -3513,35 +3513,35 @@ let MoyeLabel = class MoyeLabel extends Label {
         }
     }
 };
-__decorate$i([
-    property$i({
+__decorate$j([
+    property$j({
         editorOnly: true,
     })
 ], MoyeLabel.prototype, "_tempString", void 0);
-__decorate$i([
-    property$i
+__decorate$j([
+    property$j
 ], MoyeLabel.prototype, "_clearOnRun", void 0);
-__decorate$i([
-    property$i({
+__decorate$j([
+    property$j({
         type: CCBoolean,
         displayName: "运行时清空",
         tooltip: "运行时清空",
     })
 ], MoyeLabel.prototype, "clearOnRun", null);
-MoyeLabel = __decorate$i([
-    ccclass$i("MoyeLabel"),
+MoyeLabel = __decorate$j([
+    ccclass$j("MoyeLabel"),
     disallowMultiple(),
     menu$9('moye/MoyeLabel')
     // @inspector("packages://custom_inspector/moyeLabel.js")
 ], MoyeLabel);
 
-var __decorate$h = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$i = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$h, property: property$h, menu: menu$8 } = _decorator;
+const { ccclass: ccclass$i, property: property$i, menu: menu$8 } = _decorator;
 /**
  * 富文本点击事件监听
  */
@@ -3563,8 +3563,8 @@ let RichTextListener = class RichTextListener extends Component {
         this._cbs.push(cb);
     }
 };
-RichTextListener = __decorate$h([
-    ccclass$h('RichTextListener'),
+RichTextListener = __decorate$i([
+    ccclass$i('RichTextListener'),
     menu$8('moye/RichTextListener')
 ], RichTextListener);
 
@@ -3871,13 +3871,13 @@ class AMoyeView extends Entity {
     }
 }
 
-var __decorate$g = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$h = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$g, property: property$g, executeInEditMode: executeInEditMode$4, menu: menu$7 } = _decorator;
+const { ccclass: ccclass$h, property: property$h, executeInEditMode: executeInEditMode$4, menu: menu$7 } = _decorator;
 /**
  * 节点不参与构建
  * 也就是构建后的文件不会存在该节点
@@ -3915,28 +3915,28 @@ let NodeNotBuild = class NodeNotBuild extends Component {
         this.node.hideFlags = this.node.hideFlags & ~CCObject.Flags.EditorOnly;
     }
 };
-__decorate$g([
-    property$g({ displayName: "注释", tooltip: "注释", editorOnly: true, multiline: true })
+__decorate$h([
+    property$h({ displayName: "注释", tooltip: "注释", editorOnly: true, multiline: true })
 ], NodeNotBuild.prototype, "note", void 0);
-__decorate$g([
-    property$g
+__decorate$h([
+    property$h
 ], NodeNotBuild.prototype, "_destroyOnRun", void 0);
-__decorate$g([
-    property$g({ type: CCBoolean, tooltip: "运行时销毁节点", displayName: "运行时销毁节点" })
+__decorate$h([
+    property$h({ type: CCBoolean, tooltip: "运行时销毁节点", displayName: "运行时销毁节点" })
 ], NodeNotBuild.prototype, "destroyOnRun", null);
-NodeNotBuild = __decorate$g([
-    ccclass$g('NodeNotBuild'),
+NodeNotBuild = __decorate$h([
+    ccclass$h('NodeNotBuild'),
     menu$7('moye/NodeNotBuild'),
     executeInEditMode$4
 ], NodeNotBuild);
 
-var __decorate$f = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$g = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$f, property: property$f, menu: menu$6, executeInEditMode: executeInEditMode$3, requireComponent } = _decorator;
+const { ccclass: ccclass$g, property: property$g, menu: menu$6, executeInEditMode: executeInEditMode$3, requireComponent } = _decorator;
 let SizeFollow = class SizeFollow extends Component {
     constructor() {
         super(...arguments);
@@ -4032,44 +4032,44 @@ let SizeFollow = class SizeFollow extends Component {
         this._heightOffset = selfHeight - targetHeight;
     }
 };
-__decorate$f([
-    property$f({ type: UITransform })
+__decorate$g([
+    property$g({ type: UITransform })
 ], SizeFollow.prototype, "target", null);
-__decorate$f([
-    property$f({ type: UITransform })
+__decorate$g([
+    property$g({ type: UITransform })
 ], SizeFollow.prototype, "_target", void 0);
-__decorate$f([
-    property$f({ displayName: "高度跟随" })
+__decorate$g([
+    property$g({ displayName: "高度跟随" })
 ], SizeFollow.prototype, "heightFollow", null);
-__decorate$f([
-    property$f
+__decorate$g([
+    property$g
 ], SizeFollow.prototype, "_heightFollow", void 0);
-__decorate$f([
-    property$f({ displayName: "宽度跟随" })
+__decorate$g([
+    property$g({ displayName: "宽度跟随" })
 ], SizeFollow.prototype, "widthFollow", null);
-__decorate$f([
-    property$f
+__decorate$g([
+    property$g
 ], SizeFollow.prototype, "_widthFollow", void 0);
-__decorate$f([
-    property$f({ type: CCFloat })
+__decorate$g([
+    property$g({ type: CCFloat })
 ], SizeFollow.prototype, "_heightOffset", void 0);
-__decorate$f([
-    property$f({ type: CCFloat })
+__decorate$g([
+    property$g({ type: CCFloat })
 ], SizeFollow.prototype, "_widthOffset", void 0);
-SizeFollow = __decorate$f([
-    ccclass$f('SizeFollow'),
+SizeFollow = __decorate$g([
+    ccclass$g('SizeFollow'),
     menu$6('moye/SizeFollow'),
     requireComponent(UITransform),
     executeInEditMode$3
 ], SizeFollow);
 
-var __decorate$e = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$f = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$e, property: property$e, executeInEditMode: executeInEditMode$2, menu: menu$5 } = _decorator;
+const { ccclass: ccclass$f, property: property$f, executeInEditMode: executeInEditMode$2, menu: menu$5 } = _decorator;
 var WidgetBase;
 (function (WidgetBase) {
     WidgetBase[WidgetBase["LEFT"] = 1] = "LEFT";
@@ -4401,50 +4401,50 @@ let CTWidget = class CTWidget extends Component {
         }
     }
 };
-__decorate$e([
-    property$e({ type: UITransform })
+__decorate$f([
+    property$f({ type: UITransform })
 ], CTWidget.prototype, "target", null);
-__decorate$e([
-    property$e({ type: UITransform })
+__decorate$f([
+    property$f({ type: UITransform })
 ], CTWidget.prototype, "_target", void 0);
-__decorate$e([
-    property$e({ type: Enum(WidgetBase) })
+__decorate$f([
+    property$f({ type: Enum(WidgetBase) })
 ], CTWidget.prototype, "targetDir", null);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_targetDir", void 0);
-__decorate$e([
-    property$e({ type: Enum(WidgetDirection) })
+__decorate$f([
+    property$f({ type: Enum(WidgetDirection) })
 ], CTWidget.prototype, "dir", null);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_dir", void 0);
-__decorate$e([
-    property$e({ type: CCFloat })
+__decorate$f([
+    property$f({ type: CCFloat })
 ], CTWidget.prototype, "visibleOffset", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_isVertical", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_distance", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_changePos", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_targetOldPos", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_targetOldSize", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_selfOldPos", void 0);
-__decorate$e([
-    property$e
+__decorate$f([
+    property$f
 ], CTWidget.prototype, "_selfOldSize", void 0);
-CTWidget = __decorate$e([
-    ccclass$e('CTWidget'),
+CTWidget = __decorate$f([
+    ccclass$f('CTWidget'),
     menu$5('moye/CTWidget'),
     executeInEditMode$2
 ], CTWidget);
@@ -4676,13 +4676,13 @@ const RoundBoxAssembler = {
     },
 };
 
-var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$e = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$d, property: property$d, type, menu: menu$4 } = _decorator;
+const { ccclass: ccclass$e, property: property$e, type, menu: menu$4 } = _decorator;
 var EventType;
 (function (EventType) {
     EventType["SPRITE_FRAME_CHANGED"] = "spriteframe-changed";
@@ -4995,78 +4995,78 @@ let RoundBoxSprite = class RoundBoxSprite extends UIRenderer {
         }
     }
 };
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_sizeMode", void 0);
-__decorate$d([
+__decorate$e([
     type(Sprite.SizeMode)
 ], RoundBoxSprite.prototype, "sizeMode", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_useGrayscale", void 0);
-__decorate$d([
-    property$d({ type: CCBoolean })
+__decorate$e([
+    property$e({ type: CCBoolean })
 ], RoundBoxSprite.prototype, "grayscale", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_atlas", void 0);
-__decorate$d([
+__decorate$e([
     type(SpriteAtlas)
 ], RoundBoxSprite.prototype, "spriteAtlas", null);
-__decorate$d([
-    property$d({ type: CCInteger, serializable: true })
+__decorate$e([
+    property$e({ type: CCInteger, serializable: true })
 ], RoundBoxSprite.prototype, "_segments", void 0);
-__decorate$d([
-    property$d({ type: CCInteger, serializable: true, min: 1 })
+__decorate$e([
+    property$e({ type: CCInteger, serializable: true, min: 1 })
 ], RoundBoxSprite.prototype, "segments", null);
-__decorate$d([
-    property$d({ type: CCFloat, serializable: true })
+__decorate$e([
+    property$e({ type: CCFloat, serializable: true })
 ], RoundBoxSprite.prototype, "_radius", void 0);
-__decorate$d([
-    property$d({ type: CCFloat, serializable: true, min: 0 })
+__decorate$e([
+    property$e({ type: CCFloat, serializable: true, min: 0 })
 ], RoundBoxSprite.prototype, "radius", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_spriteFrame", void 0);
-__decorate$d([
+__decorate$e([
     type(SpriteFrame)
 ], RoundBoxSprite.prototype, "spriteFrame", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftTop", void 0);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "leftTop", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightTop", void 0);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "rightTop", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_leftBottom", void 0);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "leftBottom", null);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "_rightBottom", void 0);
-__decorate$d([
-    property$d({ serializable: true })
+__decorate$e([
+    property$e({ serializable: true })
 ], RoundBoxSprite.prototype, "rightBottom", null);
-RoundBoxSprite = __decorate$d([
-    ccclass$d('RoundBoxSprite'),
+RoundBoxSprite = __decorate$e([
+    ccclass$e('RoundBoxSprite'),
     menu$4('moye/RoundBoxSprite')
 ], RoundBoxSprite);
 
-var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$d = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$c, property: property$c, executeInEditMode: executeInEditMode$1, menu: menu$3 } = _decorator;
+const { ccclass: ccclass$d, property: property$d, executeInEditMode: executeInEditMode$1, menu: menu$3 } = _decorator;
 var UIControllerIndex;
 (function (UIControllerIndex) {
     UIControllerIndex[UIControllerIndex["Index_0"] = 1] = "Index_0";
@@ -5088,6 +5088,7 @@ let UIController = class UIController extends Component {
         super(...arguments);
         this._index = UIControllerIndex.Index_0;
         this._listeners = [];
+        this._callbacks = [];
     }
     set index(v) {
         if (this._index == v) {
@@ -5101,8 +5102,18 @@ let UIController = class UIController extends Component {
     }
     onDestroy() {
         this._listeners = [];
+        this._callbacks = [];
     }
     addListener(listener) {
+        this._callbacks.push(listener);
+    }
+    removeListener(listener) {
+        const index = this._callbacks.indexOf(listener);
+        if (index != -1) {
+            this._callbacks.splice(index, 1);
+        }
+    }
+    _addListener(listener) {
         if (this._listeners.indexOf(listener) == -1) {
             this._listeners.push(listener);
         }
@@ -5115,7 +5126,7 @@ let UIController = class UIController extends Component {
             }
         }
     }
-    removeListener(listener) {
+    _removeListener(listener) {
         const index = this._listeners.indexOf(listener);
         if (index != -1) {
             this._listeners.splice(index, 1);
@@ -5149,17 +5160,17 @@ let UIController = class UIController extends Component {
         }
     }
 };
-__decorate$c([
-    property$c
+__decorate$d([
+    property$d
 ], UIController.prototype, "_index", void 0);
-__decorate$c([
-    property$c({ type: Enum(UIControllerIndex), displayOrder: 1 })
+__decorate$d([
+    property$d({ type: Enum(UIControllerIndex), displayOrder: 1 })
 ], UIController.prototype, "index", null);
-__decorate$c([
-    property$c
+__decorate$d([
+    property$d
 ], UIController.prototype, "_listeners", void 0);
-UIController = __decorate$c([
-    ccclass$c('UIController'),
+UIController = __decorate$d([
+    ccclass$d('UIController'),
     menu$3('moye/UIController'),
     executeInEditMode$1
 ], UIController);
@@ -5174,7 +5185,37 @@ var UIControlType;
     UIControlType[UIControlType["Angle"] = 5] = "Angle";
     UIControlType[UIControlType["Anchor"] = 6] = "Anchor";
     UIControlType[UIControlType["UIController"] = 7] = "UIController";
+    UIControlType[UIControlType["SpriteColor"] = 8] = "SpriteColor";
 })(UIControlType || (UIControlType = {}));
+
+var __decorate$c = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$c, property: property$c, } = _decorator;
+let UIController_Transition = class UIController_Transition {
+    constructor() {
+        this.duration = 0;
+        this.delay = 0;
+    }
+};
+__decorate$c([
+    property$c({
+        type: CCFloat,
+        displayName: "持续时间",
+    })
+], UIController_Transition.prototype, "duration", void 0);
+__decorate$c([
+    property$c({
+        type: CCFloat,
+        displayName: "延迟时间",
+    })
+], UIController_Transition.prototype, "delay", void 0);
+UIController_Transition = __decorate$c([
+    ccclass$c('UIController_Transition')
+], UIController_Transition);
 
 var __decorate$b = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -5183,35 +5224,6 @@ var __decorate$b = (undefined && undefined.__decorate) || function (decorators, 
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 const { ccclass: ccclass$b, property: property$b, } = _decorator;
-let UIController_Transition = class UIController_Transition {
-    constructor() {
-        this.duration = 0;
-        this.delay = 0;
-    }
-};
-__decorate$b([
-    property$b({
-        type: CCFloat,
-        displayName: "持续时间",
-    })
-], UIController_Transition.prototype, "duration", void 0);
-__decorate$b([
-    property$b({
-        type: CCFloat,
-        displayName: "延迟时间",
-    })
-], UIController_Transition.prototype, "delay", void 0);
-UIController_Transition = __decorate$b([
-    ccclass$b('UIController_Transition')
-], UIController_Transition);
-
-var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-const { ccclass: ccclass$a, property: property$a, } = _decorator;
 let UIControlType_Position = class UIControlType_Position {
     constructor() {
         this._transition = false;
@@ -5249,35 +5261,35 @@ let UIControlType_Position = class UIControlType_Position {
         }
     }
 };
-__decorate$a([
-    property$a({
+__decorate$b([
+    property$b({
         displayName: "过渡动画",
     })
 ], UIControlType_Position.prototype, "transition", null);
-__decorate$a([
-    property$a({
+__decorate$b([
+    property$b({
         type: UIController_Transition,
         displayName: "过渡属性",
         visible() { return this.transition == true; }
     })
 ], UIControlType_Position.prototype, "transitionAttr", void 0);
-__decorate$a([
-    property$a
+__decorate$b([
+    property$b
 ], UIControlType_Position.prototype, "_transition", void 0);
-__decorate$a([
-    property$a([Vec3])
+__decorate$b([
+    property$b([Vec3])
 ], UIControlType_Position.prototype, "_records", void 0);
-UIControlType_Position = __decorate$a([
-    ccclass$a('UIControlType_Position')
+UIControlType_Position = __decorate$b([
+    ccclass$b('UIControlType_Position')
 ], UIControlType_Position);
 
-var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$a = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$9, property: property$9, } = _decorator;
+const { ccclass: ccclass$a, property: property$a, } = _decorator;
 let UIControlType_Size = class UIControlType_Size {
     constructor() {
         this._transition = false;
@@ -5315,35 +5327,35 @@ let UIControlType_Size = class UIControlType_Size {
         }
     }
 };
-__decorate$9([
-    property$9({
+__decorate$a([
+    property$a({
         displayName: "过渡动画",
     })
 ], UIControlType_Size.prototype, "transition", null);
-__decorate$9([
-    property$9({
+__decorate$a([
+    property$a({
         type: UIController_Transition,
         displayName: "过渡属性",
         visible() { return this.transition == true; }
     })
 ], UIControlType_Size.prototype, "transitionAttr", void 0);
-__decorate$9([
-    property$9
+__decorate$a([
+    property$a
 ], UIControlType_Size.prototype, "_transition", void 0);
-__decorate$9([
-    property$9([Size])
+__decorate$a([
+    property$a([Size])
 ], UIControlType_Size.prototype, "_records", void 0);
-UIControlType_Size = __decorate$9([
-    ccclass$9('UIControlType_Size')
+UIControlType_Size = __decorate$a([
+    ccclass$a('UIControlType_Size')
 ], UIControlType_Size);
 
-var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$9 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$8, property: property$8, } = _decorator;
+const { ccclass: ccclass$9, property: property$9, } = _decorator;
 let UIControlType_Scale = class UIControlType_Scale {
     constructor() {
         this._transition = false;
@@ -5381,35 +5393,35 @@ let UIControlType_Scale = class UIControlType_Scale {
         }
     }
 };
-__decorate$8([
-    property$8({
+__decorate$9([
+    property$9({
         displayName: "过渡动画",
     })
 ], UIControlType_Scale.prototype, "transition", null);
-__decorate$8([
-    property$8({
+__decorate$9([
+    property$9({
         type: UIController_Transition,
         displayName: "过渡属性",
         visible() { return this.transition == true; }
     })
 ], UIControlType_Scale.prototype, "transitionAttr", void 0);
-__decorate$8([
-    property$8
+__decorate$9([
+    property$9
 ], UIControlType_Scale.prototype, "_transition", void 0);
-__decorate$8([
-    property$8([Vec3])
+__decorate$9([
+    property$9([Vec3])
 ], UIControlType_Scale.prototype, "_records", void 0);
-UIControlType_Scale = __decorate$8([
-    ccclass$8('UIControlType_Scale')
+UIControlType_Scale = __decorate$9([
+    ccclass$9('UIControlType_Scale')
 ], UIControlType_Scale);
 
-var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$8 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$7, property: property$7, } = _decorator;
+const { ccclass: ccclass$8, property: property$8, } = _decorator;
 let UIControlType_Controller = class UIControlType_Controller {
     constructor() {
         this._records = [];
@@ -5434,20 +5446,20 @@ let UIControlType_Controller = class UIControlType_Controller {
         }
     }
 };
-__decorate$7([
-    property$7([CCFloat])
+__decorate$8([
+    property$8([CCFloat])
 ], UIControlType_Controller.prototype, "_records", void 0);
-UIControlType_Controller = __decorate$7([
-    ccclass$7('UIControlType_Controller')
+UIControlType_Controller = __decorate$8([
+    ccclass$8('UIControlType_Controller')
 ], UIControlType_Controller);
 
-var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$7 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$6, property: property$6, } = _decorator;
+const { ccclass: ccclass$7, property: property$7, } = _decorator;
 let UIControlType_Angle = class UIControlType_Angle {
     constructor() {
         this._transition = false;
@@ -5485,35 +5497,35 @@ let UIControlType_Angle = class UIControlType_Angle {
         }
     }
 };
-__decorate$6([
-    property$6({
+__decorate$7([
+    property$7({
         displayName: "过渡动画",
     })
 ], UIControlType_Angle.prototype, "transition", null);
-__decorate$6([
-    property$6({
+__decorate$7([
+    property$7({
         type: UIController_Transition,
         displayName: "过渡属性",
         visible() { return this.transition == true; }
     })
 ], UIControlType_Angle.prototype, "transitionAttr", void 0);
-__decorate$6([
-    property$6
+__decorate$7([
+    property$7
 ], UIControlType_Angle.prototype, "_transition", void 0);
-__decorate$6([
-    property$6([CCFloat])
+__decorate$7([
+    property$7([CCFloat])
 ], UIControlType_Angle.prototype, "_records", void 0);
-UIControlType_Angle = __decorate$6([
-    ccclass$6('UIControlType_Angle')
+UIControlType_Angle = __decorate$7([
+    ccclass$7('UIControlType_Angle')
 ], UIControlType_Angle);
 
-var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$6 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$5, property: property$5, } = _decorator;
+const { ccclass: ccclass$6, property: property$6, } = _decorator;
 let UIControlType_Anchor = class UIControlType_Anchor {
     constructor() {
         this._records = [];
@@ -5538,11 +5550,11 @@ let UIControlType_Anchor = class UIControlType_Anchor {
         }
     }
 };
-__decorate$5([
-    property$5([Vec2])
+__decorate$6([
+    property$6([Vec2])
 ], UIControlType_Anchor.prototype, "_records", void 0);
-UIControlType_Anchor = __decorate$5([
-    ccclass$5('UIControlType_Anchor')
+UIControlType_Anchor = __decorate$6([
+    ccclass$6('UIControlType_Anchor')
 ], UIControlType_Anchor);
 
 var UIControllerIndexMask;
@@ -5562,13 +5574,13 @@ var UIControllerIndexMask;
     UIControllerIndexMask[UIControllerIndexMask["Index_12"] = 4096] = "Index_12";
 })(UIControllerIndexMask || (UIControllerIndexMask = {}));
 
-var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+var __decorate$5 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const { ccclass: ccclass$4, property: property$4, } = _decorator;
+const { ccclass: ccclass$5, property: property$5, } = _decorator;
 let UIControlType_Visible = class UIControlType_Visible {
     constructor() {
         this.indexMask = UIControllerIndexMask.Index_0;
@@ -5577,14 +5589,52 @@ let UIControlType_Visible = class UIControlType_Visible {
         return (this.indexMask & index) != 0;
     }
 };
-__decorate$4([
-    property$4({
+__decorate$5([
+    property$5({
         type: BitMask(UIControllerIndexMask),
     })
 ], UIControlType_Visible.prototype, "indexMask", void 0);
-UIControlType_Visible = __decorate$4([
-    ccclass$4('UIControlType_Visible')
+UIControlType_Visible = __decorate$5([
+    ccclass$5('UIControlType_Visible')
 ], UIControlType_Visible);
+
+var __decorate$4 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+const { ccclass: ccclass$4, property: property$4, } = _decorator;
+let UIControlType_SpriteColor = class UIControlType_SpriteColor {
+    constructor() {
+        this._records = [];
+    }
+    getRecord(indexMask) {
+        const index = Math.log2(indexMask);
+        return this._records[index];
+    }
+    setRecord(indexMask, value) {
+        const index = Math.log2(indexMask);
+        const len = this._records.length;
+        if (len <= index) {
+            const start = len;
+            const end = index + 1;
+            this._records.length = end;
+            for (let i = start; i < end; i++) {
+                this._records[i] = value.clone();
+            }
+        }
+        else {
+            this._records[index] = value.clone();
+        }
+    }
+};
+__decorate$4([
+    property$4([Color])
+], UIControlType_SpriteColor.prototype, "_records", void 0);
+UIControlType_SpriteColor = __decorate$4([
+    ccclass$4('UIControlType_SpriteColor')
+], UIControlType_SpriteColor);
 
 var __decorate$3 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -5642,6 +5692,12 @@ let UIControllerAttr = class UIControllerAttr {
     }
     getUIController(indexMask) {
         return this.controller.getRecord(indexMask);
+    }
+    setSpriteColor(indexMask, color) {
+        this.spriteColor.setRecord(indexMask, color);
+    }
+    getSpriteColor(indexMask) {
+        return this.spriteColor.getRecord(indexMask);
     }
     getTransition() {
         switch (this.controlType) {
@@ -5705,6 +5761,12 @@ let UIControllerAttr = class UIControllerAttr {
         else if (!this.visible) {
             this.visible = new UIControlType_Visible();
         }
+        if (this.controlType != UIControlType.SpriteColor) {
+            this.spriteColor = null;
+        }
+        else if (this.spriteColor == null) {
+            this.spriteColor = new UIControlType_SpriteColor();
+        }
     }
 };
 __decorate$3([
@@ -5762,6 +5824,13 @@ __decorate$3([
         visible() { return this.controlType == UIControlType.Visible; }
     })
 ], UIControllerAttr.prototype, "visible", void 0);
+__decorate$3([
+    property$3({
+        displayName: "精灵颜色",
+        type: UIControlType_SpriteColor,
+        visible() { return this.controlType == UIControlType.SpriteColor; }
+    })
+], UIControllerAttr.prototype, "spriteColor", void 0);
 UIControllerAttr = __decorate$3([
     ccclass$3('UIControllerAttr')
 ], UIControllerAttr);
@@ -5823,7 +5892,7 @@ let UIControllerListener = class UIControllerListener extends Component {
             return;
         }
         if (this._controller) {
-            this._controller.removeListener(this);
+            this._controller['_removeListener'](this);
         }
         this._controller = v;
         this.listenController();
@@ -5856,7 +5925,7 @@ let UIControllerListener = class UIControllerListener extends Component {
             if (!this._controller) {
                 return;
             }
-            this._controller.removeListener(this);
+            this._controller['_removeListener'](this);
         }
     }
     onDisable() {
@@ -5880,19 +5949,21 @@ let UIControllerListener = class UIControllerListener extends Component {
         this.node.on(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
         this.node.on(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
         this.node.on(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+        this.node.on(Node.EventType.COLOR_CHANGED, this.onColorChange, this);
     }
     unRegisterEditorEvent() {
         this.node.off(Node.EventType.ACTIVE_IN_HIERARCHY_CHANGED, this.onChangeActive, this);
         this.node.off(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
         this.node.off(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
         this.node.off(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+        this.node.off(Node.EventType.COLOR_CHANGED, this.onColorChange, this);
     }
     listenController() {
         if (!this._controller) {
             return;
         }
         // this._controller.removeListener(this);
-        this._controller.addListener(this);
+        this._controller['_addListener'](this);
     }
     onChangeActive() {
         // this.registerVisible();
@@ -5905,6 +5976,9 @@ let UIControllerListener = class UIControllerListener extends Component {
     }
     onAnchorChange() {
         this.registerAnchor();
+    }
+    onColorChange() {
+        this.registerColor();
     }
     // private registerVisible() {
     //     if (!this._controller) {
@@ -5959,6 +6033,18 @@ let UIControllerListener = class UIControllerListener extends Component {
             if (attr.controlType == UIControlType.Anchor) {
                 const uiTransform = this.node.getComponent(UITransform);
                 attr.setAnchor(index, uiTransform.anchorPoint);
+            }
+        }
+    }
+    registerColor() {
+        if (!this._controller) {
+            return;
+        }
+        const index = this._controller.index;
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+            if (attr.controlType == UIControlType.SpriteColor) {
+                attr.setSpriteColor(index, this.node.getComponent(Sprite).color);
             }
         }
     }
@@ -6073,6 +6159,16 @@ let UIControllerListener = class UIControllerListener extends Component {
                     }
                     else {
                         attr.setUIController(indexMask, this.node.getComponent(UIController).index);
+                    }
+                    break;
+                }
+                case UIControlType.SpriteColor: {
+                    const color = attr.getSpriteColor(indexMask);
+                    if (color != null && color != undefined) {
+                        this.node.getComponent(Sprite).color = color;
+                    }
+                    else {
+                        attr.setSpriteColor(indexMask, this.node.getComponent(Sprite).color);
                     }
                     break;
                 }

@@ -1,4 +1,4 @@
-import { _decorator, BitMask, CCFloat, Component, Enum, Node, Size, Vec2, Vec3 } from 'cc';
+import { _decorator, BitMask, CCFloat, Color, Component, Enum, Node, Size, Vec2, Vec3 } from 'cc';
 import { UIController, UIControllerIndex } from './UIController';
 import { UIControlType } from './UIControlType/UIControlType';
 import { UIControlType_Position } from './UIControlType/UIControlType_Position';
@@ -11,6 +11,7 @@ import { UIControlType_Anchor } from './UIControlType/UIControlType_Anchor';
 import { UIControllerIndexMask } from './UIControllerIndexMask';
 import { UIControlType_Visible } from './UIControlType/UIControlType_Visible';
 import { DEBUG } from 'cc/env';
+import { UIControlType_SpriteColor } from './UIControlType/UIControlType_SpriteColor';
 const { ccclass, property, } = _decorator;
 
 
@@ -77,6 +78,13 @@ export class UIControllerAttr {
     })
         visible: UIControlType_Visible;
 
+    @property({
+        displayName: "精灵颜色",
+        type: UIControlType_SpriteColor,
+        visible() { return this.controlType == UIControlType.SpriteColor; }
+    })
+        spriteColor: UIControlType_SpriteColor;
+
     isVisible(indexMask: number) {
         return this.visible.isVisible(indexMask);
     }
@@ -127,6 +135,14 @@ export class UIControllerAttr {
 
     getUIController(indexMask: number) {
         return this.controller.getRecord(indexMask);
+    }
+
+    setSpriteColor(indexMask: number, color: Color) {
+        this.spriteColor.setRecord(indexMask, color);
+    }
+
+    getSpriteColor(indexMask: number) {
+        return this.spriteColor.getRecord(indexMask);
     }
 
     getTransition(): UIController_Transition | null {
@@ -194,6 +210,10 @@ export class UIControllerAttr {
             this.visible = new UIControlType_Visible();
         }
 
-
+        if (this.controlType != UIControlType.SpriteColor) {
+            this.spriteColor = null;
+        } else if(this.spriteColor == null){
+            this.spriteColor = new UIControlType_SpriteColor();
+        }
     }
 }

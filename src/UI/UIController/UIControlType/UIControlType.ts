@@ -7,4 +7,5 @@ export enum UIControlType {
     Angle,
     Anchor,
     UIController,
+    SpriteColor,
 }

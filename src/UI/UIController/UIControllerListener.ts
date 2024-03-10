@@ -1,4 +1,4 @@
-import { _decorator, CCString, Component, isValid, Node, Tween, tween, UITransform, v3 } from 'cc';
+import { _decorator, CCString, Component, isValid, Node, Sprite, Tween, tween, UITransform, v3 } from 'cc';
 import { UIControllerAttr } from './UIControllerAttr';
 import { UIController, UIControllerIndex } from './UIController';
 import { EDITOR } from 'cc/env';
@@ -20,7 +20,7 @@ export class UIControllerListener extends Component {
         }
 
         if (this._controller) {
-            this._controller.removeListener(this);
+            this._controller['_removeListener'](this);
         }
 
         this._controller = v;
@@ -73,7 +73,7 @@ export class UIControllerListener extends Component {
                 return;
             }
 
-            this._controller.removeListener(this);
+            this._controller['_removeListener'](this);
         }
 
     }
@@ -105,6 +105,7 @@ export class UIControllerListener extends Component {
         this.node.on(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
         this.node.on(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
         this.node.on(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+        this.node.on(Node.EventType.COLOR_CHANGED, this.onColorChange, this);
     }
 
     private unRegisterEditorEvent() {
@@ -112,6 +113,7 @@ export class UIControllerListener extends Component {
         this.node.off(Node.EventType.TRANSFORM_CHANGED, this.onTransformChange, this);
         this.node.off(Node.EventType.SIZE_CHANGED, this.onSizeChange, this);
         this.node.off(Node.EventType.ANCHOR_CHANGED, this.onAnchorChange, this);
+        this.node.off(Node.EventType.COLOR_CHANGED, this.onColorChange, this);
     }
 
     private listenController() {
@@ -120,7 +122,7 @@ export class UIControllerListener extends Component {
         }
 
         // this._controller.removeListener(this);
-        this._controller.addListener(this);
+        this._controller['_addListener'](this);
     }
 
     private onChangeActive() {
@@ -137,6 +139,10 @@ export class UIControllerListener extends Component {
 
     private onAnchorChange() {
         this.registerAnchor();
+    }
+
+    private onColorChange() {
+        this.registerColor();
     }
 
     // private registerVisible() {
@@ -204,6 +210,22 @@ export class UIControllerListener extends Component {
             if (attr.controlType == UIControlType.Anchor) {
                 const uiTransform = this.node.getComponent(UITransform);
                 attr.setAnchor(index, uiTransform.anchorPoint);
+            }
+        }
+    }
+
+    private registerColor() {
+        if (!this._controller) {
+            return;
+        }
+
+        const index = this._controller.index;
+
+        for (let i = 0; i < this._attrs.length; i++) {
+            const attr = this._attrs[i];
+
+            if (attr.controlType == UIControlType.SpriteColor) {
+                attr.setSpriteColor(index, this.node.getComponent(Sprite).color);
             }
         }
     }
@@ -327,6 +349,16 @@ export class UIControllerListener extends Component {
                     this.node.getComponent(UIController).index = controllerIndex;
                 } else {
                     attr.setUIController(indexMask, this.node.getComponent(UIController).index);
+                }
+                break;
+            }
+            case UIControlType.SpriteColor: {
+                const color = attr.getSpriteColor(indexMask);
+
+                if (color != null && color != undefined) {
+                    this.node.getComponent(Sprite).color = color;
+                } else {
+                    attr.setSpriteColor(indexMask, this.node.getComponent(Sprite).color);
                 }
                 break;
             }

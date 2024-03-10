@@ -46,16 +46,30 @@ export class UIController extends Component {
     @property
     private _listeners: IUIControllerIndexListener[] = [];
 
+    private _callbacks: Function[] = [];
+
     protected onDestroy(): void {
         this._listeners = [];
+        this._callbacks = [];
     }
 
-    addListener(listener: IUIControllerIndexListener) {
+    addListener(listener: (controller: UIController, index: number) => any) {
+        this._callbacks.push(listener);
+    }
+
+    removeListener(listener: (controller: UIController, index: number) => any) {
+        const index = this._callbacks.indexOf(listener);
+        if (index != -1) {
+            this._callbacks.splice(index, 1);
+        }
+    }
+
+    private _addListener(listener: IUIControllerIndexListener) {
         if (this._listeners.indexOf(listener) == -1) {
             this._listeners.push(listener);
         }
 
-        if(EDITOR){
+        if (EDITOR) {
             // 检查是否有null或者undefined 如果有就移除
             for (let i = this._listeners.length - 1; i >= 0; i--) {
                 if (this._listeners[i] == null || this._listeners[i] == undefined) {
@@ -65,13 +79,13 @@ export class UIController extends Component {
         }
     }
 
-    removeListener(listener: IUIControllerIndexListener) {
+    private _removeListener(listener: IUIControllerIndexListener) {
         const index = this._listeners.indexOf(listener);
         if (index != -1) {
             this._listeners.splice(index, 1);
         }
 
-        if(EDITOR){
+        if (EDITOR) {
             // 检查是否有null或者undefined 如果有就移除
             for (let i = this._listeners.length - 1; i >= 0; i--) {
                 if (this._listeners[i] == null || this._listeners[i] == undefined) {
@@ -81,15 +95,15 @@ export class UIController extends Component {
         }
     }
 
-    notifyListeners() {
+    private notifyListeners() {
         for (let i = 0; i < this._listeners.length; i++) {
 
-            if(this._listeners[i]){
+            if (this._listeners[i]) {
                 this._listeners[i].onChangeIndex(this._index);
             }
         }
 
-        if(EDITOR){
+        if (EDITOR) {
             // 检查是否有null或者undefined 如果有就移除
             for (let i = this._listeners.length - 1; i >= 0; i--) {
                 if (this._listeners[i] == null || this._listeners[i] == undefined) {
@@ -99,7 +113,7 @@ export class UIController extends Component {
 
             const selfListener = this.node.getComponent("UIControllerListener");
 
-            if(selfListener){
+            if (selfListener) {
                 selfListener['registerUIController']();
             }
         }

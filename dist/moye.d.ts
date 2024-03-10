@@ -1289,18 +1289,18 @@ export declare enum UIControllerIndex {
 	Index_11 = 2048,
 	Index_12 = 4096
 }
-export interface IUIControllerIndexListener {
-	onChangeIndex(index: number): void;
-}
 export declare class UIController extends Component {
 	private _index;
 	set index(v: UIControllerIndex);
 	get index(): UIControllerIndex;
 	private _listeners;
+	private _callbacks;
 	protected onDestroy(): void;
-	addListener(listener: IUIControllerIndexListener): void;
-	removeListener(listener: IUIControllerIndexListener): void;
-	notifyListeners(): void;
+	addListener(listener: (controller: UIController, index: number) => any): void;
+	removeListener(listener: (controller: UIController, index: number) => any): void;
+	private _addListener;
+	private _removeListener;
+	private notifyListeners;
 }
 declare enum UIControlType {
 	None = 0,
@@ -1310,7 +1310,8 @@ declare enum UIControlType {
 	Scale = 4,
 	Angle = 5,
 	Anchor = 6,
-	UIController = 7
+	UIController = 7,
+	SpriteColor = 8
 }
 declare class UIController_Transition {
 	duration: number;
@@ -1381,6 +1382,11 @@ declare class UIControlType_Visible {
 	indexMask: UIControllerIndexMask;
 	isVisible(index: UIControllerIndexMask): boolean;
 }
+declare class UIControlType_SpriteColor {
+	private _records;
+	getRecord(indexMask: UIControllerIndexMask): Color;
+	setRecord(indexMask: UIControllerIndexMask, value: Color): void;
+}
 export declare class UIControllerAttr {
 	set controlType(v: UIControlType);
 	get controlType(): UIControlType;
@@ -1392,6 +1398,7 @@ export declare class UIControllerAttr {
 	scale: UIControlType_Scale;
 	size: UIControlType_Size;
 	visible: UIControlType_Visible;
+	spriteColor: UIControlType_SpriteColor;
 	isVisible(indexMask: number): boolean;
 	setPosition(indexMask: number, pos: Vec3): void;
 	getPosition(indexMask: number): Vec3;
@@ -1405,6 +1412,8 @@ export declare class UIControllerAttr {
 	getAnchor(indexMask: number): Vec2;
 	setUIController(indexMask: number, controllerIndex: number): void;
 	getUIController(indexMask: number): number;
+	setSpriteColor(indexMask: number, color: Color): void;
+	getSpriteColor(indexMask: number): Color;
 	getTransition(): UIController_Transition | null;
 	private resetData;
 }
@@ -1428,9 +1437,11 @@ export declare class UIControllerListener extends Component {
 	private onTransformChange;
 	private onSizeChange;
 	private onAnchorChange;
+	private onColorChange;
 	private registerTransform;
 	private registerSize;
 	private registerAnchor;
+	private registerColor;
 	private registerUIController;
 	private updateAttr;
 	onChangeIndex(indexMask: number): void;
