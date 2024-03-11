@@ -5951,6 +5951,10 @@ let UIControllerListener = class UIControllerListener extends Component {
             if (!this._controller) {
                 return;
             }
+            // 控制器可能先被销毁
+            if (!this._controller.isValid) {
+                return;
+            }
             this._controller['_removeListener'](this);
         }
     }
