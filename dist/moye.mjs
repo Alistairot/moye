@@ -3949,6 +3949,10 @@ let SizeFollow = class SizeFollow extends Component {
         super(...arguments);
         this._heightFollow = true;
         this._widthFollow = true;
+        this.minH = 0;
+        this.maxH = -1;
+        this.minW = 0;
+        this.maxW = -1;
         this._heightOffset = 0;
         this._widthOffset = 0;
         this._changeSize = new Size();
@@ -4021,22 +4025,56 @@ let SizeFollow = class SizeFollow extends Component {
         const targetTrans = this._target;
         this._changeSize.set(selfTrans.contentSize);
         if (this._widthFollow) {
-            this._changeSize.width = Math.max(0, targetTrans.width + this._widthOffset);
+            let toValue = Math.max(this.minW, targetTrans.width + this._widthOffset);
+            if (this.maxW >= 0) {
+                toValue = Math.min(this.maxW, toValue);
+            }
+            this._changeSize.width = toValue;
         }
         if (this._heightFollow) {
-            this._changeSize.height = Math.max(0, targetTrans.height + this._heightOffset);
+            let toValue = Math.max(this.minH, targetTrans.height + this._heightOffset);
+            if (this.maxH >= 0) {
+                toValue = Math.min(this.maxH, toValue);
+            }
+            this._changeSize.height = toValue;
         }
         selfTrans.setContentSize(this._changeSize);
     }
     updateSizeOffset() {
+        if (!EDITOR) {
+            return;
+        }
         const selfTrans = this.node.getComponent(UITransform);
         const targetTrans = this._target;
-        const selfWidth = selfTrans.width;
         const targetWidth = targetTrans.width;
-        this._widthOffset = selfWidth - targetWidth;
+        const selfWidth = selfTrans.width;
         const selfHeight = selfTrans.height;
         const targetHeight = targetTrans.height;
-        this._heightOffset = selfHeight - targetHeight;
+        let isRecordW = true;
+        let isRecordH = true;
+        // 小于最小值, 不记录本次的偏移数据
+        if (selfWidth <= this.minW) {
+            console.log("当前节点宽度达到最小宽度, 不记录本次的偏移数据");
+            isRecordW = false;
+        }
+        if (this.maxW >= 0 && selfWidth >= this.maxW) {
+            console.log("当前节点宽度达到最大宽度, 不记录本次的偏移数据");
+            isRecordW = false;
+        }
+        if (isRecordW) {
+            this._widthOffset = selfWidth - targetWidth;
+        }
+        if (selfHeight <= this.minH) {
+            console.log("当前节点高度达到最小高度, 不记录本次的偏移数据");
+            isRecordH = false;
+        }
+        if (this.maxH >= 0 && selfHeight >= this.maxH) {
+            console.log("当前节点高度达到最大高度, 不记录本次的偏移数据");
+            isRecordH = false;
+        }
+        if (isRecordH) {
+            this._heightOffset = selfHeight - targetHeight;
+        }
     }
 };
 __decorate$g([
@@ -4057,6 +4095,38 @@ __decorate$g([
 __decorate$g([
     property$g
 ], SizeFollow.prototype, "_widthFollow", void 0);
+__decorate$g([
+    property$g({
+        type: CCFloat,
+        displayName: "最小高度",
+        min: 0,
+        visible() { return this.heightFollow == true; }
+    })
+], SizeFollow.prototype, "minH", void 0);
+__decorate$g([
+    property$g({
+        type: CCFloat,
+        displayName: "最大高度",
+        tooltip: "最大高度, 小于0表示不限制",
+        visible() { return this.heightFollow == true; }
+    })
+], SizeFollow.prototype, "maxH", void 0);
+__decorate$g([
+    property$g({
+        type: CCFloat,
+        displayName: "最小宽度",
+        min: 0,
+        visible() { return this.widthFollow == true; }
+    })
+], SizeFollow.prototype, "minW", void 0);
+__decorate$g([
+    property$g({
+        type: CCFloat,
+        displayName: "最大宽度",
+        tooltip: "最大宽度, 小于0表示不限制",
+        visible() { return this.widthFollow == true; }
+    })
+], SizeFollow.prototype, "maxW", void 0);
 __decorate$g([
     property$g({ type: CCFloat })
 ], SizeFollow.prototype, "_heightOffset", void 0);

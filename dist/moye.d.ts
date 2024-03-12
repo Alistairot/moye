@@ -1151,6 +1151,10 @@ export declare class SizeFollow extends Component {
 	set widthFollow(val: boolean);
 	get widthFollow(): boolean;
 	private _widthFollow;
+	minH: number;
+	maxH: number;
+	minW: number;
+	maxW: number;
 	private _heightOffset;
 	private _widthOffset;
 	private _changeSize;
