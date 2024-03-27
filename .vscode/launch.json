@@ -8,12 +8,10 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            // "cwd": "${workspaceFolder}/src/server",
-            // "console": "externalTerminal",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            // "preLaunchTask": "import decorator",
+
             "runtimeArgs": [
                 "--loader",
                 "tsx",

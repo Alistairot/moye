@@ -18,10 +18,6 @@ LocalStorage
 [export=true]
 Login module
 
-[name=Math]
-[export=false]
-数学库，包含 2D 与 3D 维度下的向量和矩阵运算，与其他一些相关数学类型
-
 [name=Message]
 [export=true]
 message module
