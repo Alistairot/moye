@@ -4,13 +4,14 @@ import { SceneType } from "../Entity/SceneType";
 import { AfterCreateClientScene, AfterCreateCurrentScene } from "../EventSystem/EventCore";
 import { EventSystem } from "../EventSystem/EventSystem";
 import { IdGenerator } from "../IdGenerator/IdGenerator";
-import { SceneRefCom } from "./SceneRefCom";
+import { SceneMgr } from "./SceneMgr";
+// import { SceneRefCom } from "./SceneRefCom";
 
 export class SceneFactory {
     static createClientScene(): Scene {
-        const parent = Root.get().scene.getCom(SceneRefCom);
+        // const parent = Root.get().scene.getCom(SceneRefCom);
         
-        parent.scene?.dispose();
+        // parent.scene?.dispose();
         
         const scene = new Scene();
         scene.init({
@@ -18,12 +19,14 @@ export class SceneFactory {
             sceneType: SceneType.CLIENT,
             name: "Game",
             instanceId: IdGenerator.get().generateInstanceId(),
-            parent: parent
+            parent:  SceneMgr.get().process
         });
 
-        scene.addCom(SceneRefCom);
+        // scene.addCom(SceneRefCom);
 
-        parent.scene = scene;
+        SceneMgr.get().client = scene;
+
+        // parent.scene = scene;
 
         EventSystem.get().publish(scene, AfterCreateClientScene.create());
 
@@ -31,11 +34,11 @@ export class SceneFactory {
     }
 
     static createCurrentScene(id: bigint, name: string): Scene {
-        const clientSceneRef = Root.get().scene.getCom(SceneRefCom);
-        const clientScene = clientSceneRef.scene;
-        const parent = clientScene.getCom(SceneRefCom);
+        // const clientSceneRef = Root.get().scene.getCom(SceneRefCom);
+        // const clientScene = clientSceneRef.scene;
+        // const parent = clientScene.getCom(SceneRefCom);
         
-        parent.scene?.dispose();
+        SceneMgr.get().current?.dispose();
         
         const scene = new Scene();
         scene.init({
@@ -43,10 +46,12 @@ export class SceneFactory {
             sceneType: SceneType.CURRENT,
             name: name,
             instanceId: IdGenerator.get().generateInstanceId(),
-            parent: parent
+            parent: SceneMgr.get().client
         });
 
-        parent.scene = scene;
+        // parent.scene = scene;
+
+        SceneMgr.get().current = scene;
 
         EventSystem.get().publish(scene, AfterCreateCurrentScene.create());
 

@@ -13,8 +13,9 @@ import { EntityLifiCycleMgr } from "../Entity/EntityLifiCycleMgr";
 import { Root } from "../Entity/Root";
 import { TimerMgr } from "../Timer/TimerMgr";
 import { CoroutineLock } from "../CoroutineLock/CoroutineLock";
-import { SceneRefCom } from "../Scene/SceneRefCom";
+// import { SceneRefCom } from "../Scene/SceneRefCom";
 import { SceneFactory } from "../Scene/SceneFactory";
+import { SceneMgr } from "../Scene/SceneMgr";
 
 export class Program {
     static init(rootNode: Node) {
@@ -30,6 +31,8 @@ export class Program {
         Game.addSingleton(EntityCenter);
         Game.addSingleton(EntityLifiCycleMgr);
         Game.addSingleton(Root);
+
+        Game.addSingleton(SceneMgr).process = Root.get().scene;
 
         // add client runtime
         rootNode.addComponent(MoyeRuntime);
@@ -47,7 +50,7 @@ export class Program {
         MoyeEventCenter.inst.publish(new AfterProgramStart());
 
         // create client scene
-        Root.get().scene.addCom(SceneRefCom);
+        // Root.get().scene.addCom(SceneRefCom);
         SceneFactory.createClientScene();
     }
 }

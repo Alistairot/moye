@@ -1676,43 +1676,43 @@ class CoroutineLock extends Singleton {
     }
 }
 
-/**
- * manage client scene
- */
-class SceneRefCom extends Entity {
+class SceneMgr extends Singleton {
 }
 
+// import { SceneRefCom } from "./SceneRefCom";
 class SceneFactory {
     static createClientScene() {
-        const parent = Root.get().scene.getCom(SceneRefCom);
-        parent.scene?.dispose();
+        // const parent = Root.get().scene.getCom(SceneRefCom);
+        // parent.scene?.dispose();
         const scene = new Scene();
         scene.init({
             id: 1n,
             sceneType: SceneType.CLIENT,
             name: "Game",
             instanceId: IdGenerator.get().generateInstanceId(),
-            parent: parent
+            parent: SceneMgr.get().process
         });
-        scene.addCom(SceneRefCom);
-        parent.scene = scene;
+        // scene.addCom(SceneRefCom);
+        SceneMgr.get().client = scene;
+        // parent.scene = scene;
         EventSystem.get().publish(scene, AfterCreateClientScene.create());
         return scene;
     }
     static createCurrentScene(id, name) {
-        const clientSceneRef = Root.get().scene.getCom(SceneRefCom);
-        const clientScene = clientSceneRef.scene;
-        const parent = clientScene.getCom(SceneRefCom);
-        parent.scene?.dispose();
+        // const clientSceneRef = Root.get().scene.getCom(SceneRefCom);
+        // const clientScene = clientSceneRef.scene;
+        // const parent = clientScene.getCom(SceneRefCom);
+        SceneMgr.get().current?.dispose();
         const scene = new Scene();
         scene.init({
             id: id,
             sceneType: SceneType.CURRENT,
             name: name,
             instanceId: IdGenerator.get().generateInstanceId(),
-            parent: parent
+            parent: SceneMgr.get().client
         });
-        parent.scene = scene;
+        // parent.scene = scene;
+        SceneMgr.get().current = scene;
         EventSystem.get().publish(scene, AfterCreateCurrentScene.create());
         return scene;
     }
@@ -1731,6 +1731,7 @@ class Program {
         Game.addSingleton(EntityCenter);
         Game.addSingleton(EntityLifiCycleMgr);
         Game.addSingleton(Root);
+        Game.addSingleton(SceneMgr).process = Root.get().scene;
         // add client runtime
         rootNode.addComponent(MoyeRuntime);
         MoyeEventCenter.inst.publish(new AfterProgramInit());
@@ -1744,7 +1745,7 @@ class Program {
         MoyeEventCenter.inst.publish(new BeforeProgramStart());
         MoyeEventCenter.inst.publish(new AfterProgramStart());
         // create client scene
-        Root.get().scene.addCom(SceneRefCom);
+        // Root.get().scene.addCom(SceneRefCom);
         SceneFactory.createClientScene();
     }
 }
@@ -1898,23 +1899,19 @@ class MultiMap {
 
 Entity.prototype.clientScene = function () {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const domainScene = self.domainScene();
-    if (domainScene.sceneType == SceneType.CLIENT) {
-        return domainScene;
-    }
-    else if (domainScene.sceneType == SceneType.CURRENT) {
-        return domainScene.parent.parent;
-    }
-    else if (domainScene.sceneType == SceneType.PROCESS) {
-        return domainScene.getCom(SceneRefCom).scene;
-    }
+    // const self: Entity = this;
+    // const domainScene = self.domainScene();
+    // if(domainScene.sceneType == SceneType.CLIENT) {
+    //     return domainScene;
+    // }else if(domainScene.sceneType == SceneType.CURRENT) {
+    //     return domainScene.parent.parent as Scene;
+    // }else if(domainScene.sceneType == SceneType.PROCESS) {
+    //     return domainScene.getCom(SceneRefCom).scene;
+    // }
+    return SceneMgr.get().client;
 };
 Entity.prototype.currentScene = function () {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const clientScene = self.clientScene();
-    return clientScene.getCom(SceneRefCom).scene;
+    return SceneMgr.get().current;
 };
 
 /**
@@ -6819,4 +6816,4 @@ class YYJJoystickListener extends Entity {
     }
 }
 
-export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CenterLayout, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, LocalStorageHelper, Logger, LoginCom, MoyeAssets, MoyeLabel, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneRefCom, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIController, UIControllerAttr, UIControllerIndex, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, debug, debugF, error, errorF, log, logF, safeCall, warn, warnF };
+export { AEvent, AEventHandler, AMHandler, AMoyeView, AWait, AfterAddLoginCom, AfterCreateClientScene, AfterCreateCurrentScene, AfterProgramInit, AfterProgramStart, AfterSingletonAdd, AssetOperationHandle, AsyncButtonListener, BeforeProgramInit, BeforeProgramStart, BeforeSingletonAdd, BgAdapter, BundleAsset, CTWidget, CancellationToken, CancellationTokenTag, CenterLayout, CoroutineLock, CoroutineLockItem, CoroutineLockTag, DecoratorCollector, Entity, EntityCenter, EventCom, EventDecorator, EventDecoratorType, EventHandlerTag, EventSystem, Game, IPEndPoint, IdGenerator, IdStruct, InstanceIdStruct, JsHelper, LocalStorageHelper, Logger, LoginCom, MoyeAssets, MoyeLabel, MoyeViewMgr, MsgHandlerDecorator, MsgHandlerDecoratorType, MsgMgr, MsgSerializeMgr, MultiMap, NetCom, NetServices, NetworkErrorCode, NodeNotBuild, ObjectPool, ObjectWait, Program, RecycleObj, RichTextListener, Root, RoundBoxSprite, Scene, SceneFactory, SceneMgr, SceneType, Session, SessionCom, Singleton, SizeFollow, SpeedType, Task, TimeHelper, TimeInfo, TimerMgr, UIController, UIControllerAttr, UIControllerIndex, UIControllerListener, ViewDecorator, ViewDecoratorType, ViewLayer, WChannel, WService, WaitError, YYJJoystick, YYJJoystickCom, YYJJoystickListener, YYJJoystickMoveEvent, YYJJoystickSpeedChangeEvent, debug, debugF, error, errorF, log, logF, safeCall, warn, warnF };

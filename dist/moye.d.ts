@@ -564,12 +564,6 @@ export declare class SceneFactory {
 	static createCurrentScene(id: bigint, name: string): Scene;
 }
 /**
- * manage client scene
- */
-export declare class SceneRefCom extends Entity {
-	scene: Scene;
-}
-/**
  * key对应value数组的map
  */
 export declare class MultiMap<T, K> {
@@ -582,6 +576,11 @@ export declare class MultiMap<T, K> {
 	get(t: T): K[];
 	getOne(t: T): K | undefined;
 	contains(t: T, k: K): boolean;
+}
+export declare class SceneMgr extends Singleton {
+	process: Scene;
+	client: Scene;
+	current: Scene;
 }
 export interface Entity {
 	currentScene(): Scene;

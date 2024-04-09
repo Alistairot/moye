@@ -5,6 +5,6 @@ import { Scene } from "../Entity/Scene";
 /**
  * manage client scene
  */
-export class SceneRefCom extends Entity {
-    scene: Scene;
-}
+// export class SceneRefCom extends Entity {
+//     scene: Scene;
+// }
